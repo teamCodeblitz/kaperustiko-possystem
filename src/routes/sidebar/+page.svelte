@@ -1,12 +1,8 @@
 <script lang="ts">
     import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
     import { faTachometerAlt, faBox } from '@fortawesome/free-solid-svg-icons';
-
-    let currentRoute = '/dashboard'; // Replace this with actual route logic
-    let isSidebarVisible = currentRoute === '/dashboard'; // Show sidebar only on dashboard
 </script>
 
-{#if isSidebarVisible} <!-- Conditional rendering for sidebar -->
 <div class="flex flex-col h-screen bg-green-800 w-16">
     <div class="flex justify-center mt-4">
         <img src="./icon.png" alt="Logo" class="w-14 h-14" />
@@ -26,4 +22,3 @@
         <button class="bg-gray-800 text-white rounded-full px-1 py-0.5 mt-2 text-xs hover:bg-gray-900">Log Out</button>
     </div>
 </div>
-{/if}
