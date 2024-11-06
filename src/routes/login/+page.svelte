@@ -13,7 +13,7 @@
 		// Redirect after 5 seconds
 		setTimeout(() => {
 			isLoading = false; // Reset loading state
-			window.location.href = '/project2/dashboard'; 
+			window.location.href = '/dashboard'; 
 		}, 3000);
 	}
 
@@ -192,7 +192,7 @@
             </div>
             <button type="submit" class="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">Log In</button>
             <p class="mt-4 text-center">Don't Have an Account? 
-                <button type="button" class="text-red-500" on:click={() => window.location.href='/project2/register'}>Register</button>
+                <button type="button" class="text-red-500" on:click={() => window.location.href='/register'}>Register</button>
             </p>
             <p class="mt-2 text-center text-sm text-gray-500">Version 1.0.0 Developed by Team Codeblitz</p>
         </form>
