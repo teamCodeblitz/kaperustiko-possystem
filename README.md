@@ -35,4 +35,8 @@ Modules:
 - npm install --save-dev @tauri-apps/cli
 
 Commands:
-- npm run tauri
+- npm run tauri dev
+
+Reminders:
+- Always commit on branch first before pushing to main repository
+- Always put comments on the code

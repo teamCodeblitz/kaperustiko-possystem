@@ -171,7 +171,7 @@
             <li></li>
         </ul>
         <div class="image-container">
-            <img src="./logo.png" alt="Fallback description if image fails to load" class="max-w-full h-auto" aria-hidden="true" />
+            <img src="./icon.png" alt="Fallback description if image fails to load" class="max-w-full h-auto" aria-hidden="true" />
         </div>
         <div class="absolute bottom-10 left-10 text-white text-lg">
             <h1 class="font-bold">Welcome to Kape Rustiko POS System</h1>
