@@ -30,6 +30,7 @@ Modules:
 - npm install
 - npm install tailwindcss
 - npm install flowbite
+- npm install flowbite-svelte
 - npm install font-awesome
 - npm install @tauri-apps/icons
 - npm install --save-dev @sveltejs/adapter-static
