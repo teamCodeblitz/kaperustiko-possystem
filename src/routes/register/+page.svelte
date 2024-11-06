@@ -1,11 +1,19 @@
 <script>
     let email = '';
     let password = '';
+    let firstName = '';
+    let lastName = '';
+    let middleName = '';
+    let contactNumber = '';
     
     const handleSubmit = () => {
         // Handle form submission
         console.log('Email:', email);
         console.log('Password:', password);
+        console.log('First Name:', firstName);
+        console.log('Last Name:', lastName);
+        console.log('Middle Name:', middleName);
+        console.log('Contact Number:', contactNumber);
     };
 </script>
 
@@ -144,7 +152,7 @@
                 <li></li>
             </ul>
             <div class="image-container">
-                <img src="./ESS.png" alt="Fallback description if image fails to load" class="max-w-full h-auto" aria-hidden="true" />
+                <img src="./logo.png" alt="Fallback description if image fails to load" class="max-w-full h-auto" aria-hidden="true" />
             </div>
             <div class="absolute bottom-10 left-10 text-white text-lg">
                 <h1 class="font-bold">Welcome to Kape Rustiko POS System</h1>
@@ -153,7 +161,7 @@
         </div>
     <div class="flex-1 flex items-center justify-center">
         <form on:submit|preventDefault={handleSubmit} class="p-6 w-full md:w-2/3">
-            <h2 class="text-3xl font-extrabold mb-4 text-center text-gradient">Join Us in Revolutionizing Your POS Experience!</h2>
+            <h2 class="text-3xl font-extrabold mb-4 text-center text-gradient">Be guided by system administrator</h2>
             <p class="text-center mb-6 text-gray-600">To get started, please fill in your details to create an account.</p>
             <div class="mb-4">
                 <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
@@ -162,6 +170,22 @@
             <div class="mb-4">
                 <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
                 <input type="password" id="password" bind:value={password} required class="mt-1 block w-full p-2 border border-gray-300 rounded" placeholder="Enter your password"/>
+            </div>
+            <div class="mb-4">
+                <label for="firstName" class="block text-sm font-medium text-gray-700">First Name</label>
+                <input type="text" id="firstName" bind:value={firstName} required class="mt-1 block w-full p-2 border border-gray-300 rounded" placeholder="Enter your first name"/>
+            </div>
+            <div class="mb-4">
+                <label for="lastName" class="block text-sm font-medium text-gray-700">Last Name</label>
+                <input type="text" id="lastName" bind:value={lastName} required class="mt-1 block w-full p-2 border border-gray-300 rounded" placeholder="Enter your last name"/>
+            </div>
+            <div class="mb-4">
+                <label for="middleName" class="block text-sm font-medium text-gray-700">Middle Name</label>
+                <input type="text" id="middleName" bind:value={middleName} class="mt-1 block w-full p-2 border border-gray-300 rounded" placeholder="Enter your middle name (optional)"/>
+            </div>
+            <div class="mb-4">
+                <label for="contactNumber" class="block text-sm font-medium text-gray-700">Contact Number</label>
+                <input type="tel" id="contactNumber" bind:value={contactNumber} required class="mt-1 block w-full p-2 border border-gray-300 rounded" placeholder="Enter your contact number"/>
             </div>
             <button type="submit" class="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">Register</button>
             <p class="mt-4 text-center">Already Have an Account? <button type="button" class="text-red-500" on:click={() => window.location.href='/login'}>Login Now</button></p>
