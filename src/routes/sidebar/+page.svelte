@@ -1,17 +1,23 @@
 <script lang="ts">
     import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-    import { faTachometerAlt, faBox } from '@fortawesome/free-solid-svg-icons';
+    import { faTachometerAlt, faBox, faShoppingCart, faClock } from '@fortawesome/free-solid-svg-icons';
 </script>
 
 <div class="flex flex-col h-screen bg-green-800 w-16">
     <div class="flex justify-center mt-4">
         <img src="./icon.png" alt="Logo" class="w-14 h-14" />
     </div>
-    <div class="flex items-center p-2 hover:bg-green-600 justify-center mt-4">
+    <div class="flex items-center p-4 hover:bg-green-600 justify-center mt-8">
         <FontAwesomeIcon icon={faTachometerAlt} class="text-white text-2xl" />
     </div>
-    <div class="flex items-center p-2 hover:bg-green-600 justify-center">
+    <div class="flex items-center p-4 hover:bg-green-600 justify-center">
         <FontAwesomeIcon icon={faBox} class="text-white text-2xl" />
+    </div>
+    <div class="flex items-center p-4 hover:bg-green-600 justify-center">
+        <FontAwesomeIcon icon={faShoppingCart} class="text-white text-2xl" />
+    </div>
+    <div class="flex items-center p-4 hover:bg-green-600 justify-center">
+        <FontAwesomeIcon icon={faClock} class="text-white text-2xl" />
     </div>
     <div class="flex-grow"></div>
     <div class="flex flex-col items-center mb-4">

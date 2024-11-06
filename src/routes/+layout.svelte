@@ -3,5 +3,4 @@
 	import 'flowbite/dist/flowbite.css';
 </script>
 
-
 <slot />
