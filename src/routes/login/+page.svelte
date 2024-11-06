@@ -138,14 +138,8 @@
     position: relative;
     z-index: 2;
 }
-
-/* Add this CSS to hide the loader on mobile */
-@media (max-width: 750px) {
-   .image-container, .add, .font-bold, .left-section {
-        display: none;
-    }
-}
 </style>
+
 
 {#if isLoading} <!-- Conditional rendering for loader -->
 <div class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-50">
@@ -181,12 +175,12 @@
         </div>
         <div class="absolute bottom-10 left-10 text-white text-lg">
             <h1 class="font-bold">Welcome to Kape Rustiko POS System</h1>
-            <p class="add">Your gateway to a seamless experience. Join us and explore endless possibilities!</p>
+            <p class="add">Your gateway to an exceptional POS experience. Discover new opportunities with us!</p>
         </div>
     </div>
     <div class="flex-1 flex items-center justify-center">
         <form on:submit|preventDefault={handleSubmit} class="p-6 w-full md:w-2/3">
-            <h2 class="text-3xl font-extrabold mb-4 text-center text-gradient">Welcome Back to Your Journey!</h2>
+            <h2 class="text-3xl font-extrabold mb-4 text-center text-gradient">Welcome Back to Your POS System!</h2>
             <p class="text-center mb-6 text-gray-600">Please enter your credentials to access your account.</p>
             <div class="mb-4">
                 <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
