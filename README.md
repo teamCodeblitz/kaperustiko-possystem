@@ -18,6 +18,7 @@ Frontend:
 - Flowbite
 - TailwindCSS
 - FontAwesome
+- Tauri
 
 Backend:
 - PHP
@@ -30,3 +31,8 @@ Modules:
 - npm install tailwindcss
 - npm install flowbite
 - npm install font-awesome
+- npm install --save-dev @sveltejs/adapter-static
+- npm install --save-dev @tauri-apps/cli
+
+Commands:
+- npm run tauri

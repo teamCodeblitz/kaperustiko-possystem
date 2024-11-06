@@ -1,1 +1,1 @@
-<h2 class="text-2xl font-bold text-center">Login</h2>
+<h2 class="text-2xl font-bold text-center">Logins</h2>
