@@ -24,3 +24,9 @@ Backend:
 - MySQL
 - Postman
 - XAMPP
+
+Modules:
+- npm install
+- npm install tailwindcss
+- npm install flowbite
+- npm install font-awesome
