@@ -1,5 +1,4 @@
 <script>
-    import dashboard from '../dashboard/+page.svelte';
     import { Button } from 'flowbite-svelte';
     
     // Define props for dynamic data

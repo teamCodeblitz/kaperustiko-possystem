@@ -1,6 +1,9 @@
 <script lang="ts">
+    import 'svelte-routing';
     // Change to default import
     import Card from '../components/card.svelte';
+    import Sidebar from '../sidebar/+page.svelte';
+
     let orderNumber = "#01";
     let totalCost = "₱00.00";
     let selectedCategory = "Food"; // Default category is "Food"
@@ -42,12 +45,9 @@
 
 <div class="flex h-screen">
     <!-- Left Side: Sidebar and Main Content -->
-    <div class="flex-grow overflow-hidden flex">
+    <div class="flex-grow overflow-hidden flex bg-gray-100">
         <!-- Sidebar (Optional) -->
-        <div class="w-16 bg-gradient-to-b from-green-800 to-green-400 flex flex-col items-center py-4">
-            <!-- Sidebar Icons or Buttons Here -->
-        </div>
-        
+        <Sidebar />
         <!-- Main Dashboard Content -->
         <div class="flex-grow overflow-auto p-4">
             <!-- Filter Bar Menu -->
@@ -55,9 +55,10 @@
                 <!-- Category Buttons -->
                 {#each ['All', 'Beverages', 'Food', 'Desserts', 'richard'] as category}
                     <button 
-                        class="px-6 py-2 rounded-full text-white"
-                        class:bg-black={selectedCategory === category}
-                        class:bg-gray-200={selectedCategory !== category}
+                        class="px-6 py-2 rounded-full text-black font-bold"
+                        class:bg-stone-950={selectedCategory === category}
+                        class:text-white={selectedCategory === category}
+                        class:bg-gray-300={selectedCategory !== category}
                         on:click={() => selectedCategory = category}>
                         {category}
                     </button>
@@ -65,7 +66,7 @@
             </div>
 
             <!-- Content Based on Selected Category -->
-            <div class="mt-12 ml-16">
+            <div class="mt-12 ml-16 text-black font-bold">
                 {#if selectedCategory === 'All'}
                     <p>Display All Menu</p>
                 {:else if selectedCategory === 'Beverages'}
@@ -137,15 +138,14 @@
                     <button class="bg-gray-300 text-gray-800 font-bold py-2 rounded col-span-2">Take Out</button>
                 
                     <!-- Number Buttons -->
-                    {#each ['7', '8', '9', '⌫', '4', '5', '6', 'Delete', '1', '2', '3', 'Enter', '0', '00', 'Place Order'] as key, i}
-                        <button
-                            on:click={() => {
-                                if (key === '⌫') handleBackspace();
-                                else if (key === 'Delete') handleClear();
-                                else if (key === 'Enter') handleEnter();
-                                else if (key !== 'Place Order') handleNumberInput(key);
-                            }}
-                            class="bg-gray-200 text-gray-800 font-bold py-2 rounded col-span-{key === 'Place Order' ? '2' : '1'}">
+                    {#each ['7', '8', '9', '⌫', '4', '5', '6', 'Del', '1', '2', '3', 'Enter', '0', '00', 'Place Order'] as key}                       
+                        <button on:click={() => {
+                            if (key === '⌫') handleBackspace();
+                            else if (key === 'Del') handleClear();
+                            else if (key === 'Enter') handleEnter();
+                            else if (key !== 'Place Order') handleNumberInput(key);
+                        }}
+                        class="bg-gray-200 text-gray-800 font-bold py-2 rounded col-span-{key === 'Place Order' ? '2' : '1'}">
                             {key}
                         </button>
                     {/each}
@@ -155,13 +155,3 @@
     </div>
 </div>
 
-<style>
-    .bg-gray-200 {
-        background-color: #e5e5e5;
-        color: #000;
-    }
-    .bg-black {
-        background-color: #000;
-        color: #fff;
-    }
-</style>

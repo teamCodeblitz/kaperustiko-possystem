@@ -13,7 +13,7 @@
 		// Redirect after 5 seconds
 		setTimeout(() => {
 			isLoading = false; // Reset loading state
-			window.location.href = '/dashboard'; 
+			window.location.href = '/main-pos'; 
 		}, 3000);
 	}
 
