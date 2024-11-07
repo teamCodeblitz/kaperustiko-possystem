@@ -2,31 +2,39 @@
     import { Button } from 'flowbite-svelte';
     
     // Define props for dynamic data
-    export let code = '001';
-    export let title1 = '####';
-    export let price = '₱00.00';
+    export let code = '';
+    export let title1 = '';
+    export let title2 = '';
+    export let price = '';
+    export let image = '';
   </script>
   
   <div class="flex items-center justify-center">
-    <div class="relative bg-white shadow-lg rounded-lg w-80 p-5 flex">
-      <!-- Image Placeholder (Left Side) -->
-      <div class="w-1/2 h-62 bg-gray-200 rounded-lg mr-4"></div>
+    <div class="relative bg-white shadow-lg rounded-lg w-96 h-64 p-5 flex">
+      
+      <!-- Left Image Section -->
+      <div class="w-1/2 h-62 bg-gray-200 rounded-lg mr-4">
+        <img src={image} alt="Image" class="w-full h-full rounded-lg object-cover" aria-hidden="true">
+      </div>
   
-      <!-- Right Side: Code, Text, and Button Section -->
+      <!-- Right Information Section -->
       <div class="w-1/2 flex flex-col justify-between pt-8">
-        <!-- Top Code Section -->
-        <div class="absolute top-3 right-3 bg-gray-200 text-gray-500 text-xs rounded-full px-2 py-1">
+        <!-- Centered Code Section -->
+        <div class="absolute top-3 ml-12 bg-gray-200 text-gray-500 text-xs rounded-full px-2 py-1">
           CODE: {code}
         </div>
   
         <!-- Text Section -->
         <div class="space-y-2 text-left">
-          <p class="font-bold text-lg text-gray-800">{title1}</p>
-          <p class="text-xl font-bold text-gray-800">{price}</p>
+          <p class="font-bold text-3xl text-gray-800">{title1}</p>
+          <p class="text-gray-500 text-lg">{title2}</p>
         </div>
   
+        <!-- Price Section -->
+        <p class="text-4xl font-bold text-gray-800">{price}</p>
+  
         <!-- Order Button -->
-        <Button color="dark" class="w-full mt-4">
+        <Button color="dark" class="w-full">
           ADD
         </Button>
       </div>

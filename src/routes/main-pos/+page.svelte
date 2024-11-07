@@ -10,18 +10,18 @@
     let payment = ''; // Payment input variable
 
     const cardData = [
-        { code: '001', title1: 'Pizza', title2: 'Pepperoni', price: '₱250.00' },
-        { code: '002', title1: 'Burger', title2: 'Cheese', price: '₱150.00' },
-        { code: '003', title1: 'Pasta', title2: 'Carbonara', price: '₱180.00' },
-        { code: '004', title1: 'Salad', title2: 'Caesar', price: '₱120.00' },
-        { code: '005', title1: 'Steak', title2: 'Ribeye', price: '₱500.00' },
-        { code: '006', title1: 'Sushi', title2: 'Nigiri', price: '₱300.00' },
-        { code: '007', title1: 'Sandwich', title2: 'Ham & Cheese', price: '₱90.00' },
-        { code: '008', title1: 'Fries', title2: 'Large', price: '₱70.00' },
-        { code: '009', title1: 'Ice Cream', title2: 'Vanilla', price: '₱50.00' },
-        { code: '010', title1: 'Coffee', title2: 'Latte', price: '₱100.00' },
-        { code: '011', title1: 'Tea', title2: 'Green', price: '₱80.00' },
-        { code: '012', title1: 'Juice', title2: 'Orange', price: '₱60.00' },
+        { code: '001', title1: 'Pizza', title2: 'Pepperoni', price: '₱250.00' , image: './foods/pizza.jpg' },
+        { code: '002', title1: 'Burger', title2: 'Cheese', price: '₱150.00' , image: './foods/burger.jpg' },
+        { code: '003', title1: 'Pasta', title2: 'Carbonara', price: '₱180.00' , image: './foods/pasta.jpg' },
+        { code: '004', title1: 'Salad', title2: 'Caesar', price: '₱120.00' , image: './foods/salad.jpg' },
+        { code: '005', title1: 'Steak', title2: 'Ribeye', price: '₱500.00' , image: './foods/steak.jpg' },
+        { code: '006', title1: 'Sushi', title2: 'Nigiri', price: '₱300.00' , image: './foods/sushi.jpg' },
+        { code: '007', title1: 'Sandwich', title2: 'Ham & Cheese', price: '₱90.00' , image: './foods/sandwich.jpg' },
+        { code: '008', title1: 'Fries', title2: 'Large', price: '₱70.00' , image: './foods/fries.jpg' },
+        { code: '009', title1: 'Ice Cream', title2: 'Vanilla', price: '₱50.00' , image: './foods/icecream.jpg' },
+        { code: '010', title1: 'Coffee', title2: 'Latte', price: '₱100.00' , image: './foods/coffee.jpg' },
+        { code: '011', title1: 'Tea', title2: 'Green', price: '₱80.00' , image: './foods/tea.jpg' },
+        { code: '012', title1: 'Juice', title2: 'Orange', price: '₱60.00' , image: './foods/juice.jpg' },
     ];
 
     // Payment handling functions
@@ -50,14 +50,15 @@
         <!-- Main Dashboard Content -->
         <div class="flex-grow overflow-auto p-4">
             <!-- Filter Bar Menu -->
-            <div class="flex space-x-4 mb-4 ml-16">
+            <div class="flex space-x-4 mb-4">
                 <!-- Category Buttons -->
-                {#each ['All', 'Beverages', 'Food', 'Desserts', 'richard'] as category}
+                {#each ['All', 'Beverages', 'Food', 'Desserts', 'Coffee', 'Tea', 'Juice', 'Sandwich', 'Sushi', 'Pasta', 'Burger'] as category}
                     <button 
-                        class="px-6 py-2 rounded-full text-black font-bold"
-                        class:bg-stone-950={selectedCategory === category}
+                        class="px-6 py-2 rounded-md text-black font-bold"
+                        class:bg-green-950={selectedCategory === category}
                         class:text-white={selectedCategory === category}
-                        class:bg-gray-300={selectedCategory !== category}
+                        class:bg-white={selectedCategory !== category}
+                        class:shadow-md={selectedCategory !== category}
                         on:click={() => selectedCategory = category}>
                         {category}
                     </button>
@@ -65,7 +66,7 @@
             </div>
 
             <!-- Content Based on Selected Category -->
-            <div class="mt-12 ml-16 text-black font-bold">
+            <div class="text-black font-bold ml-1">
                 {#if selectedCategory === 'All'}
                     <p>Display All Menu</p>
                 {:else if selectedCategory === 'Beverages'}
@@ -74,15 +75,27 @@
                     <p>Display Food Menu</p>
                 {:else if selectedCategory === 'Desserts'}
                     <p>Display Desserts Menu</p>
-                {:else if selectedCategory === 'richard'}
-                    <p>Display richard Menu</p>
+                {:else if selectedCategory === 'Coffee'}
+                    <p>Display Coffee Menu</p>
+                {:else if selectedCategory === 'Tea'}
+                    <p>Display Tea Menu</p>
+                {:else if selectedCategory === 'Juice'}
+                    <p>Display Juice Menu</p>
+                {:else if selectedCategory === 'Sandwich'}
+                    <p>Display Sandwich Menu</p>
+                {:else if selectedCategory === 'Sushi'}
+                    <p>Display Sushi Menu</p>
+                {:else if selectedCategory === 'Pasta'}
+                    <p>Display Pasta Menu</p>
+                {:else if selectedCategory === 'Burger'}
+                    <p>Display Burger Menu</p>
                 {/if}
             </div>
 
             <!-- Card Grid -->
-            <div class="grid grid-cols-3 gap-2 mt-6">
-                {#each cardData as { code, title1, title2, price }}
-                    <Card {code} {title1} {price} />
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mt-6 -ml-8">
+                {#each cardData as { code, title1, title2, price, image }}
+                    <Card {code} {title1} {title2} {price} {image} />
                 {/each}
             </div>
         </div>
