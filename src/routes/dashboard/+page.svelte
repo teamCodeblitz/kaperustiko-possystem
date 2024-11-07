@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { Card } from 'flowbite-svelte'; // Import Card from Flowbite
-
+    // Change to default import
+    import Card from '../components/card.svelte';
     let orderNumber = "#01";
     let totalCost = "₱00.00";
     let selectedCategory = "Food"; // Default category is "Food"
