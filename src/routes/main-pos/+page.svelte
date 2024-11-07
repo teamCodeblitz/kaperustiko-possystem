@@ -8,6 +8,7 @@
     let totalCost = "₱00.00";
     let selectedCategory = "Food"; // Default category is "Food"
     let payment = ''; // Payment input variable
+    let quantity = 0; // Add a quantity variable
 
     const cardData = [
         { code: '001', title1: 'Pizza', title2: 'Pepperoni', price: '₱250.00' , image: './foods/pizza.jpg' },
@@ -40,6 +41,23 @@
     function handleEnter() {
         alert(`Payment submitted: ₱${payment}`);
         payment = ''; // Clear payment after submission
+    }
+
+    function increaseQuantity() {
+        quantity += 1; // Increment the quantity
+    }
+
+    function decreaseQuantity() {
+        if (quantity > 0) {
+            quantity -= 1; // Decrement the quantity, ensuring it doesn't go below 0
+        }
+    }
+
+    // New function to handle adding a card
+    function handleAddCard(event: CustomEvent) { // Specify event as CustomEvent
+        const { code, title } = event.detail;
+        // Set quantity to 1 when adding the card
+        quantity = 1; // You can also manage multiple cards if needed
     }
 </script>
 
@@ -95,7 +113,7 @@
             <!-- Card Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mt-6 -ml-8">
                 {#each cardData as { code, title1, title2, price, image }}
-                    <Card {code} {title1} {title2} {price} {image} />
+                    <Card {code} {title1} {title2} {price} {image} on:add={handleAddCard} />
                 {/each}
             </div>
         </div>
@@ -103,7 +121,7 @@
 
     <!-- Right Side: Order Panel -->
     <div class="w-64">
-        <div class="flex flex-col items-center bg-gray-100 h-full p-4 w-64 shadow-lg fixed right-0 top-0">
+        <div class="flex flex-col items-center bg-gray-100 h-full p-4 w-72 shadow-lg fixed right-0 top-0">
             <!-- Order Number Section -->
             <div class="bg-green-800 text-white w-full text-center py-2 rounded-md mb-4">
                 <p class="text-sm font-bold">Order Number {orderNumber}</p>
@@ -111,13 +129,23 @@
             
             <!-- Order Items Section -->
             <div class="space-y-2 w-full mb-4 flex-grow">
-                <div class="bg-white p-3 rounded-md shadow-md">
-                    <p class="text-gray-800 font-semibold">₱00.00</p>
+                {#if quantity > 0} <!-- Only render if quantity is greater than 0 -->
+                <div class="bg-white p-3 rounded-md shadow-md flex items-center justify-between">
+                    <p class="text-gray-800 font-semibold">003</p>
+                    <p class="text-gray-800 font-semibold">Pasta</p>
+                    <div class="flex items-center">
+                        <button class="bg-red-500 text-white font-bold py-1 px-2 rounded" on:click={decreaseQuantity}>-</button>
+                        <input 
+                            type="number" 
+                            class="w-14 text-gray-800 font-semibold text-center appearance-none" 
+                            bind:value={quantity} 
+                            style="border: none; outline: none;" 
+                            min="0"
+                        />
+                        <button class="bg-green-500 -ml-4 text-white font-bold py-1 px-2 rounded" on:click={increaseQuantity}>+</button>
+                    </div>
                 </div>
-                <div class="bg-white p-3 rounded-md shadow-md">
-                    <p class="text-gray-800 font-semibold">####</p>
-                    <p class="text-gray-800">₱00.00</p>
-                </div>
+                {/if}
             </div>
 
             <!-- Bottom Section -->
@@ -150,14 +178,14 @@
                     <button class="bg-gray-300 text-gray-800 font-bold py-2 rounded col-span-2">Take Out</button>
                 
                     <!-- Number Buttons -->
-                    {#each ['7', '8', '9', '⌫', '4', '5', '6', 'Del', '1', '2', '3', 'Enter', '0', '00', 'Place Order'] as key}                       
+                    {#each ['7', '8', '9', '⌫', '4', '5', '6', 'Clr', '1', '2', '3', 'Enter', '0', '00', 'Place Order'] as key}                       
                         <button on:click={() => {
                             if (key === '⌫') handleBackspace();
-                            else if (key === 'Del') handleClear();
+                            else if (key === 'Clr') handleClear();
                             else if (key === 'Enter') handleEnter();
                             else if (key !== 'Place Order') handleNumberInput(key);
                         }}
-                        class="bg-gray-200 text-gray-800 font-bold py-2 rounded col-span-{key === 'Place Order' ? '2' : '1'}">
+                        class="bg-gray-200 text-gray-800 font-bold py-2 rounded col-span-{key === 'Place Order' ? '2' : '1'} {key === 'Clr' ? 'bg-red-900 text-white' : ''}">
                             {key}
                         </button>
                     {/each}

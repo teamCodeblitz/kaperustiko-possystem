@@ -1,6 +1,9 @@
 <script>
     import { Button } from 'flowbite-svelte';
-    
+    import { createEventDispatcher } from 'svelte';
+
+    const dispatch = createEventDispatcher();
+
     // Define props for dynamic data
     export let code = '';
     export let title1 = '';
@@ -34,7 +37,7 @@
         <p class="text-4xl font-bold text-gray-800">{price}</p>
   
         <!-- Order Button -->
-        <Button color="dark" class="w-full">
+        <Button color="dark" class="w-full" on:click={() => dispatch('add', { code: '003', title: 'Pasta' })}>
           ADD
         </Button>
       </div>
