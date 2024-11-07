@@ -4,7 +4,6 @@
     // Define props for dynamic data
     export let code = '001';
     export let title1 = '####';
-    export let title2 = '####';
     export let price = '₱00.00';
   </script>
   
@@ -23,13 +22,12 @@
         <!-- Text Section -->
         <div class="space-y-2 text-left">
           <p class="font-bold text-lg text-gray-800">{title1}</p>
-          <p class="font-bold text-lg text-gray-800">{title2}</p>
           <p class="text-xl font-bold text-gray-800">{price}</p>
         </div>
   
         <!-- Order Button -->
         <Button color="dark" class="w-full mt-4">
-          ORDER
+          ADD
         </Button>
       </div>
     </div>

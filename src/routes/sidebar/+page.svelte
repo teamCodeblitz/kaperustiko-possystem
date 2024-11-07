@@ -10,12 +10,12 @@
     });
 </script>
 
-<div class="flex flex-col h-screen bg-green-950 w-14">
-    <div class="flex justify-center mt-4">
-        <img src="./icon.png" alt="Logo" class="w-14 h-14" />
+<div class="flex flex-col h-screen bg-green-950 w-14 ">
+    <div class="flex justify-center mt-4 mb-24">
+        <img src="./icon.png" alt="Logo" class="w-14 h-14 " />
     </div>
-    <div class="flex items-center p-4 hover:bg-green-600 justify-center mt-8 {isActive ? 'bg-yellow-500 rounded-md h-12 ml-1 mr-1' : ''}">
-        <FontAwesomeIcon icon={faTachometerAlt} class="text-white text-2xl" />
+    <div class="flex items-center p-4 hover:bg-green-600 justify-center {isActive ? 'text-black' : 'text-white'} bg-yellow-300 rounded-md h-12 ml-1 mr-1">
+        <FontAwesomeIcon icon={faTachometerAlt} class="text-2xl" />
     </div>
     <div class="flex items-center p-4 hover:bg-green-600 justify-center">
         <FontAwesomeIcon icon={faClipboardCheck} class="text-white text-2xl" />

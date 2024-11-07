@@ -46,7 +46,6 @@
 <div class="flex h-screen">
     <!-- Left Side: Sidebar and Main Content -->
     <div class="flex-grow overflow-hidden flex bg-gray-100">
-        <!-- Sidebar (Optional) -->
         <Sidebar />
         <!-- Main Dashboard Content -->
         <div class="flex-grow overflow-auto p-4">
@@ -83,7 +82,7 @@
             <!-- Card Grid -->
             <div class="grid grid-cols-3 gap-2 mt-6">
                 {#each cardData as { code, title1, title2, price }}
-                    <Card {code} {title1} {title2} {price} />
+                    <Card {code} {title1} {price} />
                 {/each}
             </div>
         </div>
