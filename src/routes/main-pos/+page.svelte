@@ -66,9 +66,9 @@
     <div class="flex-grow overflow-hidden flex bg-gray-100">
         
         <!-- Main Dashboard Content -->
-        <div class="flex-grow overflow-auto p-4">
+        <div class="flex-start overflow-auto p-4 w-full">
             <!-- Filter Bar Menu -->
-            <div class="flex space-x-4 mb-4">
+            <div class="flex space-x-4 mb-4 ml-1 ">
                 <!-- Category Buttons -->
                 {#each ['All', 'Beverages', 'Food', 'Desserts', 'Coffee', 'Tea', 'Juice', 'Sandwich', 'Sushi', 'Pasta', 'Burger'] as category}
                     <button 
@@ -84,7 +84,7 @@
             </div>
 
             <!-- Content Based on Selected Category -->
-            <div class="text-black font-bold ml-1 mb-4">
+            <div class="text-black ml-2 font-bold mb-4">
                 {#if selectedCategory === 'All'}
                     <p>Display All Menu</p>
                 {:else if selectedCategory === 'Beverages'}
@@ -111,7 +111,7 @@
             </div>
 
             <!-- Card Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6 flex-start">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-6">
                 {#each cardData as { code, title1, title2, price, image }}
                     <Card {code} {title1} {title2} {price} {image} on:add={handleAddCard} />
                 {/each}
@@ -120,7 +120,7 @@
     </div>
 
     <!-- Right Side: Order Panel -->
-    <div class="w-64">
+    <div class="w-[300px]">
         <div class="flex flex-col items-center bg-gray-100 h-full p-4 w-72 shadow-lg fixed right-0 top-0">
             <!-- Order Number Section -->
             <div class="bg-green-800 text-white w-full text-center py-2 rounded-md mb-4">
@@ -157,7 +157,7 @@
                 </div>
                 <div class="flex items-center justify-between w-full">
                     <p class="text-gray-700 font-semibold">Change:</p>
-                    <p class="text-gray-800 font-bold">₱00.00</p> <!-- Replace with dynamic change variable if needed -->
+                    <p class="text-gray-800 font-bold">₱00.00</p> 
                 </div>
 
                 <!-- Payment Input Section -->

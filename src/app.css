@@ -119,3 +119,20 @@
 	  z-index: 2;
 
   }
+
+
+  /* For Webkit browsers (Chrome, Safari) */
+::-webkit-scrollbar {
+    display: none; /* Hide scrollbar */
+	background-color: transparent;
+}
+
+/* For Firefox */
+.scroll-container {
+    scrollbar-width: none; /* Hide scrollbar */
+}
+
+/* For Internet Explorer and Edge */
+.scroll-container {
+    -ms-overflow-style: none; /* Hide scrollbar */
+}

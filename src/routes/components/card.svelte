@@ -13,7 +13,7 @@
   </script>
   
   <div class="flex items-center justify-center">
-    <div class="relative bg-white shadow-lg rounded-lg w-96 h-64 p-5 flex">
+    <div class="relative bg-white shadow-lg rounded-lg w-full h-64 p-5 flex">
       
       <!-- Left Image Section -->
       <div class="w-1/2 h-62 bg-gray-200 rounded-lg mr-4">
