@@ -62,9 +62,9 @@
 </script>
 
 <div class="flex h-screen">
-    <!-- Left Side: Sidebar and Main Content -->
+    <Sidebar />
     <div class="flex-grow overflow-hidden flex bg-gray-100">
-        <Sidebar />
+        
         <!-- Main Dashboard Content -->
         <div class="flex-grow overflow-auto p-4">
             <!-- Filter Bar Menu -->
@@ -73,7 +73,7 @@
                 {#each ['All', 'Beverages', 'Food', 'Desserts', 'Coffee', 'Tea', 'Juice', 'Sandwich', 'Sushi', 'Pasta', 'Burger'] as category}
                     <button 
                         class="px-6 py-2 rounded-md text-black font-bold"
-                        class:bg-green-950={selectedCategory === category}
+                        class:bg-cyan-950={selectedCategory === category}
                         class:text-white={selectedCategory === category}
                         class:bg-white={selectedCategory !== category}
                         class:shadow-md={selectedCategory !== category}
@@ -84,7 +84,7 @@
             </div>
 
             <!-- Content Based on Selected Category -->
-            <div class="text-black font-bold ml-1">
+            <div class="text-black font-bold ml-1 mb-4">
                 {#if selectedCategory === 'All'}
                     <p>Display All Menu</p>
                 {:else if selectedCategory === 'Beverages'}
@@ -111,7 +111,7 @@
             </div>
 
             <!-- Card Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mt-6 -ml-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6 flex-start">
                 {#each cardData as { code, title1, title2, price, image }}
                     <Card {code} {title1} {title2} {price} {image} on:add={handleAddCard} />
                 {/each}

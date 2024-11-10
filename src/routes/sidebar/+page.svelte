@@ -12,7 +12,7 @@
     }
 </script>
 
-<div class="flex flex-col h-screen bg-green-950 w-14 ">
+<div class="flex flex-col h-screen bg-cyan-950 w-14 ">
     <div class="flex justify-center mt-4 mb-24">
         <img src="./icon.png" alt="Logo" class="w-10 h-10 " />
     </div>
