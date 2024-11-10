@@ -68,7 +68,7 @@
         <!-- Main Dashboard Content -->
         <div class="flex-start overflow-auto p-4 w-full">
             <!-- Filter Bar Menu -->
-            <div class="flex space-x-4 mb-4 ml-1 ">
+            <div class="flex space-x-4 mb-4 ">
                 <!-- Category Buttons -->
                 {#each ['All', 'Beverages', 'Food', 'Desserts', 'Coffee', 'Tea', 'Juice', 'Sandwich', 'Sushi', 'Pasta', 'Burger'] as category}
                     <button 
@@ -84,7 +84,7 @@
             </div>
 
             <!-- Content Based on Selected Category -->
-            <div class="text-black ml-2 font-bold mb-4">
+            <div class="text-black font-bold mb-4">
                 {#if selectedCategory === 'All'}
                     <p>Display All Menu</p>
                 {:else if selectedCategory === 'Beverages'}
@@ -120,8 +120,8 @@
     </div>
 
     <!-- Right Side: Order Panel -->
-    <div class="w-[300px]">
-        <div class="flex flex-col items-center bg-gray-100 h-full p-4 w-72 shadow-lg fixed right-0 top-0">
+    <div class="w-[380px]">
+        <div class="flex flex-col items-center bg-gray-100 h-full p-4 w-[350px] shadow-lg fixed right-0 top-0">
             <!-- Order Number Section -->
             <div class="bg-green-800 text-white w-full text-center py-2 rounded-md mb-4">
                 <p class="text-sm font-bold">Order Number {orderNumber}</p>
@@ -165,14 +165,14 @@
                     <p class="block text-sm font-bold">Payment:</p>
                     <input
                         type="text"
-                        class="w-full py-2 px-4 border rounded bg-gray-100 text-right font-mono text-xl"
+                        class="w-full py-2 px-4 border-none rounded bg-gray-200 text-right font-mono text-xl"
                         bind:value={payment}
                         readonly
                     />
                 </div>
 
                 <!-- Buttons Section -->
-                <div class="grid grid-cols-4 gap-2 w-full mb-4">
+                <div class="grid grid-cols-4 gap-2 w-full h-[400px]">
                     <!-- Dine In and Take Out Buttons -->
                     <button class="bg-gray-300 text-gray-800 font-bold py-2 rounded col-span-2">Dine In</button>
                     <button class="bg-gray-300 text-gray-800 font-bold py-2 rounded col-span-2">Take Out</button>

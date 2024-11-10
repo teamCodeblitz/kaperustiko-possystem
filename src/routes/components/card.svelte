@@ -23,7 +23,7 @@
       <!-- Right Information Section -->
       <div class="w-1/2 flex flex-col justify-between pt-8">
         <!-- Centered Code Section -->
-        <div class="absolute top-3 ml-12 bg-gray-200 text-gray-500 text-xs rounded-full px-2 py-1">
+        <div class="absolute top-3 ml-[85px] bg-gray-200 text-gray-500 text-xs rounded-full px-2 py-1">
           CODE: {code}
         </div>
   

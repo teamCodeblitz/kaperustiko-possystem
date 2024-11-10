@@ -30,7 +30,9 @@
         <FontAwesomeIcon icon={faExchangeAlt} class={`text-2xl ${activeIcon === 'exchange' ? 'text-black' : 'text-white'}`} />
     </div>
     <div class="flex items-center p-4 hover:bg-green-600 justify-center">
-        <FontAwesomeIcon icon={faBoxOpen} class="text-white text-2xl" />
+        <button type="button" on:click={() => { window.location.href = '/inventory'; setActive('inventory'); }} class="flex items-center">
+            <FontAwesomeIcon icon={faBoxOpen} class="text-white text-2xl" />
+        </button>
     </div>
     <div class="flex items-center p-4 hover:bg-green-600 justify-center">
         <FontAwesomeIcon icon={faBoxes} class="text-white text-2xl" />
@@ -41,7 +43,7 @@
     <div class="flex-grow"></div>
     <div class="flex flex-col items-center mb-4">
         <div class="flex justify-center mt-4">
-            <img src="./default.jpg" alt="Avatar" class="w-12 h-12 rounded-full border-2 border-white" />
+            <img src="./default.jpg" alt="Avatar" class="w-10 h-10 rounded-full border-2 border-white" />
         </div>
         <span class="text-white font-bold mt-2 text-sm">USER</span>
         <button class="bg-yellow-300 text-black rounded-full p-1 mt-2 text-2xs hover:bg-gray-900">
