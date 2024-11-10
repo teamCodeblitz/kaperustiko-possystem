@@ -10,10 +10,12 @@
 		
 		isLoading = true; // Set loading state to true
 
-		// Redirect after 5 seconds
+		// Redirect after 3 seconds
 		setTimeout(() => {
 			isLoading = false; // Reset loading state
 			window.location.href = '/main-pos'; 
+			// New line to open a second screen
+			window.open('/customers-page', '_blank'); // Opens a new screen
 		}, 3000);
 	}
 
@@ -62,7 +64,7 @@
     <div class="flex-1 flex items-center justify-center">
         <form on:submit|preventDefault={handleSubmit} class="p-6 w-full md:w-2/3">
             <h2 class="text-3xl font-extrabold mb-4 text-center text-gradient">Welcome Back to Your POS System!</h2>
-            <p class="text-center mb-6 text-gray-600">Please enter your credentials to access your account.</p>
+            <p class="text-center mb-6 text-gray-600">Please enter your credentials to access the system.</p>
             <div class="mb-4">
                 <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
                 <input type="email" id="email" bind:value={email} required class="mt-1 block w-full p-2 border border-gray-300 rounded" />

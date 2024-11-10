@@ -59,6 +59,24 @@
         // Set quantity to 1 when adding the card
         quantity = 1; // You can also manage multiple cards if needed
     }
+
+    // Add a new variable to control the popup visibility
+    let isPopupVisible = false;
+
+    // Function to handle placing an order and showing the popup
+    function handlePlaceOrder() {
+        isPopupVisible = true; // Show the popup
+    }
+
+    // Function to close the popup
+    function closePopup() {
+        isPopupVisible = false; // Hide the popup
+    }
+
+    // Function to print the receipt
+    function printReceipt() {
+        // Implement the printReceipt function as per your application's requirements
+    }
 </script>
 
 <div class="flex h-screen">
@@ -183,7 +201,8 @@
                             if (key === '⌫') handleBackspace();
                             else if (key === 'Clr') handleClear();
                             else if (key === 'Enter') handleEnter();
-                            else if (key !== 'Place Order') handleNumberInput(key);
+                            else if (key === 'Place Order') handlePlaceOrder(); // Call the new function
+                            else handleNumberInput(key);
                         }}
                         class="bg-gray-200 text-gray-800 font-bold py-2 rounded col-span-{key === 'Place Order' ? '2' : '1'} {key === 'Clr' ? 'bg-red-900 text-white' : ''}">
                             {key}
@@ -194,4 +213,44 @@
         </div>
     </div>
 </div>
+
+<!-- Popup component -->
+{#if isPopupVisible}
+    <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white p-4 rounded shadow-lg">
+            <!-- Logo -->
+            <div class="flex justify-center mb-2">
+                <img src="icon.png" alt="Restaurant Logo" class="h-16" /> <!-- Adjust the path and size as needed -->
+            </div>
+            <!-- Restaurant Details -->
+            <h2 class="text-lg font-bold text-center">Kape Rustiko Restaurant</h2> <!-- Replace with actual restaurant name -->
+            <p class="text-center">Dewey Ave, Subic Bay Freeport Zone</p> <!-- Replace with actual location -->
+            <p class="text-center">Contact: (047) 998-0000</p> <!-- Replace with actual contact number -->
+            <h2 class="text-lg text-center font-bold mt-4 mb-4">Sales Preview</h2>
+            <p>Receipt Number: {orderNumber}</p>
+            <p>Date and Time: {new Date().toLocaleString()}</p>
+            <p>Cashier Name: Mike</p>
+            <div class="flex justify-between">
+                <h2 class="text-lg font-bold mt-4">Items Ordered:</h2><span class="text-lg font-bold mt-4">Items Price</span>
+            </div>
+            <ul class="flex justify-between">
+                <li>Pasta x {quantity}</li><span>₱00.00</span><!-- Update this line to reflect actual items if needed -->
+            </ul>
+            <div class="flex justify-between">
+                <p class="text-lg font-bold mt-4">Total Amount</p><span class="text-lg font-bold mt-4">₱00.00</span>
+            </div>
+            <div class="flex justify-between">
+                <p>Amount Paid:</p><span>₱00.00</span>
+            </div>
+            <div class="flex justify-between">
+                <p>Change:</p><span>₱00.00</span>
+            </div>
+            <h2 class="text-lg text-center font-bold mt-4">Thank You for Dining with Us!</h2>
+            <div class="flex justify-between mt-4">
+                <button on:click={closePopup} class="bg-red-500 text-white py-1 px-4 rounded w-full mr-1">Cancel Order</button>
+                <button on:click={printReceipt} class="bg-blue-500 text-white py-1 px-4 rounded w-full ml-1">Print Receipt</button>
+            </div>
+        </div>
+    </div>
+{/if}
 

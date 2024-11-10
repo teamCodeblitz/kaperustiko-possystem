@@ -46,7 +46,10 @@
             <img src="./default.jpg" alt="Avatar" class="w-10 h-10 rounded-full border-2 border-white" />
         </div>
         <span class="text-white font-bold mt-2 text-sm">USER</span>
-        <button class="bg-yellow-300 text-black rounded-full p-1 mt-2 text-2xs hover:bg-gray-900">
+        <button class="bg-yellow-300 text-black rounded-full p-1 mt-2 text-2xs hover:bg-gray-900" on:click={() => { 
+            localStorage.removeItem('userSession'); 
+            window.location.href = '/login'; 
+        }}>
           <FontAwesomeIcon icon={faSignOutAlt} class="text-black" />
         </button>
     </div>
