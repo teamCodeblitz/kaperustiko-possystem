@@ -11,18 +11,18 @@
     let quantity = 0; // Add a quantity variable
 
     const cardData = [
-        { code: '001', title1: 'Pizza', title2: 'Pepperoni', price: '₱250.00' , image: './foods/pizza.jpg' },
-        { code: '002', title1: 'Burger', title2: 'Cheese', price: '₱150.00' , image: './foods/burger.jpg' },
-        { code: '003', title1: 'Pasta', title2: 'Carbonara', price: '₱180.00' , image: './foods/pasta.jpg' },
-        { code: '004', title1: 'Salad', title2: 'Caesar', price: '₱120.00' , image: './foods/salad.jpg' },
-        { code: '005', title1: 'Steak', title2: 'Ribeye', price: '₱500.00' , image: './foods/steak.jpg' },
-        { code: '006', title1: 'Sushi', title2: 'Nigiri', price: '₱300.00' , image: './foods/sushi.jpg' },
-        { code: '007', title1: 'Sandwich', title2: 'Ham & Cheese', price: '₱90.00' , image: './foods/sandwich.jpg' },
-        { code: '008', title1: 'Fries', title2: 'Large', price: '₱70.00' , image: './foods/fries.jpg' },
-        { code: '009', title1: 'Ice Cream', title2: 'Vanilla', price: '₱50.00' , image: './foods/icecream.jpg' },
-        { code: '010', title1: 'Coffee', title2: 'Latte', price: '₱100.00' , image: './foods/coffee.jpg' },
-        { code: '011', title1: 'Tea', title2: 'Green', price: '₱80.00' , image: './foods/tea.jpg' },
-        { code: '012', title1: 'Juice', title2: 'Orange', price: '₱60.00' , image: './foods/juice.jpg' },
+        { code: '001', title1: 'Pizza', title2: 'Pepperoni', price: '₱250.00', image: './foods/pizza.jpg', label: 'Food' },
+        { code: '002', title1: 'Burger', title2: 'Cheese', price: '₱150.00', image: './foods/burger.jpg', label: 'Food' },
+        { code: '003', title1: 'Pasta', title2: 'Carbonara', price: '₱180.00', image: './foods/pasta.jpg', label: 'Food' },
+        { code: '004', title1: 'Salad', title2: 'Caesar', price: '₱120.00', image: './foods/salad.jpg', label: 'Food' },
+        { code: '005', title1: 'Steak', title2: 'Ribeye', price: '₱500.00', image: './foods/steak.jpg', label: 'Food' },
+        { code: '006', title1: 'Sushi', title2: 'Nigiri', price: '₱300.00', image: './foods/sushi.jpg', label: 'Food' },
+        { code: '007', title1: 'Sandwich', title2: 'Ham & Cheese', price: '₱90.00', image: './foods/sandwich.jpg', label: 'Food' },
+        { code: '008', title1: 'Fries', title2: 'Large', price: '₱70.00', image: './foods/fries.jpg', label: 'Food' },
+        { code: '009', title1: 'Ice Cream', title2: 'Vanilla', price: '₱50.00', image: './foods/icecream.jpg', label: 'Dessert' },
+        { code: '010', title1: 'Coffee', title2: 'Latte', price: '₱100.00', image: './foods/coffee.jpg', label: 'Beverage' },
+        { code: '011', title1: 'Tea', title2: 'Green', price: '₱80.00', image: './foods/tea.jpg', label: 'Beverage' },
+        { code: '012', title1: 'Juice', title2: 'Orange', price: '₱60.00', image: './foods/juice.jpg', label: 'Beverage' },
     ];
 
     // Payment handling functions
@@ -111,26 +111,17 @@
                     <p>Display Food Menu</p>
                 {:else if selectedCategory === 'Desserts'}
                     <p>Display Desserts Menu</p>
-                {:else if selectedCategory === 'Coffee'}
-                    <p>Display Coffee Menu</p>
-                {:else if selectedCategory === 'Tea'}
-                    <p>Display Tea Menu</p>
-                {:else if selectedCategory === 'Juice'}
-                    <p>Display Juice Menu</p>
-                {:else if selectedCategory === 'Sandwich'}
-                    <p>Display Sandwich Menu</p>
-                {:else if selectedCategory === 'Sushi'}
-                    <p>Display Sushi Menu</p>
-                {:else if selectedCategory === 'Pasta'}
-                    <p>Display Pasta Menu</p>
-                {:else if selectedCategory === 'Burger'}
-                    <p>Display Burger Menu</p>
                 {/if}
             </div>
 
             <!-- Card Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-6">
-                {#each cardData as { code, title1, title2, price, image }}
+                {#each cardData.filter(item => 
+                    selectedCategory === 'All' || 
+                    (selectedCategory === 'Beverages' && item.label === 'Beverage') || 
+                    (selectedCategory === 'Food' && item.label === 'Food') ||
+                    (selectedCategory === 'Desserts' && item.label === 'Dessert')
+                ) as { code, title1, title2, price, image }}
                     <Card {code} {title1} {title2} {price} {image} on:add={handleAddCard} />
                 {/each}
             </div>

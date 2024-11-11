@@ -3,7 +3,7 @@
     import { faTachometerAlt, faBox, faShoppingCart, faClock, faUser, faClipboardList, faChartLine, faTruck, faBoxes, faUndo, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
     import { faClipboardCheck, faExchangeAlt, faBoxOpen } from '@fortawesome/free-solid-svg-icons';
     import { onMount } from 'svelte';
-    let isActive = { mainPos: false, transaction: false, dashboard: false, inventory: false }; // Define isActive without activeIcon
+    let isActive = { mainPos: false, transaction: false, dashboard: false, inventory: false, delivery: false }; // Define isActive without activeIcon
     let showModal = false; // Define showModal to control the modal visibility
 
     function setActive(icon: keyof typeof isActive) {
@@ -72,6 +72,13 @@
         <button type="button" on:click={() => { window.location.href = '/inventory'; setActive('inventory'); }} class="flex items-center justify-center">
             <span class:text-cyan-950={isActive.inventory} class:text-white={!isActive.inventory}>
                 <FontAwesomeIcon icon={faBoxOpen} class="text-2xl"    />
+            </span>
+        </button>
+    </div>
+    <div class="flex items-center p-4 hover:bg-cyan-600 justify-center" class:bg-white={isActive.delivery} class:rounded-[4px]={isActive.delivery} class:ml-[5px]={isActive.delivery} class:mr-[5px]={isActive.delivery} class:h-[50px]={isActive.delivery}>
+        <button type="button" on:click={() => { window.location.href = '/delivery'; setActive('delivery'); }} class="flex items-center justify-center">
+            <span class:text-cyan-950={isActive.delivery} class:text-white={!isActive.delivery}>
+                <FontAwesomeIcon icon={faTruck} class="text-2xl" />
             </span>
         </button>
     </div>
