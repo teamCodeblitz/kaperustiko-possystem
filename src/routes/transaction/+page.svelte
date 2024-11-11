@@ -2,13 +2,35 @@
     import { onMount } from "svelte";
     import Sidebar from "../sidebar/+page.svelte";
   
-    let salesRemitItems = [
-      { id: 1, name: "Nandy pogi", totalSales: "₱1000.00", date: "₱1000.00", shortage: "₱10.00" },
-      { id: 2, name: "Nandy padin", totalSales: "₱1000.00", date: "₱1000,00", shortage: "₱10.00" },
-    ];
-  
-    let inventoryItems = [
-      { id: 1, name: "beef kardereta", quantity: "beef kardereta", disposeDate: "11-07-24", disposeCost: "₱100.00" },
+    let recentSales = [
+      {
+        receipt: 1,
+        items: "Hotdog ni nandy",
+        quantity: "1x",
+        totalCost: "₱500.00",
+        payAmount: "₱500.00",
+        changeDue: "₱0.00",
+        orderDate: "11-07-24",
+        orderTime: "12:39 AM",
+        orderIn: "Nids",
+        orderType: "Dine In",
+        name: "Sam Pogi",
+        totalDiscount: "₱24.00",
+      },
+      {
+        receipt: 1,
+        items: "Hotdog ni nandy",
+        quantity: "1x",
+        totalCost: "₱500.00",
+        payAmount: "₱500.00",
+        changeDue: "₱0.00",
+        orderDate: "11-07-24",
+        orderTime: "12:39 AM",
+        orderIn: "Nids",
+        orderType: "Dine In",
+        name: "Sam Pogi",
+        totalDiscount: "₱24.00",
+      },
     ];
   </script>
   
@@ -18,94 +40,64 @@
   
     <!-- Main Content -->
     <div class="flex-grow p-6 bg-gray-100">
-      <!-- Statistics Cards -->
-      <div class="grid grid-cols-6 gap-4 mb-6">
-        <div class="bg-white rounded-lg shadow-md p-4 text-center">
-          <div class="text-gray-500">Today Total Sales</div>
+      <!-- Top Card for Total Sales -->
+      <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow-md p-6 col-span-1 text-center">
+          <div class="text-gray-500 font-medium">Today Total Sales</div>
           <div class="text-3xl font-bold">###</div>
-          <div class="text-green-600">₱</div>
-        </div>
-        <div class="bg-white rounded-lg shadow-md p-4 text-center">
-          <div class="text-gray-500">Return Items</div>
-          <div class="text-3xl font-bold text-green-500">🔄</div>
-        </div>
-        <div class="bg-white rounded-lg shadow-md p-4 text-center">
-          <div class="text-gray-500">Best Seller</div>
-          <div class="text-3xl font-bold text-green-500">⭐</div>
-        </div>
-        <div class="bg-white rounded-lg shadow-md p-4 text-center">
-          <div class="text-gray-500">Expired Items</div>
-          <div class="text-3xl font-bold text-red-500">❗</div>
-        </div>
-        <div class="bg-white rounded-lg shadow-md p-4 text-center">
-          <div class="text-gray-500">Total Dispose Items</div>
-          <div class="text-3xl font-bold text-red-500">🚮</div>
-        </div>
-        <div class="bg-white rounded-lg shadow-md p-4 text-center">
-          <div class="text-gray-500">Total Dispose Cost</div>
-          <div class="text-3xl font-bold text-red-500">₱</div>
+          <div class="text-green-600 text-2xl">₱</div>
         </div>
       </div>
   
-      <!-- Tables Section -->
-      <div class="grid grid-cols-2 gap-4">
-        <!-- Sales Remit Table -->
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div class="bg-gray-800 text-white text-center font-bold p-2">Sales Remit</div>
-          <table class="w-full text-left table-fixed border-collapse">
-            <thead class="bg-gray-700 text-white">
-              <tr>
-                <th class="p-2">Remit id</th>
-                <th class="p-2">Name</th>
-                <th class="p-2">Total Sales</th>
-                <th class="p-2">Date</th>
-                <th class="p-2">Shortage</th>
-                <th class="p-2">Validate</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white">
-              {#each salesRemitItems as item}
-                <tr class="border-t border-gray-300">
-                  <td class="p-2 text-center">{item.id}</td>
-                  <td class="p-2">{item.name}</td>
-                  <td class="p-2">{item.totalSales}</td>
-                  <td class="p-2">{item.date}</td>
-                  <td class="p-2">{item.shortage}</td>
-                  <td class="p-2 text-center">
-                    <button class="p-1 bg-gray-200 text-gray-700 rounded">Validate</button>
-                  </td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        </div>
+      <!-- Recent Sales Header -->
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold">Recent Sales</h2>
+        <button class="bg-gray-800 text-white px-4 py-2 rounded shadow-md">Recent Sales</button>
+      </div>
   
-        <!-- Inventory Item Dispose Table -->
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div class="bg-gray-800 text-white text-center font-bold p-2">Inventory Item Dispose</div>
-          <table class="w-full text-left table-fixed border-collapse">
-            <thead class="bg-gray-700 text-white">
-              <tr>
-                <th class="p-2">Dispose id</th>
-                <th class="p-2">Item Name</th>
-                <th class="p-2">Quantity</th>
-                <th class="p-2">Dispose Date</th>
-                <th class="p-2">Dispose Cost</th>
+      <!-- Sales Table -->
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <table class="w-full text-left table-fixed border-collapse">
+          <thead class="bg-gray-800 text-white">
+            <tr>
+              <th class="p-2">Receipt #</th>
+              <th class="p-2">Items</th>
+              <th class="p-2">Total Cost</th>
+              <th class="p-2">Pay Amount</th>
+              <th class="p-2">Change Due</th>
+              <th class="p-2">Order Date</th>
+              <th class="p-2">Order In</th>
+              <th class="p-2">Order Type</th>
+              <th class="p-2">Name</th>
+              <th class="p-2">Total Discount</th>
+              <th class="p-2">Action</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white">
+            {#each recentSales as sale, i}
+              <tr class="border-t border-gray-300 {i % 2 === 0 ? 'bg-blue-100' : ''}">
+                <td class="p-2 text-center">{sale.receipt}</td>
+                <td class="p-2">{sale.items} <span class="text-gray-500">{sale.quantity}</span></td>
+                <td class="p-2">{sale.totalCost}</td>
+                <td class="p-2">{sale.payAmount}</td>
+                <td class="p-2">{sale.changeDue}</td>
+                <td class="p-2">
+                  <span class="bg-green-200 text-green-800 px-2 py-1 rounded">{sale.orderDate}</span>
+                  <span class="bg-green-200 text-green-800 px-2 py-1 rounded ml-2">{sale.orderTime}</span>
+                </td>
+                <td class="p-2">
+                  <span class="bg-green-200 text-green-800 px-2 py-1 rounded">{sale.orderIn}</span>
+                </td>
+                <td class="p-2">{sale.orderType}</td>
+                <td class="p-2">{sale.name}</td>
+                <td class="p-2">{sale.totalDiscount}</td>
+                <td class="p-2 text-center">
+                  <button class="bg-red-500 text-white px-3 py-1 rounded">Void</button>
+                </td>
               </tr>
-            </thead>
-            <tbody class="bg-white">
-              {#each inventoryItems as item}
-                <tr class="border-t border-gray-300">
-                  <td class="p-2 text-center">{item.id}</td>
-                  <td class="p-2">{item.name}</td>
-                  <td class="p-2">{item.quantity}</td>
-                  <td class="p-2">{item.disposeDate}</td>
-                  <td class="p-2">{item.disposeCost}</td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        </div>
+            {/each}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

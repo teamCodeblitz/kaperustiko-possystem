@@ -32,6 +32,7 @@ Modules:
 - npm install flowbite
 - npm install flowbite-svelte
 - npm install font-awesome
+- npm install svelte svelte-chartjs @sveltejs/kit
 - npm install @tauri-apps/icons
 - npm install --save-dev @sveltejs/adapter-static
 - npm install --save-dev @tauri-apps/cli
