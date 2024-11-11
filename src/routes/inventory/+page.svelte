@@ -64,7 +64,7 @@
             <select class="p-2 rounded border border-gray-300 focus:outline-none">
               <option>Check Status</option>
             </select>
-            <button class="p-2 bg-gray-200 rounded">Prepared Item</button>
+            <button class="p-2 bg-blue-500 text-white rounded">Prepared Item</button>
           </div>
         </div>
   

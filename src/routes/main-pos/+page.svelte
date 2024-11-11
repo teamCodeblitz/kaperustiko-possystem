@@ -53,15 +53,9 @@
         }
     }
 
-    // New function to handle adding a card
-    function handleAddCard(event: CustomEvent) { // Specify event as CustomEvent
-        const { code, title } = event.detail;
-        // Set quantity to 1 when adding the card
-        quantity = 1; // You can also manage multiple cards if needed
-    }
-
     // Add a new variable to control the popup visibility
     let isPopupVisible = false;
+    let isVariationVisible = false;
 
     // Function to handle placing an order and showing the popup
     function handlePlaceOrder() {
@@ -71,11 +65,24 @@
     // Function to close the popup
     function closePopup() {
         isPopupVisible = false; // Hide the popup
+        isVariationVisible = false; // Hide the popup
     }
 
     // Function to print the receipt
     function printReceipt() {
         window.print(); // Trigger the print dialog
+    }
+
+    let selectedItem: { code: string; title1: string; title2: string; price: string; image: string; label: string; } | null = null; // To store the selected item details for the popup
+
+    // Add new variables for size and add-ons
+    let selectedSize = ''; // Variable to store selected size
+    let selectedAddons: string[] = []; // Array to store selected add-ons
+
+    // Function to handle adding an item with size and add-ons
+    function handleAdd(item: { code: string; title1: string; title2: string; price: string; image: string; label: string; }) {
+        selectedItem = item; // Set the selected item
+        isVariationVisible = true; // Show the popup
     }
 </script>
 
@@ -122,7 +129,7 @@
                     (selectedCategory === 'Food' && item.label === 'Food') ||
                     (selectedCategory === 'Desserts' && item.label === 'Dessert')
                 ) as { code, title1, title2, price, image }}
-                    <Card {code} {title1} {title2} {price} {image} on:add={handleAddCard} />
+                    <Card {code} {title1} {title2} {price} {image} onAdd={handleAdd} />
                 {/each}
             </div>
         </div>
@@ -143,15 +150,7 @@
                     <p class="text-gray-800 font-semibold">003</p>
                     <p class="text-gray-800 font-semibold">Pasta</p>
                     <div class="flex items-center">
-                        <button class="bg-red-500 text-white font-bold py-1 px-2 rounded" on:click={decreaseQuantity}>-</button>
-                        <input 
-                            type="number" 
-                            class="w-14 text-gray-800 font-semibold text-center appearance-none" 
-                            bind:value={quantity} 
-                            style="border: none; outline: none;" 
-                            min="0"
-                        />
-                        <button class="bg-green-500 -ml-4 text-white font-bold py-1 px-2 rounded" on:click={increaseQuantity}>+</button>
+                      
                     </div>
                 </div>
                 {/if}
@@ -208,43 +207,108 @@
 <!-- Popup component -->
 {#if isPopupVisible}
     <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-        <div class="bg-white p-4 rounded shadow-lg">
+        <div class="bg-white p-8 rounded-lg shadow-lg"> <!-- Increased padding for larger touch targets -->
             <!-- Logo -->
-            <div class="flex justify-center mb-2">
-                <img src="icon.png" alt="Restaurant Logo" class="h-16" /> <!-- Adjust the path and size as needed -->
+            <div class="flex justify-center mb-4">
+                <img src="icon.png" alt="Restaurant Logo" class="h-24" /> <!-- Increased logo size for better visibility -->
             </div>
             <!-- Restaurant Details -->
-            <h2 class="text-lg font-bold text-center">Kape Rustiko Restaurant</h2> <!-- Replace with actual restaurant name -->
-            <p class="text-center">Dewey Ave, Subic Bay Freeport Zone</p> <!-- Replace with actual location -->
-            <p class="text-center">Contact: (047) 998-0000</p> <!-- Replace with actual contact number -->
+            <h2 class="text-2xl font-bold text-center">Kape Rustiko Restaurant</h2> <!-- Increased font size -->
+            <p class="text-center text-lg">Dewey Ave, Subic Bay Freeport Zone</p> <!-- Increased font size for better readability -->
+            <p class="text-center text-lg">Contact: (047) 998-0000</p> <!-- Increased font size for better readability -->
             
             <!-- BIR Requirements -->
-            <p class="text-center">TIN: 123-456-789</p> <!-- Add TIN -->
-            <p class="text-center">Address: Dewey Ave, SBFZ</p> <!-- Add business address if different -->
+            <p class="text-center text-lg">TIN: 123-456-789</p> <!-- Increased font size for better readability -->
+            <p class="text-center text-lg">Address: Dewey Ave, SBFZ</p> <!-- Increased font size for better readability -->
 
-            <h2 class="text-lg text-center font-bold mt-4 mb-4">Sales Preview</h2>
-            <p>Receipt Number: {orderNumber}</p>
-            <p>Date and Time: {new Date().toLocaleString()}</p>
-            <p>Cashier Name: Mike</p>
+            <h2 class="text-2xl text-center font-bold mt-4 mb-4">Sales Preview</h2> <!-- Increased font size -->
+            <p class="text-lg">Receipt Number: {orderNumber}</p> <!-- Increased font size for better readability -->
+            <p class="text-lg">Date and Time: {new Date().toLocaleString()}</p> <!-- Increased font size for better readability -->
+            <p class="text-lg">Cashier Name: Mike</p> <!-- Increased font size for better readability -->
             <div class="flex justify-between">
                 <h2 class="text-lg font-bold mt-4">Items Ordered:</h2><span class="text-lg font-bold mt-4">Items Price</span>
             </div>
             <ul class="flex justify-between">
-                <li>Pasta x {quantity}</li><span>₱00.00</span><!-- Update this line to reflect actual items if needed -->
+                <li class="text-lg">Pasta x {quantity}</li><span class="text-lg">₱00.00</span><!-- Update this line to reflect actual items if needed -->
             </ul>
             <div class="flex justify-between">
                 <p class="text-lg font-bold mt-4">Total Amount</p><span class="text-lg font-bold mt-4">₱00.00</span>
             </div>
             <div class="flex justify-between">
-                <p>Amount Paid:</p><span>₱00.00</span>
+                <p class="text-lg">Amount Paid:</p><span class="text-lg">₱00.00</span>
             </div>
             <div class="flex justify-between">
-                <p>Change:</p><span>₱00.00</span>
+                <p class="text-lg">Change:</p><span class="text-lg">₱00.00</span>
             </div>
-            <h2 class="text-lg text-center font-bold mt-4">Thank You for Dining with Us!</h2>
+            <h2 class="text-2xl text-center font-bold mt-4">Thank You for Dining with Us!</h2> <!-- Increased font size -->
             <div class="flex justify-between mt-4">
-                <button on:click={closePopup} class="bg-red-500 text-white py-1 px-4 rounded w-full mr-1">Cancel Order</button>
-                <button on:click={printReceipt} class="bg-blue-500 text-white py-1 px-4 rounded w-full ml-1">Print Receipt</button>
+                <button on:click={closePopup} class="bg-red-500 text-white py-3 px-6 rounded w-full mr-1">Cancel Order</button> <!-- Increased padding for larger touch targets -->
+                <button on:click={printReceipt} class="bg-blue-500 text-white py-3 px-6 rounded w-full ml-1">Print Receipt</button> <!-- Increased padding for larger touch targets -->
+            </div>
+        </div>
+    </div>
+{/if}
+
+<!-- Popup for variations, quantity, size, and add-ons -->
+{#if isVariationVisible}
+    <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70">
+        <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full"> <!-- Increased padding for larger touch targets -->
+            <h2 class="text-2xl font-bold text-center mb-6">Add {selectedItem?.title1}</h2> <!-- Increased font size -->
+            <p class="text-lg text-center mb-6">Price: {selectedItem?.price}</p> <!-- Increased margin for better spacing -->
+            
+            <!-- Product Image -->
+            {#if selectedItem?.image}
+                <img src={selectedItem.image} alt={selectedItem.title1} class="w-full h-[400px] mb-4 rounded" /> <!-- Added product image -->
+            {/if}
+
+            <!-- Size Selection -->
+            <label for="size" class="block text-sm font-medium mb-2">Size:</label> <!-- Increased margin for better spacing -->
+            <select id="size" bind:value={selectedSize} class="block w-full p-3 border border-gray-300 rounded-md mb-6"> <!-- Increased padding for larger touch targets -->
+                <option value="">Select Size</option>
+                <option value="Small">Small</option>
+                <option value="Medium">Medium</option>
+                <option value="Large">Large</option>
+            </select>
+
+            <!-- Add-ons Selection -->
+            <label for="addons" class="block text-sm font-medium mb-2">Add-ons:</label> <!-- Increased margin for better spacing -->
+            <div class="mb-6"> <!-- Increased margin for better spacing -->
+                {#if selectedItem?.label === 'Beverage'}
+                    <label class="block mb-2"> <!-- Added margin for better spacing -->
+                        <input type="checkbox" bind:group={selectedAddons} value="Extra Shot" class="mr-2" /> Extra Shot
+                    </label>
+                    <label class="block mb-2"> <!-- Added margin for better spacing -->
+                        <input type="checkbox" bind:group={selectedAddons} value="Flavored Syrup" class="mr-2" /> Flavored Syrup
+                    </label>
+                    <label class="block mb-2"> <!-- Added margin for better spacing -->
+                        <input type="checkbox" bind:group={selectedAddons} value="Whipped Cream" class="mr-2" /> Whipped Cream
+                    </label>
+                {:else}
+                    <label class="block mb-2"> <!-- Added margin for better spacing -->
+                        <input type="checkbox" bind:group={selectedAddons} value="Extra Cheese" class="mr-2" /> Extra Cheese
+                    </label>
+                    <label class="block mb-2"> <!-- Added margin for better spacing -->
+                        <input type="checkbox" bind:group={selectedAddons} value="Bacon" class="mr-2" /> Bacon
+                    </label>
+                    <label class="block mb-2"> <!-- Added margin for better spacing -->
+                        <input type="checkbox" bind:group={selectedAddons} value="Olives" class="mr-2" /> Olives
+                    </label>
+                {/if}
+            </div>
+
+            <label for="quantity" class="block text-sm font-medium mb-2">Quantity:</label> <!-- Increased margin for better spacing -->
+            <input type="number" id="quantity" bind:value={quantity} min="1" class="block w-full p-3 border border-gray-300 rounded-md mb-6" /> <!-- Increased padding for larger touch targets -->
+
+            <div class="flex justify-between">
+                <button on:click={closePopup} class="bg-red-500 text-white py-3 px-6 rounded-md hover:bg-red-600 transition">Cancel</button> <!-- Increased padding for larger touch targets -->
+                <button on:click={() => {
+                    if (quantity > 0 && selectedSize) { // Check if quantity is greater than 0 and size is selected
+                        // Handle adding item logic here
+                        closePopup(); // Close the popup after adding
+                    } else {
+                        alert('Please select a quantity greater than 0 and a size.'); // Alert if quantity is 0 or size is not selected
+                    }
+                }} class="bg-blue-500 text-white py-3 px-6 rounded-md hover:bg-blue-600 transition">Add to Order</button> <!-- Increased padding for larger touch targets -->
             </div>
         </div>
     </div>

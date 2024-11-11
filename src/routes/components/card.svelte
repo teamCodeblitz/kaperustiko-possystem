@@ -10,6 +10,8 @@
     export let title2 = '';
     export let price = '';
     export let image = '';
+    export let label = '';
+    export let onAdd;
   </script>
   
   <div class="flex items-center justify-center">
@@ -37,7 +39,7 @@
         <p class="text-4xl font-bold text-gray-800">{price}</p>
   
         <!-- Order Button -->
-        <Button color="dark" class="w-full" on:click={() => dispatch('add', { code: '003', title: 'Pasta' })}>
+        <Button color="dark" class="w-full" on:click={() => onAdd({ code, title1, title2, price, image, label })}>
           ADD
         </Button>
       </div>
