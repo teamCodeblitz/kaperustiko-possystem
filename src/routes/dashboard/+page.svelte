@@ -112,12 +112,12 @@
 
          <!-- Date Sorter -->
          <div class="flex justify-end mb-4 w-full">
-            <input type="text" placeholder="Search..." class="bg-gray-200 text-black border-none rounded p-2 mr-2 flex-grow" />
-            <select class="bg-gray-200 text-black border-none rounded">
+            <input type="text" placeholder="Search..." class="bg-white text-black border border-gray-300 rounded p-2 mr-2 flex-grow shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <select class="bg-white text-black border border-gray-300 rounded p-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="sort-asc">Sort by Date (Asc)</option>
                 <option value="sort-desc">Sort by Date (Desc)</option>
             </select>
-            <button class="ml-2 p-2 bg-blue-500 text-white rounded" on:click={printPage}>
+            <button class="ml-2 p-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition duration-200" on:click={printPage}>
                 <FontAwesomeIcon icon={faPrint} />
             </button>
         </div>

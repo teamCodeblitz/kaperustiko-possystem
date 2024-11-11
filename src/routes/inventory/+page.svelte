@@ -51,13 +51,13 @@
     <div class="flex-grow p-6 overflow-auto">
       <div class="rounded-lg shadow-lg overflow-hidden">
         <!-- Search Bar and Filters -->
-        <div class="flex justify-between p-3 bg-gray-100">
+        <div class="flex items-center mb-4">
           <input
             type="text"
             placeholder="Search"
-            class="w-1/3 p-2 rounded border border-gray-300 focus:outline-none"
+            class="flex-grow p-2 rounded border border-gray-300 focus:outline-none"
           />
-          <div class="flex space-x-4">
+          <div class="flex space-x-4 ml-4">
             <select class="p-2 rounded border border-gray-300 focus:outline-none">
               <option>Category</option>
             </select>
@@ -68,11 +68,12 @@
           </div>
         </div>
   
+  
         <!-- Table -->
         <table class="min-w-full table-auto border-collapse bg-white shadow-md rounded-lg overflow-hidden">
           <thead class="bg-gray-800 text-white">
             <tr>
-              <th class="p-4 text-center">Id</th>
+              <th class="p-4 text-center">ID</th>
               <th class="p-4 text-left">Name</th>
               <th class="p-4 text-right">Price 1</th>
               <th class="p-4 text-right">Price 2</th>

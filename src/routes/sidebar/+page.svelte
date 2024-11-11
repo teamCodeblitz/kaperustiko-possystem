@@ -23,8 +23,14 @@
         else if (currentPath === '/transaction') {
             setActive('transaction');
         }
+        else if (currentPath === '/dashboard') {
+            setActive('dashboard');
+        }
         else if (currentPath === '/inventory') {
             setActive('inventory');
+        }
+        else if (currentPath === '/delivery') {
+            setActive('delivery');
         }
     });
 

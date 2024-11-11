@@ -6,7 +6,7 @@
 
     let orderNumber = "#01";
     let totalCost = "₱00.00";
-    let selectedCategory = "Food"; // Default category is "Food"
+    let selectedCategory = "All"; // Default category is now "All"
     let payment = ''; // Payment input variable
     let quantity = 0; // Add a quantity variable
 
@@ -217,6 +217,11 @@
             <h2 class="text-lg font-bold text-center">Kape Rustiko Restaurant</h2> <!-- Replace with actual restaurant name -->
             <p class="text-center">Dewey Ave, Subic Bay Freeport Zone</p> <!-- Replace with actual location -->
             <p class="text-center">Contact: (047) 998-0000</p> <!-- Replace with actual contact number -->
+            
+            <!-- BIR Requirements -->
+            <p class="text-center">TIN: 123-456-789</p> <!-- Add TIN -->
+            <p class="text-center">Address: Dewey Ave, SBFZ</p> <!-- Add business address if different -->
+
             <h2 class="text-lg text-center font-bold mt-4 mb-4">Sales Preview</h2>
             <p>Receipt Number: {orderNumber}</p>
             <p>Date and Time: {new Date().toLocaleString()}</p>
