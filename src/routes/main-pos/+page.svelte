@@ -75,7 +75,7 @@
 
     // Function to print the receipt
     function printReceipt() {
-        // Implement the printReceipt function as per your application's requirements
+        window.print(); // Trigger the print dialog
     }
 </script>
 

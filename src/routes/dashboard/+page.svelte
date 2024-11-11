@@ -1,7 +1,7 @@
 <script>
     import { onMount } from "svelte";
     import { FontAwesomeIcon } from "@fortawesome/svelte-fontawesome";
-    import { faStar, faUndo, faExclamationTriangle, faTrash, faPesoSign } from "@fortawesome/free-solid-svg-icons";
+    import { faStar, faUndo, faExclamationTriangle, faTrash, faPesoSign, faPrint } from "@fortawesome/free-solid-svg-icons";
     import Sidebar from "../sidebar/+page.svelte";
     import { Bar, Line, Pie } from 'svelte-chartjs';
     import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement } from 'chart.js';
@@ -53,6 +53,10 @@
             }
         ]
     };
+
+    function printPage() {
+        window.print();
+    }
 </script>
 
 <div class="flex h-screen bg-gradient-to-b from-green-500 to-green-700">
@@ -106,11 +110,23 @@
             </div>
         </div>
 
+         <!-- Date Sorter -->
+         <div class="flex justify-end mb-4 w-full">
+            <input type="text" placeholder="Search..." class="bg-gray-200 text-black border-none rounded p-2 mr-2 flex-grow" />
+            <select class="bg-gray-200 text-black border-none rounded">
+                <option value="sort-asc">Sort by Date (Asc)</option>
+                <option value="sort-desc">Sort by Date (Desc)</option>
+            </select>
+            <button class="ml-2 p-2 bg-blue-500 text-white rounded" on:click={printPage}>
+                <FontAwesomeIcon icon={faPrint} />
+            </button>
+        </div>
+
         <!-- Charts Section -->
         <div class="grid grid-cols-3 gap-2 mb-6">
             <div class="bg-white rounded-lg shadow-lg p-2">
                 <h3 class="text-center font-bold text-sm">Sales Chart</h3>
-                <Bar data={salesData} options={{ responsive: true }} />
+                <Bar data={salesData} />
             </div>
             <div class="bg-white rounded-lg shadow-lg p-2">
                 <h3 class="text-center font-bold text-sm">Inventory Chart</h3>
