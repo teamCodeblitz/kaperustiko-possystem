@@ -6,16 +6,58 @@
     let middleName = '';
     let contactNumber = '';
     
-    const handleSubmit = () => {
-        // Handle form submission
-        console.log('Email:', email);
-        console.log('Password:', password);
-        console.log('First Name:', firstName);
-        console.log('Last Name:', lastName);
-        console.log('Middle Name:', middleName);
-        console.log('Contact Number:', contactNumber);
-    };
+    // New state variables for error messages
+    let emailError = '';
+    let passwordError = '';
+    let firstNameError = '';
+    let lastNameError = '';
+    let contactNumberError = '';
+
+    async function handleSubmit() {
+        // Reset error messages
+        emailError = '';
+        passwordError = '';
+        firstNameError = '';
+        lastNameError = '';
+        contactNumberError = '';
+
+        // Basic validation
+        if (!email) emailError = 'Email is required';
+        if (!password) passwordError = 'Password is required';
+        if (!firstName) firstNameError = 'First Name is required';
+        if (!lastName) lastNameError = 'Last Name is required';
+        if (!contactNumber) contactNumberError = 'Contact Number is required';
+
+        // If there are any errors, stop the submission
+        if (emailError || passwordError || firstNameError || lastNameError || contactNumberError) {
+            return;
+        }
+
+        const response = await fetch('http://localhost/kaperustiko-possystem/backend/register.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                firstName: firstName,
+                lastName: lastName,
+                middleName: middleName,
+                email: email,
+                password: password,
+                contactNumber: contactNumber
+            })
+        });
+
+        const result = await response.text();
+        console.log(result);
+
+        if (result.includes("success")) {
+            window.location.href = '/login'; // Redirect to login page
+        }
+    }
+
 </script>
+
 
     <div class="flex flex-col min-h-screen md:flex-row">
         <div class="flex-1 bg-cyan-950 flex items-center justify-center relative left-section">
@@ -46,18 +88,22 @@
             <div class="mb-4">
                 <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
                 <input type="email" id="email" bind:value={email} required class="mt-1 block w-full p-2 border border-gray-300 rounded" placeholder="Enter your email"/>
+                {#if emailError}<p class="text-red-500 text-sm">{emailError}</p>{/if} <!-- Error message for email -->
             </div>
             <div class="mb-4">
                 <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
                 <input type="password" id="password" bind:value={password} required class="mt-1 block w-full p-2 border border-gray-300 rounded" placeholder="Enter your password"/>
+                {#if passwordError}<p class="text-red-500 text-sm">{passwordError}</p>{/if} <!-- Error message for password -->
             </div>
             <div class="mb-4">
                 <label for="firstName" class="block text-sm font-medium text-gray-700">First Name</label>
                 <input type="text" id="firstName" bind:value={firstName} required class="mt-1 block w-full p-2 border border-gray-300 rounded" placeholder="Enter your first name"/>
+                {#if firstNameError}<p class="text-red-500 text-sm">{firstNameError}</p>{/if} <!-- Error message for first name -->
             </div>
             <div class="mb-4">
                 <label for="lastName" class="block text-sm font-medium text-gray-700">Last Name</label>
                 <input type="text" id="lastName" bind:value={lastName} required class="mt-1 block w-full p-2 border border-gray-300 rounded" placeholder="Enter your last name"/>
+                {#if lastNameError}<p class="text-red-500 text-sm">{lastNameError}</p>{/if} <!-- Error message for last name -->
             </div>
             <div class="mb-4">
                 <label for="middleName" class="block text-sm font-medium text-gray-700">Middle Name</label>
@@ -66,6 +112,7 @@
             <div class="mb-4">
                 <label for="contactNumber" class="block text-sm font-medium text-gray-700">Contact Number</label>
                 <input type="tel" id="contactNumber" bind:value={contactNumber} required class="mt-1 block w-full p-2 border border-gray-300 rounded" placeholder="Enter your contact number"/>
+                {#if contactNumberError}<p class="text-red-500 text-sm">{contactNumberError}</p>{/if} <!-- Error message for contact number -->
             </div>
             <button type="submit" class="w-full bg-blue-900 text-white p-2 rounded hover:bg-sky-600">Register</button>
             <p class="mt-4 text-center">Already Have an Account? <button type="button" class="text-red-500" on:click={() => window.location.href='/login'}>Login Now</button></p>

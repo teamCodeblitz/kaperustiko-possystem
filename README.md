@@ -37,6 +37,12 @@ Modules:
 - npm install --save-dev @sveltejs/adapter-static
 - npm install --save-dev @tauri-apps/cli
 
+- npm install express
+- npm install mysql
+- npm install body-parser
+- npm install cors
+
+
 Commands:
 - npm run tauri dev
 

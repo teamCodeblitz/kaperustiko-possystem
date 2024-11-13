@@ -1,26 +1,95 @@
 <script lang="ts">
 
 
-	let email = 'user@example.com';
-	let password = 'password';
+	let email = '';
+	let password = '';
 	let isLoading = false; // New state variable to control loader visibility
+	let emailError = ''; // State variable for email error
+	let passwordError = ''; // State variable for password error
+	let accountError = ''; // State variable for general account error
+	let activeInput = ''; // Track which input is currently active
+	let typingTimeout: NodeJS.Timeout; // Specify the type for typingTimeout
+	let showAccountError = false; // Flag to control the display of account error messages
+	let showPassword = false; // New state variable to control password visibility
 
-	function handleLogin() {
+	async function handleLogin() {
 		console.log('Logging in with', email, password);
 		
 		isLoading = true; // Set loading state to true
 
-		// Redirect after 3 seconds
-		setTimeout(() => {
-			isLoading = false; // Reset loading state
+		// Send login request to the backend
+		const response = await fetch('http://localhost/kaperustiko-possystem/backend/login.php', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+			},
+			body: new URLSearchParams({
+				email: email,
+				password: password
+			})
+		});
+
+		const result = await response.json(); // Parse JSON response
+		console.log(result.message); // Log the response message
+
+		isLoading = false; // Reset loading state
+
+		if (result.status === "success") { // Check for success status
+			// Redirect after successful login
 			window.location.href = '/main-pos'; 
-			// New line to open a second screen
 			window.open('/customers-page', '_blank'); // Opens a new screen
-		}, 3000);
+		} else {
+			// Reset error messages
+			emailError = '';
+			passwordError = '';
+			accountError = '';
+
+			// Set error messages based on response
+			if (result.message.includes("password")) {
+				passwordError = 'Wrong password'; // Set wrong password message
+			} else if (result.message.includes("email")) {
+				emailError = result.message; // Set email error message
+			} else {
+				accountError = 'Invalid account credentials'; // Set general account error message
+			}
+			showAccountError = true; // Show account error after submission
+		}
+	}
+
+	function validateForm() {
+		let isValid = true;
+		emailError = '';
+		passwordError = '';
+		accountError = ''; // Reset account error
+
+		// Validate email format
+		const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (activeInput === 'email' && !emailPattern.test(email)) {
+			emailError = 'Please enter a valid email (format: youremail@gmail.com)';
+			isValid = false;
+		}
+
+		return isValid;
+	}
+
+	// New function to handle input changes with debounce
+	function handleInputChange() {
+		clearTimeout(typingTimeout); // Clear the previous timeout
+		typingTimeout = setTimeout(() => {
+			validateForm(); // Validate form after a delay
+		}, 300); // Adjust the delay as needed (300ms in this case)
+	}
+
+	// New function to handle input focus
+	function handleFocus(input: string) {
+		activeInput = input; // Set the active input
+		validateForm(); // Validate form on focus
 	}
 
 	function handleSubmit() {
-		handleLogin(); 
+		if (validateForm()) {
+			 handleLogin(); 
+		}
 	}
 </script>
 
@@ -67,11 +136,14 @@
             <p class="text-center mb-6 text-gray-600">Please enter your credentials to access the system.</p>
             <div class="mb-4">
                 <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                <input type="email" id="email" bind:value={email} required class="mt-1 block w-full p-2 border border-gray-300 rounded" />
+                <input type="email" id="email" bind:value={email} on:input={handleInputChange} on:focus={() => handleFocus('email')} required placeholder="Enter your email" class="mt-1 block w-full p-2 border border-gray-300 rounded" />
+                {#if activeInput === 'email' && emailError}<p class="text-red-500 text-sm">{emailError}</p>{/if} <!-- Error message for email -->
             </div>
             <div class="mb-4">
                 <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                <input type="password" id="password" bind:value={password} required class="mt-1 block w-full p-2 border border-gray-300 rounded" />
+                <input type="password" id="password" bind:value={password} on:input={handleInputChange} on:focus={() => handleFocus('password')} required placeholder="Enter your password" class="mt-1 block w-full p-2 border border-gray-300 rounded" />
+                {#if passwordError}<p class="text-red-500 text-sm">{passwordError}</p>{/if} <!-- Error message for password -->
+                {#if showAccountError}<p class="text-red-500 text-sm">{accountError}</p>{/if} <!-- Error message for invalid account -->
             </div>
             <button type="submit" class="w-full bg-blue-900 text-white p-2 rounded hover:bg-sky-600">Log In</button>
             <p class="mt-4 text-center">Don't Have an Account? 
