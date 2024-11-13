@@ -8,27 +8,27 @@
     let totalCost = "₱00.00";
     let selectedCategory = "All"; // Default category is now "All"
     let payment = ''; // Payment input variable
-    let quantity = 0; // Add a quantity variable
+    let quantity = 1; // Change default quantity to 1
 
     const cardData = [
-        { code: '001', title1: 'Pizza', title2: 'Pepperoni', price: '₱250.00', image: './foods/pizza.jpg', label: 'Food' },
-        { code: '002', title1: 'Burger', title2: 'Cheese', price: '₱150.00', image: './foods/burger.jpg', label: 'Food' },
-        { code: '003', title1: 'Pasta', title2: 'Carbonara', price: '₱180.00', image: './foods/pasta.jpg', label: 'Food' },
-        { code: '004', title1: 'Salad', title2: 'Caesar', price: '₱120.00', image: './foods/salad.jpg', label: 'Food' },
-        { code: '005', title1: 'Steak', title2: 'Ribeye', price: '₱500.00', image: './foods/steak.jpg', label: 'Food' },
-        { code: '006', title1: 'Sushi', title2: 'Nigiri', price: '₱300.00', image: './foods/sushi.jpg', label: 'Food' },
-        { code: '007', title1: 'Sandwich', title2: 'Ham & Cheese', price: '₱90.00', image: './foods/sandwich.jpg', label: 'Food' },
-        { code: '008', title1: 'Fries', title2: 'Large', price: '₱70.00', image: './foods/fries.jpg', label: 'Food' },
-        { code: '009', title1: 'Ice Cream', title2: 'Vanilla', price: '₱50.00', image: './foods/icecream.jpg', label: 'Dessert' },
-        { code: '010', title1: 'Coffee', title2: 'Latte', price: '₱100.00', image: './foods/coffee.jpg', label: 'Beverage' },
-        { code: '011', title1: 'Tea', title2: 'Green', price: '₱80.00', image: './foods/tea.jpg', label: 'Beverage' },
-        { code: '012', title1: 'Juice', title2: 'Orange', price: '₱60.00', image: './foods/juice.jpg', label: 'Beverage' },
+        { menu_no: '001', code: '001', title1: 'Pizza', title2: 'Pepperoni', price1: '₱250.00', price2: '₱500.00', price3: '₱1000.00', image: './foods/pizza.jpg', label: 'Food' },
+        { menu_no: '002', code: '002', title1: 'Burger', title2: 'Cheese', price1: '₱150.00', price2: '₱300.00', price3: '₱600.00', image: './foods/burger.jpg', label: 'Food' },
+        { menu_no: '003', code: '003', title1: 'Pasta', title2: 'Carbonara', price1: '₱180.00', price2: '₱360.00', price3: '₱540.00', image: './foods/pasta.jpg', label: 'Food' },
+        { menu_no: '004', code: '004', title1: 'Salad', title2: 'Caesar', price1: '₱120.00', price2: '₱240.00', price3: '₱360.00', image: './foods/salad.jpg', label: 'Food' },
+        { menu_no: '005', code: '005', title1: 'Steak', title2: 'Ribeye', price1: '₱500.00', price2: '₱1000.00', price3: '₱1500.00', image: './foods/steak.jpg', label: 'Food' },
+        { menu_no: '006', code: '006', title1: 'Sushi', title2: 'Nigiri', price1: '₱300.00', price2: '₱600.00', price3: '₱900.00', image: './foods/sushi.jpg', label: 'Food' },
+        { menu_no: '007', code: '007', title1: 'Sandwich', title2: 'Ham & Cheese', price1: '₱90.00', price2: '₱180.00', price3: '₱270.00', image: './foods/sandwich.jpg', label: 'Food' },
+        { menu_no: '008', code: '008', title1: 'Fries', title2: 'Large', price1: '₱70.00', price2: '₱140.00', price3: '₱210.00', image: './foods/fries.jpg', label: 'Food' },
+        { menu_no: '009', code: '009', title1: 'Ice Cream', title2: 'Vanilla', price1: '₱50.00', price2: '₱100.00', price3: '₱150.00', image: './foods/icecream.jpg', label: 'Dessert' },
+        { menu_no: '010', code: '010', title1: 'Coffee', title2: 'Latte', price1: '₱100.00', price2: '₱200.00', price3: '₱300.00', image: './foods/coffee.jpg', label: 'Beverage' },
+        { menu_no: '011', code: '011', title1: 'Tea', title2: 'Green', price1: '₱80.00', price2: '₱160.00', price3: '₱240.00', image: './foods/tea.jpg', label: 'Beverage' },
+        { menu_no: '012', code: '012', title1: 'Juice', title2: 'Orange', price1: '₱60.00', price2: '₱60.00', price3: '₱60.00', image: './foods/juice.jpg', label: 'Beverage' },
     ];
 
     // Payment handling functions
     function handleNumberInput(num: string) { // Specify num as a string
-    payment += num;
-}
+        payment += num;
+    }
 
     function handleBackspace() {
         payment = payment.slice(0, -1);
@@ -73,16 +73,40 @@
         window.print(); // Trigger the print dialog
     }
 
-    let selectedItem: { code: string; title1: string; title2: string; price: string; image: string; label: string; } | null = null; // To store the selected item details for the popup
+    // Define a type for the selected item to avoid 'never' type error
+    type MenuItem = { menu_no: string; code: string; title1: string; title2: string; price1: string; price2: string; price3: string; image: string; label: string; };
+
+    let selectedItem: MenuItem | null = null; // Updated type definition
+
+    // Check if selectedItem is not null before accessing its properties
+    let displayedPrice = selectedItem ? (selectedItem as MenuItem).price1 : ''; // Cast to MenuItem
 
     // Add new variables for size and add-ons
     let selectedSize = ''; // Variable to store selected size
     let selectedAddons: string[] = []; // Array to store selected add-ons
 
     // Function to handle adding an item with size and add-ons
-    function handleAdd(item: { code: string; title1: string; title2: string; price: string; image: string; label: string; }) {
+    function handleAdd(item: MenuItem) {
         selectedItem = item; // Set the selected item
+        displayedPrice = item.price1; // Default to the regular price
+        console.log('Displayed Price:', displayedPrice); // Log the displayed price
+        console.log('Price2:', item.price2); // Log price2
+        console.log('Price3:', item.price3); // Log price3
         isVariationVisible = true; // Show the popup
+    }
+
+    // Function to handle size selection and update displayed price
+    function selectSize(size: string) {
+        selectedSize = size; // Set the selected size
+        if (selectedItem) { // Check if selectedItem is not null
+            if (size === 'Regular') {
+                displayedPrice = selectedItem.price1; // Show price for Regular
+            } else if (size === 'Large') {
+                displayedPrice = selectedItem.price2; // Show price for Large
+            } else if (size === 'Family') {
+                displayedPrice = selectedItem.price3; // Show price for Family
+            }
+        }
     }
 </script>
 
@@ -128,8 +152,8 @@
                     (selectedCategory === 'Beverages' && item.label === 'Beverage') || 
                     (selectedCategory === 'Food' && item.label === 'Food') ||
                     (selectedCategory === 'Desserts' && item.label === 'Dessert')
-                ) as { code, title1, title2, price, image }}
-                    <Card {code} {title1} {title2} {price} {image} onAdd={handleAdd} />
+                ) as { code, title1, title2, price1, price2, price3, image, menu_no }}
+                    <Card {code} {title1} {title2} {price1} {price2} {price3} {image} {menu_no} onAdd={handleAdd} />
                 {/each}
             </div>
         </div>
@@ -254,7 +278,7 @@
     <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70">
         <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full"> <!-- Increased padding for larger touch targets -->
             <h2 class="text-2xl font-bold text-center mb-6">Add {selectedItem?.title1}</h2> <!-- Increased font size -->
-            <p class="text-lg text-center mb-6">Price: {selectedItem?.price}</p> <!-- Increased margin for better spacing -->
+            <p class="text-lg text-center mb-6">Price: {displayedPrice}</p> <!-- Show the updated price -->
             
             <!-- Product Image -->
             {#if selectedItem?.image}
@@ -263,41 +287,38 @@
 
             <!-- Size Selection -->
             <label for="size" class="block text-sm font-medium mb-2">Size:</label> <!-- Increased margin for better spacing -->
-            <select id="size" bind:value={selectedSize} class="block w-full p-3 border border-gray-300 rounded-md mb-6"> <!-- Increased padding for larger touch targets -->
-                <option value="">Select Size</option>
-                <option value="Small">Small</option>
-                <option value="Medium">Medium</option>
-                <option value="Large">Large</option>
-            </select>
+            <div class="flex space-x-4 mb-6 w-full"> <!-- Added flex container for horizontal layout -->
+                <button on:click={() => selectSize('Regular')} class="flex-1 p-3 border border-gray-300 rounded-md {selectedSize === 'Regular' ? 'bg-blue-500 text-white' : ''}">Regular</button>
+                <button on:click={() => selectSize('Large')} class="flex-1 p-3 border border-gray-300 rounded-md {selectedSize === 'Large' ? 'bg-blue-500 text-white' : ''}">Large</button>
+                <button on:click={() => selectSize('Family')} class="flex-1 p-3 border border-gray-300 rounded-md {selectedSize === 'Family' ? 'bg-blue-500 text-white' : ''}">Family</button>
+            </div>
 
             <!-- Add-ons Selection -->
             <label for="addons" class="block text-sm font-medium mb-2">Add-ons:</label> <!-- Increased margin for better spacing -->
             <div class="mb-6"> <!-- Increased margin for better spacing -->
                 {#if selectedItem?.label === 'Beverage'}
-                    <label class="block mb-2"> <!-- Added margin for better spacing -->
-                        <input type="checkbox" bind:group={selectedAddons} value="Extra Shot" class="mr-2" /> Extra Shot
-                    </label>
-                    <label class="block mb-2"> <!-- Added margin for better spacing -->
-                        <input type="checkbox" bind:group={selectedAddons} value="Flavored Syrup" class="mr-2" /> Flavored Syrup
-                    </label>
-                    <label class="block mb-2"> <!-- Added margin for better spacing -->
-                        <input type="checkbox" bind:group={selectedAddons} value="Whipped Cream" class="mr-2" /> Whipped Cream
+                    <label class="block mb-4"> <!-- Increased margin for better spacing -->
+                        <input type="checkbox" bind:group={selectedAddons} value="Extra Shot" class="mr-2 h-6 w-6" /> Extra Shot
                     </label>
                 {:else}
-                    <label class="block mb-2"> <!-- Added margin for better spacing -->
-                        <input type="checkbox" bind:group={selectedAddons} value="Extra Cheese" class="mr-2" /> Extra Cheese
+                    <label class="block mb-4"> <!-- Increased margin for better spacing -->
+                        <input type="checkbox" bind:group={selectedAddons} value="Extra Cheese" class="mr-2 h-6 w-6" /> Extra Cheese
                     </label>
-                    <label class="block mb-2"> <!-- Added margin for better spacing -->
-                        <input type="checkbox" bind:group={selectedAddons} value="Bacon" class="mr-2" /> Bacon
+                    <label class="block mb-4"> <!-- Increased margin for better spacing -->
+                        <input type="checkbox" bind:group={selectedAddons} value="Bacon" class="mr-2 h-6 w-6" /> Bacon
                     </label>
-                    <label class="block mb-2"> <!-- Added margin for better spacing -->
-                        <input type="checkbox" bind:group={selectedAddons} value="Olives" class="mr-2" /> Olives
+                    <label class="block mb-4"> <!-- Increased margin for better spacing -->
+                        <input type="checkbox" bind:group={selectedAddons} value="Olives" class="mr-2 h-6 w-6" /> Olives
                     </label>
                 {/if}
             </div>
 
             <label for="quantity" class="block text-sm font-medium mb-2">Quantity:</label> <!-- Increased margin for better spacing -->
-            <input type="number" id="quantity" bind:value={quantity} min="1" class="block w-full p-3 border border-gray-300 rounded-md mb-6" /> <!-- Increased padding for larger touch targets -->
+            <div class="flex justify-between mb-6"> <!-- Added flex container for button layout -->
+                <button on:click={decreaseQuantity} class="flex-1 p-3 border border-gray-300 rounded-md">-</button>
+                <input type="number" id="quantity" bind:value={quantity} min="1" class="block w-full p-3 border border-gray-300 rounded-md mx-2 text-center" readonly /> <!-- Centered input -->
+                <button on:click={increaseQuantity} class="flex-1 p-3 border border-gray-300 rounded-md">+</button>
+            </div>
 
             <div class="flex justify-between">
                 <button on:click={closePopup} class="bg-red-500 text-white py-3 px-6 rounded-md hover:bg-red-600 transition">Cancel</button> <!-- Increased padding for larger touch targets -->

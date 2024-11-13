@@ -5,10 +5,13 @@
     const dispatch = createEventDispatcher();
 
     // Define props for dynamic data
+    export let menu_no = '';
     export let code = '';
     export let title1 = '';
     export let title2 = '';
-    export let price = '';
+    export let price1 = '';
+    export let price2 = '';
+    export let price3 = '';
     export let image = '';
     export let label = '';
     export let onAdd;
@@ -36,10 +39,13 @@
         </div>
   
         <!-- Price Section -->
-        <p class="text-4xl font-bold text-gray-800">{price}</p>
+        <p class="text-4xl font-bold text-gray-800">{price1}</p>
   
         <!-- Order Button -->
-        <Button color="dark" class="w-full" on:click={() => onAdd({ code, title1, title2, price, image, label })}>
+        <Button color="dark" class="w-full" on:click={() => {
+            console.log(menu_no);
+            onAdd({ code, title1, title2, price1, price2, price3, image, label });
+        }}>
           ADD
         </Button>
       </div>

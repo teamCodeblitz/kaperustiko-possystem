@@ -1,14 +1,17 @@
-<script>
-    // ... existing script code ...
-</script>
-
-<div class="min-h-screen flex flex-col">
-    <header class="bg-blue-600 text-white p-4">
-        <h1 class="text-2xl">Customers Page</h1>
-    </header>
-
-    <main class="flex-grow p-4">
-        <section class="bg-white shadow-md rounded-lg p-6">
-            <h2 class="text-xl font-bold mb-4">Welcome to the Customers Page</h2>
-            <p class="text-gray-700">
+<div class="bg-cyan-950 h-screen w-full flex flex-col items-center justify-center">
+    <ul class="circles">
+        <li class="animate-pulse"></li>
+        <li class="animate-pulse"></li>
+        <li class="animate-pulse"></li>
+        <li class="animate-pulse"></li>
+        <li class="animate-pulse"></li>
+        <li class="animate-pulse"></li>
+        <li class="animate-pulse"></li>
+        <li class="animate-pulse"></li>
+        <li class="animate-pulse"></li>
+        <li class="animate-pulse"></li>
+    </ul>
+    <div class="flex items-center justify-center w-full h-full">
+        <img src="./icon.png" alt="Fallback description if image fails to load" class="max-w-full h-auto" aria-hidden="true" />
+    </div>
 </div>

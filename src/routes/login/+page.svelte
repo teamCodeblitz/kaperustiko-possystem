@@ -10,7 +10,6 @@
 	let activeInput = ''; // Track which input is currently active
 	let typingTimeout: NodeJS.Timeout; // Specify the type for typingTimeout
 	let showAccountError = false; // Flag to control the display of account error messages
-	let showPassword = false; // New state variable to control password visibility
 
 	async function handleLogin() {
 		console.log('Logging in with', email, password);
@@ -37,7 +36,7 @@
 		if (result.status === "success") { // Check for success status
 			// Redirect after successful login
 			window.location.href = '/main-pos'; 
-			window.open('/customers-page', '_blank'); // Opens a new screen
+			window.open('/customers-page', '_blank', 'toolbar=no,location=no,menubar=no,scrollbars=no,status=no,resizable=no'); // Opens a new screen without URL
 		} else {
 			// Reset error messages
 			emailError = '';
