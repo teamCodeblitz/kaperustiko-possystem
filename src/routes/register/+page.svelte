@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     let email = '';
     let password = '';
     let firstName = '';
@@ -52,8 +52,22 @@
         console.log(result);
 
         if (result.includes("success")) {
-            window.location.href = '/login'; // Redirect to login page
+            showAlert('Registration Successful', 'success');
+            setTimeout(() => {
+                window.location.href = '/login'; // Redirect to login page after 3 seconds
+            }, 3000); // 3000 milliseconds = 3 seconds
         }
+    }
+
+    // Update showAlert function to handle success type
+    function showAlert(message: string, type: string) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `fixed top-0 left-1/2 transform -translate-x-1/2 mt-4 p-4 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white rounded shadow-lg`;
+        alertDiv.innerText = message;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000); // Remove alert after 3 seconds
     }
 
 </script>

@@ -14,6 +14,7 @@
     export let price3 = '';
     export let image = '';
     export let label = '';
+    export let label2 = '';
     export let onAdd;
   </script>
   
@@ -39,12 +40,12 @@
         </div>
   
         <!-- Price Section -->
-        <p class="text-4xl font-bold text-gray-800">{price1}</p>
+        <p class="text-4xl font-bold text-gray-800">₱{price1}</p>
   
         <!-- Order Button -->
         <Button color="dark" class="w-full" on:click={() => {
             console.log(menu_no);
-            onAdd({ code, title1, title2, price1, price2, price3, image, label });
+            onAdd({ code, title1, title2, price1, price2, price3, image, label, label2 });
         }}>
           ADD
         </Button>

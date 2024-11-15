@@ -1,7 +1,7 @@
 <script>
     import { onMount } from "svelte";
     import { FontAwesomeIcon } from "@fortawesome/svelte-fontawesome";
-    import { faStar, faUndo, faExclamationTriangle, faTrash, faPesoSign, faPrint } from "@fortawesome/free-solid-svg-icons";
+    import { faStar, faUndo, faExclamationTriangle, faTrash, faDollarSign, faPrint } from "@fortawesome/free-solid-svg-icons";
     import Sidebar from "../sidebar/+page.svelte";
     import { Bar, Line, Pie } from 'svelte-chartjs';
     import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement } from 'chart.js';
@@ -54,6 +54,18 @@
         ]
     };
 
+    let totalSalesToday = 0; // Variable to store today's total sales
+
+    onMount(async () => {
+        const today = new Date();
+        const formattedDate = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`; // Format date as MM/DD/YYYY
+        const response = await fetch(`http://localhost/kaperustiko-possystem/backend/get_today_sales.php?date=${formattedDate}`); // Use formatted date in the URL
+        const data = await response.json();
+        if (data.length > 0 && data[0].total_amount) { // Adjusted to check the correct structure of the response
+            totalSalesToday = data[0].total_amount; // Update the total sales for today
+        }
+    });
+
     function printPage() {
         window.print();
     }
@@ -68,9 +80,9 @@
         <div class="grid grid-cols-6 gap-4 mb-6">
             <div class="bg-white rounded-lg shadow-md p-4 text-center">
                 <div class="text-gray-500">Today Total Sales</div>
-                <div class="text-3xl font-bold">###</div>
+                <div class="text-3xl font-bold">₱{totalSalesToday}</div>
                 <div class="text-green-600">
-                    <FontAwesomeIcon icon={faPesoSign} />
+                    <FontAwesomeIcon icon={faDollarSign} />
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-md p-4 text-center">
@@ -105,7 +117,7 @@
                 <div class="text-gray-500">Total Dispose Cost</div>
                 <div class="text-3xl font-bold">###</div>
                 <div class="text-red-500">
-                    <FontAwesomeIcon icon={faPesoSign} />
+                    <FontAwesomeIcon icon={faDollarSign} />
                 </div>
             </div>
         </div>

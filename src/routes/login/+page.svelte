@@ -34,8 +34,11 @@
 		isLoading = false; // Reset loading state
 
 		if (result.status === "success") { // Check for success status
-			// Redirect after successful login
-			window.location.href = '/main-pos'; 
+			showAlert('Login Successful', 'success'); // Call showAlert with success type
+			setTimeout(() => {
+				isLoading = true; // Set loading state to true
+				window.location.href = '/main-pos'; // Redirect after 3 seconds
+			}, 3000); // 3000 milliseconds = 3 seconds
 			window.open('/customers-page', '_blank', 'toolbar=no,location=no,menubar=no,scrollbars=no,status=no,resizable=no'); // Opens a new screen without URL
 		} else {
 			// Reset error messages
@@ -89,6 +92,17 @@
 		if (validateForm()) {
 			 handleLogin(); 
 		}
+	}
+
+	// Update showAlert function to handle success type
+	function showAlert(message: string, type: string) {
+		const alertDiv = document.createElement('div');
+		alertDiv.className = `fixed top-0 left-1/2 transform -translate-x-1/2 mt-4 p-4 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white rounded shadow-lg`;
+		alertDiv.innerText = message;
+		document.body.appendChild(alertDiv);
+		setTimeout(() => {
+			alertDiv.remove();
+		}, 3000); // Remove alert after 3 seconds
 	}
 </script>
 

@@ -1,169 +1,88 @@
 <script lang="ts">
 	import 'svelte-routing';
-	// Change to default import
 	import Card from '../components/card.svelte';
 	import Sidebar from '../sidebar/+page.svelte';
+	import { orderedItemsStore } from '../../stores/orderedItemsStore';
+	import { onMount } from 'svelte';
+	import { handleButtonClick } from '../../utils/buttonHandler'; // Import the reusable function
+	import { currentInputStore } from '../../stores/currentInputStore'; // Import the store
 
-	let orderNumber = '#01';
+	let cardData: MenuItem[] = [];
+	let amountPaid = '₱0.00';
+	let isDineIn = false;
+	let isTakeOut = false;
+	let riceQuantity = 0; // Declare riceQuantity
+
+	async function fetchMenu() {
+		const response = await fetch('http://localhost/kaperustiko-possystem/backend/get_menu.php');
+		if (response.ok) {
+			cardData = await response.json();
+		} else {
+			console.error('Failed to fetch menu items');
+		}
+	}
+
+	async function fetchOrders() {
+		const response = await fetch('http://localhost/kaperustiko-possystem/backend/get_order.php');
+		if (response.ok) {
+			const orders = await response.json();
+			orderedItemsStore.set(orders);
+			// Fetch the total order count from the database
+			const totalResponse = await fetch('http://localhost/kaperustiko-possystem/backend/get_total_orders.php');
+			if (totalResponse.ok) {
+				const totalData = await totalResponse.json();
+				orderNumber = `#${(totalData.total_order).toString().padStart(2, '0')}`; // Increment order number
+			} else {
+				console.error('Failed to fetch total orders');
+			}
+		} else {
+			console.error('Failed to fetch orders');
+		}
+	}
+
+	onMount(() => {
+		fetchMenu();
+		fetchOrders();
+	});
+
+	let orderNumber = '';
 	let totalCost = '₱00.00';
-	let selectedCategory = 'All'; // Default category is now "All"
-	let payment = ''; // Payment input variable
-	let quantity = 1; // Change default quantity to 1
+	let selectedCategory = 'All';
+	let payment = '';
+	let quantity = 1;
 	let isPopupVisible = false;
 	let isVariationVisible = false;
-	let selectedItem: MenuItem | null = null; // Updated type definition
-	let selectedItemDetails: { title: string; price: string; size: string; quantity: number; addons: string[] } | null = null; // New variable to store selected item details
-	let orderedItems: { title: string; price: string; size: string; quantity: number; addons: string[] }[] = []; // New array to store ordered items
+	let selectedItem: MenuItem | null = null;
+	let selectedItemDetails: { title: string; price: string; size: string; quantity: number; addons: string[] } | null = null;
+	type OrderedItem = {
+		title: string;
+		price: string;
+		size: string;
+		quantity: number;
+		addons: string[];
+		originalPrice: string;
+	};
+	let orderedItems: OrderedItem[] = [];
+	let selectedAddons: string[] = [];
+	let displayedPrice = selectedItem ? 
+		formatPrice(quantity * (parseFloat((selectedItem as MenuItem).price1.replace('₱', '').replace(',', '')) + 
+		parseFloat(calculateAddonsPrice(selectedAddons).replace('₱', '').replace(',', '')))) 
+		: '';
+	let selectedSize = 'Regular';
+	let isCodePopupVisible = false;
+	let voidIndex: number | null = null;
+	let inputCode = '123456';
 
-	// Check if selectedItem is not null before accessing its properties
-	let displayedPrice = selectedItem ? (selectedItem as MenuItem).price1 : ''; // Cast to MenuItem
+	// Sort cardData by label1 and label2
+	cardData.sort((a, b) => {
+		if (a.label < b.label) return -1;
+		if (a.label > b.label) return 1;
+		if (a.label2 < b.label2) return -1;
+		if (a.label2 > b.label2) return 1;
+		return 0;
+	});
 
-	// Add new variables for size and add-ons
-	let selectedSize = ''; // Variable to store selected size
-	let selectedAddons: string[] = []; // Array to store selected add-ons
-
-	let isCodePopupVisible = false; // New variable to control the code input popup visibility
-	let voidIndex: number | null = null; // Store the index of the item to void
-	let inputCode = '123456'; // Variable to store the input code
-
-	const cardData = [
-		{
-			menu_no: '001',
-			code: '001',
-			title1: 'Pizza',
-			title2: 'Pepperoni',
-			price1: '₱250.00',
-			price2: '₱500.00',
-			price3: '₱1000.00',
-			image: './foods/pizza.jpg',
-			label: 'Food'
-		},
-		{
-			menu_no: '002',
-			code: '002',
-			title1: 'Burger',
-			title2: 'Cheese',
-			price1: '₱150.00',
-			price2: '₱300.00',
-			price3: '₱600.00',
-			image: './foods/burger.jpg',
-			label: 'Food'
-		},
-		{
-			menu_no: '003',
-			code: '003',
-			title1: 'Pasta',
-			title2: 'Carbonara',
-			price1: '₱180.00',
-			price2: '₱360.00',
-			price3: '₱540.00',
-			image: './foods/pasta.jpg',
-			label: 'Food'
-		},
-		{
-			menu_no: '004',
-			code: '004',
-			title1: 'Salad',
-			title2: 'Caesar',
-			price1: '₱120.00',
-			price2: '₱240.00',
-			price3: '₱360.00',
-			image: './foods/salad.jpg',
-			label: 'Food'
-		},
-		{
-			menu_no: '005',
-			code: '005',
-			title1: 'Steak',
-			title2: 'Ribeye',
-			price1: '₱500.00',
-			price2: '₱1000.00',
-			price3: '₱1500.00',
-			image: './foods/steak.jpg',
-			label: 'Food'
-		},
-		{
-			menu_no: '006',
-			code: '006',
-			title1: 'Sushi',
-			title2: 'Nigiri',
-			price1: '₱300.00',
-			price2: '₱600.00',
-			price3: '₱900.00',
-			image: './foods/sushi.jpg',
-			label: 'Food'
-		},
-		{
-			menu_no: '007',
-			code: '007',
-			title1: 'Sandwich',
-			title2: 'Ham & Cheese',
-			price1: '₱90.00',
-			price2: '₱180.00',
-			price3: '₱270.00',
-			image: './foods/sandwich.jpg',
-			label: 'Food'
-		},
-		{
-			menu_no: '008',
-			code: '008',
-			title1: 'Fries',
-			title2: 'Large',
-			price1: '₱70.00',
-			price2: '₱140.00',
-			price3: '₱210.00',
-			image: './foods/fries.jpg',
-			label: 'Food'
-		},
-		{
-			menu_no: '009',
-			code: '009',
-			title1: 'Ice Cream',
-			title2: 'Vanilla',
-			price1: '₱50.00',
-			price2: '₱100.00',
-			price3: '₱150.00',
-			image: './foods/icecream.jpg',
-			label: 'Dessert'
-		},
-		{
-			menu_no: '010',
-			code: '010',
-			title1: 'Coffee',
-			title2: 'Latte',
-			price1: '₱100.00',
-			price2: '₱200.00',
-			price3: '₱300.00',
-			image: './foods/coffee.jpg',
-			label: 'Beverage'
-		},
-		{
-			menu_no: '011',
-			code: '011',
-			title1: 'Tea',
-			title2: 'Green',
-			price1: '₱80.00',
-			price2: '₱160.00',
-			price3: '₱240.00',
-			image: './foods/tea.jpg',
-			label: 'Beverage'
-		},
-		{
-			menu_no: '012',
-			code: '012',
-			title1: 'Juice',
-			title2: 'Orange',
-			price1: '₱60.00',
-			price2: '₱60.00',
-			price3: '₱60.00',
-			image: './foods/juice.jpg',
-			label: 'Beverage'
-		}
-	];
-
-	// Payment handling functions
 	function handleNumberInput(num: string) {
-		// Specify num as a string
 		payment += num;
 	}
 
@@ -177,35 +96,116 @@
 
 	function handleEnter() {
 		alert(`Payment submitted: ₱${payment}`);
-		payment = ''; // Clear payment after submission
+		payment = '';
 	}
 
 	function increaseQuantity() {
-		quantity += 1; // Increment the quantity
+		quantity += 1;
 	}
 
 	function decreaseQuantity() {
 		if (quantity > 0) {
-			quantity -= 1; // Decrement the quantity, ensuring it doesn't go below 0
+			quantity -= 1;
 		}
 	}
 
-	// Add a new variable to control the popup visibility
-
-	// Function to handle placing an order and showing the popup
 	function handlePlaceOrder() {
-		isPopupVisible = true; // Show the popup
+		// Fetch the total order count from the database
+		fetch('http://localhost/kaperustiko-possystem/backend/get_total_orders.php')
+			.then(response => response.json())
+			.then(data => {
+				orderNumber = `#${(data.total_order).toString().padStart(2, '0')}`; // Set order number based on fetched data
+				isPopupVisible = true;
+
+				// Move the delete orders logic here
+				fetch('http://localhost/kaperustiko-possystem/backend/delete_all_order.php', {
+					method: 'DELETE', // Assuming you have a DELETE endpoint
+				})
+				.then(deleteResponse => {
+					if (!deleteResponse.ok) {
+						console.error('Failed to delete orders:', deleteResponse.statusText); // Log the status text for better debugging
+					} else {
+						console.log('Orders deleted successfully'); // Log success
+					}
+				})
+				.catch(error => {
+					console.error('Error deleting orders:', error);
+				});
+			})
+			.catch(error => {
+				console.error('Failed to fetch total orders:', error);
+			});
 	}
 
-	// Function to close the popup
 	function closePopup() {
-		isPopupVisible = false; // Hide the popup
-		isVariationVisible = false; // Hide the popup
+		isPopupVisible = false;
+		isVariationVisible = false;
 	}
 
-	// Function to print the receipt and reset the state
 	function printReceipt() {
-		// Reset all relevant variables
+	// Prepare the receipt data
+	const receiptData = {
+		receiptNumber: orderNumber,
+		date: new Date().toLocaleDateString(),
+		time: new Date().toLocaleTimeString(),
+		cashierName: 'Mike',
+		itemsOrdered: orderedItems.map(item => ({
+			title: item.title,
+			quantity: 'x' + item.quantity,
+			size: item.size,
+			...(item.addons && item.addons.length > 0 && { addons: item.addons }),
+			price: item.price
+		})),
+		totalAmount: orderedItems.reduce((total, item) => total + parseFloat(item.price.replace('₱', '').replace(',', '')), 0).toFixed(2),
+		amountPaid: payment,
+		change: orderedItems.length > 0 && payment ? 
+			(parseFloat(payment.replace('₱', '').replace(',', '')) - 
+			orderedItems.reduce((total, item) => total + parseFloat(item.price.replace('₱', '').replace(',', '')), 0)).toFixed(2) 
+			: '0.00',
+		order_take: isDineIn ? 'Dine In' : 'Take Out'
+	};
+
+	// Send data to the server
+	fetch('http://localhost/kaperustiko-possystem/backend/save_receipt.php', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify(receiptData),
+	})
+	.then(response => {
+		if (!response.ok) {
+			return response.text().then(text => {
+				throw new Error(`Network response was not ok: ${text}`);
+			});
+		}
+		return response.json();
+	})
+	.then(data => {
+		console.log('Receipt saved successfully:', data);
+		// Show success alert
+		showAlert('Order Success', 'success'); // Call showAlert with success type
+
+		// Delete all orders from the database after printing the receipt
+		fetch('http://localhost/kaperustiko-possystem/backend/delete_all_order.php', {
+			method: 'DELETE', // Assuming you have a DELETE endpoint
+		})
+		.then(deleteResponse => {
+			if (!deleteResponse.ok) {
+				console.error('Failed to delete orders:', deleteResponse.statusText); // Log the status text for better debugging
+			} else {
+				console.log('Orders deleted successfully'); // Log success
+			}
+		})
+		.catch(error => {
+			console.error('Error deleting orders:', error);
+		});
+	})
+	.catch(error => {
+			console.error('There was a problem with the fetch operation:', error);
+		});
+
+		// Reset the receipt data
 		orderNumber = '#01';
 		totalCost = '₱00.00';
 		selectedCategory = 'All';
@@ -216,15 +216,27 @@
 		selectedItem = null;
 		selectedItemDetails = null;
 		orderedItems = [];
-		selectedSize = '';
+		selectedSize = 'Regular';
 		selectedAddons = [];
 		voidIndex = null;
 		inputCode = '123456';
-		// Reload the page
+		
+		// Reset all numbers in local storage
+		localStorage.clear(); // Clear all numbers in local storage
+
 		location.reload();
 	}
 
-	// Define a type for the selected item to avoid 'never' type error
+	function showAlert(message: string, type: string) {
+		const alertDiv = document.createElement('div');
+		alertDiv.className = `fixed top-0 left-1/2 transform -translate-x-1/2 mt-4 p-4 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white rounded shadow-lg`;
+		alertDiv.innerText = message;
+		document.body.appendChild(alertDiv);
+		setTimeout(() => {
+			alertDiv.remove();
+		}, 3000); // Remove alert after 3 seconds
+	}
+
 	type MenuItem = {
 		menu_no: string;
 		code: string;
@@ -235,50 +247,134 @@
 		price3: string;
 		image: string;
 		label: string;
+		label2: string;
 	};
 
-	// Function to format price with commas
 	function formatPrice(price: number): string {
 		return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 	}
 
-	// Function to handle adding an item with size and add-ons
 	function handleAdd(item: MenuItem) {
-		selectedItem = item; // Set the selected item
-		isVariationVisible = true; // Show the popup
+		selectedItem = item;
+		console.log('Selected Item Details:', selectedItem);
+		isVariationVisible = true;
 	}
 
-    function handleOrder(item: MenuItem) {
-        selectedItem = item;
-        const newItem = { // Create a new item object
-            title: item.title1,
-            price: item.price1 ? formatPrice(quantity * parseFloat(item.price1.replace('₱', '').replace(',', ''))) : '₱0.00',
-            size: selectedSize,
-            quantity: quantity,
-            addons: selectedAddons
-        };
-        orderedItems = [...orderedItems, newItem]; // Create a new array reference
-        console.log('Updated Ordered Items:', orderedItems); // Log the updated array
-        selectedItem = null; // Reset selected item after adding to order
-        closePopup(); // Close the popup after adding the item
+	function handleOrder(item: MenuItem) {
+    selectedItem = item;
+    const addonsPrice = calculateAddonsPrice(selectedAddons); // Calculate addons price
+    const basePrice = selectedSize === 'Regular' ? parseFloat(item.price1.replace('₱', '').replace(',', '')) :
+        selectedSize === 'Large' ? parseFloat(item.price2.replace('₱', '').replace(',', '')) :
+        parseFloat(item.price3.replace('₱', '').replace(',', '')); // Adjust for Family size
+
+    const newItem = {
+        title: item.title1,
+        price: formatPrice(quantity * basePrice + parseFloat(addonsPrice.replace('₱', '').replace(',', ''))), // Correctly calculate total price
+        originalPrice: formatPrice(basePrice),
+        size: selectedSize,
+        quantity: quantity,
+        addons: selectedAddons,
+        basePrice: basePrice, // Add basePrice to the newItem
+        addonsPrices: selectedAddons.map(addon => {
+            const price = calculateAddonsPrice([addon]); // Get individual addon price
+            return `${addon} - ₱${price}`; // Format as "Addon - Price"
+        }).join(', ') // Join the prices into a single string
+    };
+    orderedItems = [...orderedItems, newItem];
+
+    // Prepare data to send to the server
+    type OrderData = {
+        order_name: string;
+        order_quantity: number;
+        order_size: string;
+        order_price: string;
+        order_image: string;
+        order_addons?: string; // Add optional properties for addons
+        order_addons_price?: string;
+        order_addons2?: string;
+        order_addons_price2?: string;
+        order_addons3?: string;
+        order_addons_price3?: string;
+        basePrice: number; // Add basePrice to the OrderData type
+    };
+
+    const orderData: OrderData = {
+        order_name: item.title1,
+        order_quantity: quantity,
+        order_size: selectedSize,
+        order_price: newItem.price,
+        order_image: item.image,
+        basePrice: newItem.basePrice // Include basePrice in the order data
+    };
+
+    // Handle add-ons
+    if (selectedAddons.length > 0) {
+        orderData.order_addons = selectedAddons[0]; // First addon
+        orderData.order_addons_price = calculateAddonsPrice([selectedAddons[0]]); // Price for first addon
+    }
+    if (selectedAddons.length > 1) {
+        orderData.order_addons2 = selectedAddons[1]; // Second addon
+        orderData.order_addons_price2 = calculateAddonsPrice([selectedAddons[1]]); // Price for second addon
+    }
+    if (selectedAddons.length > 2) {
+        orderData.order_addons3 = selectedAddons[2]; // Third addon
+        orderData.order_addons_price3 = calculateAddonsPrice([selectedAddons[2]]); // Price for third addon
     }
 
-	// Function to handle size selection and update displayed price
+    // Save the order to the database
+    fetch('http://localhost/kaperustiko-possystem/backend/save_order.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData), // Send the order data
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data.message); // Log success or error message
+    })
+    .catch(error => {
+        console.error('Error saving order:', error);
+    });
+
+    fetchOrders();
+
+    selectedItem = null;
+    selectedSize = 'Regular';
+    selectedAddons = [];
+    quantity = 1; // Reset quantity to 1
+    closePopup();
+}
+
+	function calculateAddonsPrice(addons: string[]): string {
+		// Define prices for each addon
+		const addonPrices: { [key: string]: number } = {
+			'Sugar': 5,
+			'Bobba': 10,
+			'Milk': 7,
+			'Extra Cheese': 15,
+			'Bacon': 20,
+			'Olives': 10,
+			'Rice': 10 
+		};
+
+		// Return a string of addon prices
+		return addons.map(addon => `${addonPrices[addon] || 0}`).join(', ');
+	}
+
 	function selectSize(size: string) {
-		 selectedSize = size; // Set the selected size
+		 selectedSize = size;
 		 if (selectedItem) {
-			 // Check if selectedItem is not null
 			 if (size === 'Regular') {
-				 displayedPrice = formatPrice(quantity * parseFloat(selectedItem.price1.replace('₱', '').replace(',', ''))); // Update price based on quantity
+				 displayedPrice = formatPrice(quantity * parseFloat(selectedItem.price1.replace('₱', '').replace(',', '')));
 			 } else if (size === 'Large') {
-				 displayedPrice = formatPrice(quantity * parseFloat(selectedItem.price2.replace('₱', '').replace(',', ''))); // Update price based on quantity
+				 displayedPrice = formatPrice(quantity * parseFloat(selectedItem.price2.replace('₱', '').replace(',', '')));
 			 } else if (size === 'Family') {
-				 displayedPrice = formatPrice(quantity * parseFloat(selectedItem.price3.replace('₱', '').replace(',', ''))); // Update price based on quantity
+				 displayedPrice = formatPrice(quantity * parseFloat(selectedItem.price3.replace('₱', '').replace(',', '')));
 			 }
 		 }
 	}
 
-	// Reactive statement to update displayedPrice based on quantity, selectedItem, and selectedSize
 	$: {
 		if (selectedItem) {
 			let price = 0;
@@ -289,44 +385,39 @@
 			} else if (selectedSize === 'Family') {
 				price = parseFloat(selectedItem.price3.replace('₱', '').replace(',', ''));
 			}
-			displayedPrice = formatPrice(quantity * price); // Update displayed price based on quantity
+			displayedPrice = formatPrice(quantity * price);
 		}
 	}
 
-	// Function to handle voiding an order item
 	function voidOrder(index: number) {
-		voidIndex = index; // Store the index of the item to void
-		isCodePopupVisible = true; // Show the code input popup
+		voidIndex = index;
+		isCodePopupVisible = true;
 	}
 
-	// Function to confirm voiding the order
 	function confirmVoid() {
 		if (inputCode.length === 6) {
-			orderedItems.splice(voidIndex!, 1); // Remove the item at the specified index
-			voidIndex = null; // Reset the index
-			inputCode = ''; // Clear the input code
-			isCodePopupVisible = false; // Hide the popup
+			orderedItems.splice(voidIndex!, 1);
+			orderedItemsStore.set(orderedItems);
+			voidIndex = null;
+			inputCode = '';
+			isCodePopupVisible = false;
 		} else {
-			alert('Please enter a valid 6-digit code.'); // Alert for invalid code
+			alert('Please enter a valid 6-digit code.');
 		}
 	}
 
-	// Function to close the code input popup
 	function closeCodePopup() {
-		isCodePopupVisible = false; // Hide the popup
-		inputCode = ''; // Clear the input code
+		isCodePopupVisible = false;
+		inputCode = '';
 	}
 </script>
 
 <div class="flex h-screen">
 	<Sidebar />
 	<div class="flex flex-grow overflow-hidden bg-gray-100">
-		<!-- Main Dashboard Content -->
 		<div class="flex-start w-full overflow-auto p-4">
-			<!-- Filter Bar Menu -->
 			<div class="mb-4 flex space-x-4">
-				<!-- Category Buttons -->
-				{#each ['All', 'Beverages', 'Food', 'Desserts', 'Coffee', 'Tea', 'Juice', 'Sandwich', 'Sushi', 'Pasta', 'Burger'] as category}
+				{#each ['All', 'Beverages', 'Food', 'Dessert', 'Coffee', 'Tea', 'Juice', 'Sandwich', 'Sushi', 'Pasta', 'Burger', 'Ulam'] as category}
 					<button
 						class="rounded-md px-6 py-2 font-bold text-black"
 						class:bg-cyan-950={selectedCategory === category}
@@ -340,7 +431,6 @@
 				{/each}
 			</div>
 
-			<!-- Content Based on Selected Category -->
 			<div class="mb-4 font-bold text-black">
 				{#if selectedCategory === 'All'}
 					<p>Display All Menu</p>
@@ -353,9 +443,8 @@
 				{/if}
 			</div>
 
-			<!-- Card Grid -->
 			<div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-				{#each cardData.filter((item) => selectedCategory === 'All' || (selectedCategory === 'Beverages' && item.label === 'Beverage') || (selectedCategory === 'Food' && item.label === 'Food') || (selectedCategory === 'Desserts' && item.label === 'Dessert')) as { code, title1, title2, price1, price2, price3, image, menu_no }}
+				{#each cardData.filter(item => selectedCategory === 'All' || item.label === selectedCategory || item.label2 === selectedCategory) as { code, title1, title2, price1, price2, price3, image, menu_no, label, label2 }}
 					<Card
 						{code}
 						{title1}
@@ -363,6 +452,8 @@
 						{price1}
 						{price2}
 						{price3}
+						{label}
+						{label2}
 						{image}
 						{menu_no}
 						onAdd={handleAdd}
@@ -372,28 +463,34 @@
 		</div>
 	</div>
 
-	<!-- Right Side: Order Panel -->
 	<div class="w-[380px]">
 		<div
 			class="fixed right-0 top-0 flex h-full w-[350px] flex-col items-center bg-gray-100 p-4 shadow-lg"
 		>
-			<!-- Order Number Section -->
 			<div class="mb-4 w-full rounded-md bg-green-800 py-2 text-center text-white">
 				<p class="text-sm font-bold">Order Number {orderNumber}</p>
 			</div>
 
-			<!-- Order Items Section -->
 			<div class="mb-4 w-full flex-grow space-y-2 overflow-y-auto max-h-[400px]">
 				{#if orderedItems.length > 0}
 					{#each orderedItems as item, index}
-						<div class="flex items-center justify-between rounded-md bg-white p-4 shadow-md transition-transform transform hover:scale-105">
-							<div class="flex flex-col">
+						<div class="flex flex-col p-4 bg-white rounded-lg shadow-md">
+							<div class="flex justify-between items-center">
 								<p class="font-semibold text-gray-800">{item.title} x {item.quantity}</p>
-								<p class="text-gray-600">Size: {item.size}</p>
-								<p class="text-gray-600">Add-ons: {item.addons.join(', ') || 'None'}</p>
+								<p class="font-semibold text-gray-800 text-right">₱{item.price}</p>
 							</div>
-							<p class="font-semibold text-gray-800 text-lg">₱{item.price}</p>
-							<button on:click={() => voidOrder(index)} class="text-red-500">Void</button>
+							<div class="flex justify-between items-center">
+								<p class="text-gray-600">Size: {item.size}</p>
+								<p class="text-gray-800 text-right">₱{item.originalPrice}</p>
+							</div>
+							<p class="text-gray-600">Add-ons:</p>
+							{#each item.addons as addon}
+								<div class="flex justify-between">
+									<p class="text-gray-600">{addon}</p>
+									<p class="text-gray-500 text-right">₱{calculateAddonsPrice([addon])}</p>
+								</div>
+							{/each}
+							<button on:click={() => voidOrder(index)} class="mt-2 text-red-500 text-center">Void</button>
 						</div>
 					{/each}
 				{:else}
@@ -401,16 +498,14 @@
 				{/if}
 			</div>
 
-			<!-- Bottom Section -->
 			<div class="mt-auto w-full p-4 rounded-lg shadow-md">
-				<!-- Total Cost and Change Section -->
 				<div class="mb-4 flex w-full items-center justify-between border-b pb-2">
 					<p class="font-semibold text-gray-700">Total Cost:</p>
 					<p class="font-bold text-gray-800">₱{orderedItems.reduce((total, item) => total + parseFloat(item.price.replace('₱', '').replace(',', '')), 0).toFixed(2)}</p>
 				</div>
 				<div class="flex justify-between">
 					<p class="text-lg">Amount Paid:</p>
-					<span class="text-lg">₱{payment}</span>
+					<span class="text-lg">₱{payment || '0.00'}</span>
 				</div>
 				<div class="flex justify-between">
 					<p class="text-lg">Change:</p>
@@ -421,31 +516,53 @@
 				</div>
 			</div>
 
-			<!-- Buttons Section -->
 			<div class="grid h-[400px] w-full grid-cols-4 gap-2">
-				<!-- Dine In and Take Out Buttons -->
-				<button class="col-span-2 rounded bg-gray-300 py-2 font-bold text-gray-800"
-					>Dine In</button
-				>
-				<button class="col-span-2 rounded bg-gray-300 py-2 font-bold text-gray-800"
-					>Take Out</button
-				>
+				<button 
+				class="col-span-2 rounded py-2 font-bold text-gray-800 {isDineIn ? 'bg-blue-500 text-white' : 'bg-gray-300'}"
 
-				<!-- Number Buttons -->
+				on:click={() => { isDineIn = true; isTakeOut = false; }}
+			>
+
+				Dine In
+
+			</button>
+
+			<button 
+
+				class="col-span-2 rounded py-2 font-bold text-gray-800 {isTakeOut ? 'bg-blue-500 text-white' : 'bg-gray-300'}"
+				on:click={() => { isDineIn = false; isTakeOut = true; }}
+
+			>
+
+				Take Out
+
+			</button>
+
 				{#each ['7', '8', '9', '⌫', '4', '5', '6', 'Clr', '1', '2', '3', 'Void', '0', '00', 'Place Order'] as key, index}
 					<button
 						on:click={() => {
-							if (key === '⌫') handleBackspace();
-							else if (key === 'Clr') handleClear();
-							else if (key === 'Void') voidOrder(index);
-							else if (key === 'Place Order')
-								handlePlaceOrder(); // Call the new function
-							else handleNumberInput(key);
+							if (key === 'Clr') {
+								localStorage.removeItem('payment'); // Clear all numbers in local storage
+								console.log('Cleared all numbers from local storage');
+							} else if (key === '⌫') {
+								const currentPayment = localStorage.getItem('payment') || '';
+								localStorage.setItem('payment', currentPayment.slice(0, -1)); // Delete last number
+								console.log('Deleted last number, current value:', localStorage.getItem('payment'));
+							} else {
+								const currentPayment = localStorage.getItem('payment') || '';
+								localStorage.setItem('payment', currentPayment + key); // Store number in local storage
+								console.log('Stored number:', key, 'Current value:', localStorage.getItem('payment'));
+							}
+							handleButtonClick(key, index, orderedItems, payment, handleBackspace, handleClear, voidOrder, handlePlaceOrder, handleNumberInput, isDineIn, isTakeOut);
+							currentInputStore.update(store => {
+								return {
+									...store,
+									currentInput: key, // Update the current input
+									amountPaid: parseFloat(amountPaid.replace('₱', '').replace(',', '')) 
+								};
+							});
 						}}
-						class="rounded bg-gray-200 py-2 font-bold text-gray-800 col-span-{key ===
-						'Place Order'
-							? '2'
-							: '1'} {key === 'Void' ? 'bg-red-900 text-white' : ''}"
+						class="rounded bg-gray-200 py-2 font-bold text-gray-800 col-span-{key === 'Place Order' ? '2' : '1'} {key === 'Void' ? 'bg-red-900 text-white' : ''}"
 					>
 						{key}
 					</button>
@@ -455,38 +572,22 @@
 	</div>
 </div>
 
-<!-- Popup component -->
 {#if isPopupVisible}
 	<div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
 		<div class="rounded-lg bg-white p-8 shadow-lg">
-			<!-- Increased padding for larger touch targets -->
-			<!-- Logo -->
 			<div class="mb-4 flex justify-center">
 				<img src="icon.png" alt="Restaurant Logo" class="h-24" />
-				<!-- Increased logo size for better visibility -->
 			</div>
-			<!-- Restaurant Details -->
 			<h2 class="text-center text-2xl font-bold">Kape Rustiko Restaurant</h2>
-			<!-- Increased font size -->
 			<p class="text-center text-lg">Dewey Ave, Subic Bay Freeport Zone</p>
-			<!-- Increased font size for better readability -->
 			<p class="text-center text-lg">Contact: (047) 998-0000</p>
-			<!-- Increased font size for better readability -->
-
-			<!-- BIR Requirements -->
 			<p class="text-center text-lg">TIN: 123-456-789</p>
-			<!-- Increased font size for better readability -->
 			<p class="text-center text-lg">Address: Dewey Ave, SBFZ</p>
-			<!-- Increased font size for better readability -->
-
 			<h2 class="mb-4 mt-4 text-center text-2xl font-bold">Sales Preview</h2>
-			<!-- Increased font size -->
 			<p class="text-lg">Receipt Number: {orderNumber}</p>
-			<!-- Increased font size for better readability -->
 			<p class="text-lg">Date and Time: {new Date().toLocaleString()}</p>
-			<!-- Increased font size for better readability -->
 			<p class="text-lg">Cashier Name: Mike</p>
-			<!-- Increased font size for better readability -->
+			<p class="text-lg">Order Type: {isDineIn ? 'Dine In' : 'Take Out'}</p>
 			<div class="flex justify-between">
 				<h2 class="mt-4 text-lg font-bold">Items Ordered:</h2>
 				<span class="mt-4 text-lg font-bold">Items Price</span>
@@ -515,46 +616,33 @@
 					: '0.00'}</span>
 			</div>
 			<h2 class="mt-4 text-center text-2xl font-bold">Thank You for Dining with Us!</h2>
-			<!-- Increased font size -->
 			<div class="mt-4 flex justify-between">
 				<button on:click={closePopup} class="mr-1 w-full rounded bg-red-500 px-6 py-3 text-white"
 					>Cancel Order</button
 				>
-				<!-- Increased padding for larger touch targets -->
 				<button on:click={printReceipt} class="ml-1 w-full rounded bg-blue-500 px-6 py-3 text-white"
 					>Print Receipt</button
 				>
-				<!-- Increased padding for larger touch targets -->
 			</div>
 		</div>
 	</div>
 {/if}
 
-<!-- Popup for variations, quantity, size, and add-ons -->
 {#if isVariationVisible}
 	<div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70">
 		<div class="w-full max-w-md rounded-lg bg-white p-8 shadow-lg">
-			<!-- Increased padding for larger touch targets -->
 			<h2 class="mb-6 text-center text-2xl font-bold">Add {selectedItem?.title1}</h2>
-			<!-- Increased font size -->
-			<p class="mb-6 text-center text-lg">Price: ₱{displayedPrice}</p>
-			<!-- Show the updated price -->
-
-			<!-- Product Image -->
+			<p class="mb-6 text-center text-lg">Price: ₱{displayedPrice} (Add-ons: ₱{calculateAddonsPrice(selectedAddons)})</p>
 			{#if selectedItem?.image}
 				<img
 					src={selectedItem.image}
 					alt={selectedItem.title1}
 					class="mb-4 h-[400px] w-full rounded"
 				/>
-				<!-- Added product image -->
 			{/if}
 
-			<!-- Size Selection -->
 			<label for="size" class="mb-2 block text-sm font-medium">Size:</label>
-			<!-- Increased margin for better spacing -->
 			<div class="mb-6 flex w-full space-x-4">
-				<!-- Added flex container for horizontal layout -->
 				<button
 					on:click={() => selectSize('Regular')}
 					class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === 'Regular'
@@ -575,52 +663,53 @@
 				>
 			</div>
 
-			<!-- Add-ons Selection -->
 			<label for="addons" class="mb-2 block text-sm font-medium">Add-ons:</label>
-			<!-- Increased margin for better spacing -->
 			<div class="mb-6">
-				<!-- Increased margin for better spacing -->
-				{#if selectedItem?.label === 'Beverage'}
+				{#if selectedItem?.label === 'Beverages' || selectedItem?.label2 === 'Beverages'}
 					<label class="mb-4 block">
-						<!-- Increased margin for better spacing -->
 						<input
 							type="checkbox"
 							bind:group={selectedAddons}
-							value="Extra Shot"
+							value="Sugar"
 							class="mr-2 h-6 w-6"
-						/> Extra Shot
+						/> Sugar - ₱5
 					</label>
-				{:else}
 					<label class="mb-4 block">
-						<!-- Increased margin for better spacing -->
 						<input
 							type="checkbox"
 							bind:group={selectedAddons}
-							value="Extra Cheese"
+							value="Bobba"
 							class="mr-2 h-6 w-6"
-						/> Extra Cheese
+						/> Bobba - ₱10
 					</label>
 					<label class="mb-4 block">
-						<!-- Increased margin for better spacing -->
-						<input type="checkbox" bind:group={selectedAddons} value="Bacon" class="mr-2 h-6 w-6" />
-						Bacon
-					</label>
-					<label class="mb-4 block">
-						<!-- Increased margin for better spacing -->
 						<input
 							type="checkbox"
 							bind:group={selectedAddons}
-							value="Olives"
+							value="Milk"
 							class="mr-2 h-6 w-6"
-						/> Olives
+						/> Milk - ₱7
+					</label>
+				{:else if selectedItem?.label === 'Food' || selectedItem?.label2 === 'Food'}
+					<label class="mb-4 block">
+						<input type="checkbox" bind:group={selectedAddons} value="Extra Cheese" class="mr-2 h-6 w-6" /> Extra Cheese - ₱15
+					</label>
+					<label class="mb-4 block">
+						<input type="checkbox" bind:group={selectedAddons} value="Bacon" class="mr-2 h-6 w-6" /> Bacon - ₱20
+					</label>
+					<label class="mb-4 block">
+						<input type="checkbox" bind:group={selectedAddons} value="Olives" class="mr-2 h-6 w-6" /> Olives - ₱10
+					</label>
+				{:else if selectedItem?.label2 === 'Ulam'}
+					<label class="mb-4 block">
+						<input type="checkbox" bind:group={selectedAddons} value="Rice" class="mr-2 h-6 w-6" /> Rice - ₱10
+						<input type="number" min="0" bind:value={riceQuantity} class="ml-2 w-10" />
 					</label>
 				{/if}
 			</div>
 
 			<label for="quantity" class="mb-2 block text-sm font-medium">Quantity:</label>
-			<!-- Increased margin for better spacing -->
 			<div class="mb-6 flex justify-between">
-				<!-- Added flex container for button layout -->
 				<button on:click={decreaseQuantity} class="flex-1 rounded-md border border-gray-300 p-3"
 					>-</button
 				>
@@ -631,7 +720,6 @@
 					min="1"
 					class="mx-2 block w-full rounded-md border border-gray-300 p-3 text-center"
 				/>
-				<!-- Centered input -->
 				<button on:click={increaseQuantity} class="flex-1 rounded-md border border-gray-300 p-3"
 					>+</button
 				>
@@ -643,19 +731,16 @@
 					class="rounded-md bg-red-500 px-6 py-3 text-white transition hover:bg-red-600"
 					>Cancel</button
 				>
-				<!-- Increased padding for larger touch targets -->
 				<button
 					on:click={() => selectedItem && handleOrder(selectedItem)}
 					class="rounded-md bg-blue-500 px-6 py-3 text-white transition hover:bg-blue-600"
 					>Add to Order</button
 				>
-				<!-- Increased padding for larger touch targets -->
 			</div>
 		</div>
 	</div>
 {/if}
 
-<!-- Popup for voiding an order -->
 {#if isCodePopupVisible}
 	<div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70">
 		<div class="w-full max-w-md rounded-lg bg-white p-8 shadow-lg">
