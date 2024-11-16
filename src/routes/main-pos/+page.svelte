@@ -161,39 +161,37 @@
 			order_take: isDineIn ? 'Dine In' : 'Take Out'
 		};
 
-		// Send data to the server and delete orders simultaneously
-		console.log('Sending receipt data:', receiptData); // Log the receipt data being sent
-		Promise.all([
-				fetch('http://localhost/kaperustiko-possystem/backend/save_receipt.php', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(receiptData),
-				}),
-				// ... existing code ...
-		])
-		.then(async ([saveResponse]) => {
-			if (!saveResponse.ok) {
-				const text = await saveResponse.text();
-				throw new Error(`Failed to save receipt: ${text}`);
-			}
-			const data = await saveResponse.json();
-			console.log('Receipt saved successfully:', data);
-			
-			// Now delete all orders after saving the receipt
-			const deleteResponse = await fetch('http://localhost/kaperustiko-possystem/backend/delete_all_order.php', {
-				method: 'DELETE', // Assuming you have a DELETE endpoint
-			});
+		// Now delete all orders before saving the receipt
+		fetch('http://localhost/kaperustiko-possystem/backend/delete_all_order.php', {
+			method: 'DELETE', // Assuming you have a DELETE endpoint
+		})
+		.then(async deleteResponse => {
 			if (!deleteResponse.ok) {
 				const text = await deleteResponse.text();
 				throw new Error(`Failed to delete orders: ${text}`);
 			}
+			console.log('All orders deleted successfully');
+
+			// Send data to the server to save the receipt
+			const saveResponse = await fetch('http://localhost/kaperustiko-possystem/backend/save_receipt.php', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(receiptData),
+			});
+
+			const textResponse = await saveResponse.text(); // Get the response as text
+			console.log('Response from save_receipt.php:', textResponse); // Log the response
+
+			if (!saveResponse.ok) {
+				throw new Error(`Failed to save receipt: ${textResponse}`);
+			}
+
+			const data = JSON.parse(textResponse); // Parse the text response as JSON
+			console.log('Receipt saved successfully:', data);
 			// Show success alert
 			showAlert('Order Success', 'success'); // Call showAlert with success type
-		})
-		.catch(error => {
-			console.error('There was a problem with the fetch operation:', error);
 		});
 
 		// Reset the receipt data
@@ -215,6 +213,7 @@
 		// Reset all numbers in local storage
 		localStorage.clear(); // Clear all numbers in local storage
 		window.location.reload();
+		
 		
 	}
 
@@ -617,11 +616,37 @@
 				<h2 class="mt-4 text-lg font-bold">Items Ordered:</h2>
 				<span class="mt-4 text-lg font-bold">Items Price</span>
 			</div>
-			<ul>
+			<ul class="overflow-auto max-h-[200px]">
 				{#each orderedItems as item}
-					<li class="flex justify-between text-lg">
-						{item.order_name} x {item.order_quantity} {item.order_size} {Array.isArray(item.order_addons) && item.order_addons.length > 0 ? `(${item.order_addons.join(', ')})` : ''}
-						<span>₱{item.order_price}</span>
+					<li class="flex flex-col justify-between text-lg">
+						<div class="flex justify-between">
+							<span>{item.order_name} x {item.order_quantity} {item.order_size}</span>
+							<span>₱{item.basePrice}.00</span>
+						</div>
+						<ul class="list-disc pl-5">
+							{#if Array.isArray(item.order_addons) && item.order_addons.length > 0}
+								<li>{item.order_addons.join(', ')}</li>
+							{/if}
+							{#if item.order_addons !== 'None'}
+								<li class="flex justify-between">
+									<span>{item.order_addons}</span>
+									<span class="text-right">₱{item.order_addons_price}.00</span>
+								</li>
+							{/if}
+							{#if item.order_addons2 !== 'None'}
+								<li class="flex justify-between">
+									<span>{item.order_addons2}</span>
+									<span class="text-right">₱{item.order_addons_price2}.00</span>
+								</li>
+							{/if}
+							{#if item.order_addons3 !== 'None'}
+								<li class="flex justify-between">
+									<span>{item.order_addons3}</span>
+									<span class="text-right">₱{item.order_addons_price3}.00</span>
+								</li>
+							{/if}
+						</ul>
+						<span>---------------------------------------------</span>
 					</li>
 				{/each}
 			</ul>

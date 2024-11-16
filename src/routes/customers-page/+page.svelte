@@ -1,10 +1,11 @@
 <script lang="ts">
-    import { onMount } from 'svelte'; // Ensure you import onMount
+    import { onMount, afterUpdate } from 'svelte'; // Ensure you import onMount and afterUpdate
     import { handleButtonClick } from '../../utils/buttonHandler'; // Import the reusable function
     import { currentInputStore } from '../../stores/currentInputStore'; // Import the store
     let orders: { order_name: string; order_quantity: number; order_size: string; order_price: number; basePrice: number; order_addons: string; order_addons_price: number; order_addons2: string; order_addons_price2: number; order_addons3: string; order_addons_price3: number; order_image?: string }[] = []; // Explicitly define the type
     let amountPaid: number = 0; // Add a reactive variable for amount paid
     let currentInput = '';
+    let ordersContainer: HTMLDivElement; // Reference for the orders container
 
     // Subscribe to the store
     currentInputStore.subscribe(store => {
@@ -56,6 +57,13 @@
     // Example of how you might call updateAmountPaid when a button is clicked
     // This should be connected to your button click event in the main POS
     // updateAmountPaid(8); // Call this function with the value you want to add
+
+    // Scroll to the bottom of the orders container after orders are updated
+    afterUpdate(() => {
+        if (ordersContainer) {
+            ordersContainer.scrollTop = ordersContainer.scrollHeight; // Scroll to the bottom
+        }
+    });
 </script>
 
 
@@ -63,7 +71,7 @@
     <div class="p-4 bg-cyan-950 h-screen flex flex-col">
         
         {#if orders.length > 0}
-        <div class="flex flex-col space-y-4 w-full flex-1  border-gray-300 p-4 bg-white rounded-lg shadow-md">
+        <div bind:this={ordersContainer} class="flex flex-col space-y-4 w-full flex-1  border-gray-300 p-4 bg-white rounded-lg shadow-md overflow-auto max-h-[1000px]">
             {#each orders as order}
                 <div class="flex items-start justify-between border-b py-2">
                     <div class="flex-1 flex items-center">
@@ -87,7 +95,7 @@
                         </div>
                     </div>
                     <div class="text-right pl-4 flex-shrink-0">
-                        <p class="text-xl font-bold text-green-600">₱{(Number(order.order_price) + Number(order.order_addons_price) + Number(order.order_addons_price2) + Number(order.order_addons_price3)).toFixed(2)}</p>
+                        <p class="text-xl font-bold text-green-600">₱{(Number(order.basePrice) + Number(order.order_addons_price) + Number(order.order_addons_price2) + Number(order.order_addons_price3)).toFixed(2)}</p>
                         <p class="text-gray-600">₱{order.basePrice}.00</p>
                         <p class="text-gray-600">---------------------------------------------</p>
                         <p class="text-gray-600">---------------------------------------------</p>
@@ -107,7 +115,7 @@
         <div class="text-right mt-4 bg-white p-4 rounded-lg shadow-md">
             <h2 class="text-xl font-semibold">Total Cost: ₱{totalCost.toFixed(2)}</h2>
             <p>Amount Paid: ₱{amountPaid.toFixed(2)}</p>
-            <p>Change: ₱{(amountPaid - totalCost).toFixed(2)}</p>
+            <p>Change: ₱{Math.max(0, (amountPaid - totalCost)).toFixed(2)}</p>
         </div>
         {:else}
             <div class="bg-cyan-950 h-screen w-full flex flex-col items-center justify-center">

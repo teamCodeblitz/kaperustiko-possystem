@@ -11,7 +11,10 @@ export function handleButtonClick(key: string, index: number, orderedItems: any[
 			showAlert('Error: Please select either Dine In or Take Out.');
 			return; // Prevent further execution
 		}
-		const totalCost = orderedItems.reduce((total, item) => total + parseFloat(item.price.replace('₱', '').replace(',', '')), 0);
+		const totalCost = orderedItems.reduce((total, item) => {
+			const price = item.price ? parseFloat(item.price.replace('₱', '').replace(',', '')) : 0;
+			return total + price;
+		}, 0);
 		const amountPaid = parseFloat(payment.replace('₱', '').replace(',', ''));
 
 		if (!payment || amountPaid <= 0) {
