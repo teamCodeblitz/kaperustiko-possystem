@@ -72,6 +72,7 @@
 		order_addons3: string;
 		order_addons_price3: number;
 		basePrice: number;
+		code: string;
 	};
 
 	let selectedAddons: string[] = [];
@@ -121,6 +122,9 @@
 	}
 
 	function handlePlaceOrder() {
+		// Log the codes of all ordered items
+		console.log('Ordered Item Codes:', orderedItems.map(item => item.code)); // Log the codes
+
 		// Fetch the total order count from the database
 		fetch('http://localhost/kaperustiko-possystem/backend/get_total_orders.php')
 			.then(response => response.json())
@@ -162,6 +166,29 @@
 		};
 
 		// Now delete all orders before saving the receipt
+		// Call updateQuantity for each ordered item
+		orderedItems.forEach(item => {
+			const code = item.code;
+			console.log('Sending code to PHP:', code); // Log the code being sent
+			// Prioritize deleting quantity before saving receipt
+			fetch(`http://localhost/kaperustiko-possystem/backend/qty_data.php?code=${code}`, {
+				method: 'GET',
+			})
+			.then(response => response.json())
+			.then(data => {
+				if (data.status === 'success') {
+					console.log(data.message); // Log success message
+					fetchOrders(); // Refresh orders to reflect updated quantities
+				} else {
+					console.error(data.message); // Log error message
+				}
+			})
+			.catch(error => {
+				console.error('Error updating quantity:', error);
+			});
+		});
+		
+		// Now delete all orders before saving the receipt
 		fetch('http://localhost/kaperustiko-possystem/backend/delete_all_order.php', {
 			method: 'DELETE', // Assuming you have a DELETE endpoint
 		})
@@ -175,10 +202,10 @@
 			// Send data to the server to save the receipt
 			const saveResponse = await fetch('http://localhost/kaperustiko-possystem/backend/save_receipt.php', {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(receiptData),
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(receiptData),
 			});
 
 			const textResponse = await saveResponse.text(); // Get the response as text
@@ -271,7 +298,8 @@
         addonsPrices: selectedAddons.map(addon => {
             const price = calculateAddonsPrice([addon]); // Get individual addon price
             return `${addon} - ₱${price}`; // Format as "Addon - Price"
-        }).join(', ') // Join the prices into a single string
+        }).join(', '), // Join the prices into a single string
+		code: item.code
     };
     orderedItems = [...orderedItems];
 
@@ -289,6 +317,7 @@
         order_addons3?: string;
         order_addons_price3?: number;
         basePrice: number; // Add basePrice to the OrderData type
+		code: string;
     };
 
     const currentAddonsPrice = calculateAddonsPrice(selectedAddons); // Renamed variable
@@ -309,6 +338,7 @@
         order_addons_price2: selectedAddons.length > 1 ? parseFloat(calculateAddonsPrice([selectedAddons[1]]).replace('₱', '').replace(',', '')) : 0,
         order_addons3: selectedAddons.length > 2 ? selectedAddons[2] : 'None',
         order_addons_price3: selectedAddons.length > 2 ? parseFloat(calculateAddonsPrice([selectedAddons[2]]).replace('₱', '').replace(',', '')) : 0,
+		code: item.code
     };
 
     console.log('Order Data:', orderData); // Log the order data
@@ -413,12 +443,15 @@
 		} else {
 			alert('Please enter a valid 6-digit code.');
 		}
+
+		window.location.reload();
 	}
 
 	function closeCodePopup() {
 		isCodePopupVisible = false;
 		inputCode = '';
 	}
+
 </script>
 
 <div class="flex h-screen">
@@ -485,6 +518,9 @@
 				{#if orderedItems.length > 0}
 					{#each orderedItems as item, index}
 						<div class="flex flex-col p-4 bg-white rounded-lg shadow-md">
+							<div class="flex justify-between items-center">
+								<p class="text-gray-600">Code: {item.code}</p>
+							</div>
 							<div class="flex justify-between items-center">
 								<p class="font-semibold text-gray-800">{item.order_name} x {item.order_quantity}</p>
 								<p class="font-semibold text-gray-800 text-right">₱{item.order_price}.00</p>

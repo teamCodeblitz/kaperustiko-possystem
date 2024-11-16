@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { onMount } from "svelte";
     import { FontAwesomeIcon } from "@fortawesome/svelte-fontawesome";
     import { faStar, faUndo, faExclamationTriangle, faTrash, faDollarSign, faPrint } from "@fortawesome/free-solid-svg-icons";
@@ -31,12 +31,22 @@
     };
 
     let inventoryData = {
-        labels: ['Item A', 'Item B', 'Item C'],
+        labels: [],
         datasets: [
             {
-                label: 'Inventory',
-                data: [50, 30, 20],
-                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+                label: 'Good',
+                data: [],
+                backgroundColor: 'green',
+            },
+            {
+                label: 'Warning',
+                data: [],
+                backgroundColor: 'yellow',
+            },
+            {
+                label: 'Critical',
+                data: [],
+                backgroundColor: 'red',
             }
         ]
     };
@@ -64,6 +74,27 @@
         if (data.length > 0 && data[0].total_amount) { // Adjusted to check the correct structure of the response
             totalSalesToday = data[0].total_amount; // Update the total sales for today
         }
+
+        // Fetch inventory items from the backend
+        const responseMenu = await fetch('http://localhost/kaperustiko-possystem/backend/get_menu.php');
+        const menuItems = await responseMenu.json();
+         // Sort menuItems by label and label2
+        menuItems.sort((a: any, b: any) => {
+            if (a.label < b.label) return -1;
+            if (a.label > b.label) return 1;
+            return a.label2 < b.label2 ? -1 : 1;
+        });
+
+        // Populate inventoryData with fetched menu items
+        inventoryData.labels = menuItems.map((item: { qty: number }) => item.qty.toString()); // Set labels to qty as strings
+        inventoryData.datasets[0].data = menuItems.map((item: { qty: number }) => item.qty); // Set data to qty
+
+        // Set background colors based on qty
+        inventoryData.datasets[0].backgroundColor = menuItems.map((item: { qty: number }) => {
+            if (item.qty < 10) return 'red'; // Red
+            if (item.qty < 20) return 'yellow'; // Yellow
+            return 'green';
+        });
     });
 
     function printPage() {
@@ -126,8 +157,18 @@
          <div class="flex justify-end mb-4 w-full">
             <input type="text" placeholder="Search..." class="bg-white text-black border border-gray-300 rounded p-2 mr-2 flex-grow shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             <select class="bg-white text-black border border-gray-300 rounded p-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="sort-asc">Sort by Date (Asc)</option>
-                <option value="sort-desc">Sort by Date (Desc)</option>
+                    <option value="all">All</option>
+                    <option value="beverages">Beverages</option>
+                    <option value="food">Food</option>
+                    <option value="dessert">Dessert</option>
+                    <option value="coffee">Coffee</option>
+                    <option value="tea">Tea</option>
+                    <option value="juice">Juice</option>
+                    <option value="sandwich">Sandwich</option>
+                    <option value="sushi">Sushi</option>
+                    <option value="pasta">Pasta</option>
+                    <option value="burger">Burger</option>
+                    <option value="ulam">Ulam</option>
             </select>
             <button class="ml-2 p-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition duration-200" on:click={printPage}>
                 <FontAwesomeIcon icon={faPrint} />

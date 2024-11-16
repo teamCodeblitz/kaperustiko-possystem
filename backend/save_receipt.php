@@ -31,16 +31,7 @@ $receiptNumber = $data['receiptNumber'];
 $date = $data['date'];
 $time = $data['time'];
 $cashierName = $data['cashierName'];
-
-// Modify itemsOrdered to exclude addons if they are null
-$itemsOrdered = array_map(function($item) {
-    if (is_null($item['addons'])) {
-        unset($item['addons']); // Remove addons if null
-    }
-    return $item;
-}, $data['itemsOrdered']);
-
-$itemsOrderedJson = json_encode($itemsOrdered); // Encode modified itemsOrdered
+$itemsOrderedJson = json_encode($data['itemsOrdered']); // Encode modified itemsOrdered
 $totalAmount = $data['totalAmount'];
 $amountPaid = $data['amountPaid'];
 $change = $data['change'];
