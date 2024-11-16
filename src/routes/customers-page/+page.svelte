@@ -2,7 +2,7 @@
     import { onMount } from 'svelte'; // Ensure you import onMount
     import { handleButtonClick } from '../../utils/buttonHandler'; // Import the reusable function
     import { currentInputStore } from '../../stores/currentInputStore'; // Import the store
-    let orders: { order_name: string; order_quantity: number; order_size: string; order_price: number; order_addons: string; order_addons_price: number; order_image?: string }[] = []; // Explicitly define the type
+    let orders: { order_name: string; order_quantity: number; order_size: string; order_price: number; basePrice: number; order_addons: string; order_addons_price: number; order_addons2: string; order_addons_price2: number; order_addons3: string; order_addons_price3: number; order_image?: string }[] = []; // Explicitly define the type
     let amountPaid: number = 0; // Add a reactive variable for amount paid
     let currentInput = '';
 
@@ -30,8 +30,13 @@
         return () => clearInterval(interval); // Clear interval on component unmount
     });
 
-    // Calculate total cost reactively
-    $: totalCost = orders.reduce((sum, order) => sum + Number(order.order_price), 0); // Ensure order_price is treated as a number
+    // Calculate total cost reactively, including all relevant prices
+    $: totalCost = orders.reduce((sum, order) => {
+        return sum + Number(order.order_price) + 
+               Number(order.order_addons_price) + 
+               Number(order.order_addons_price2) + 
+               Number(order.order_addons_price3);
+    }, 0); // Ensure all prices are included
 
     // Function to update amount paid from local storage
     function updateAmountPaidFromStorage() {
@@ -60,24 +65,47 @@
         {#if orders.length > 0}
         <div class="flex flex-col space-y-4 w-full flex-1  border-gray-300 p-4 bg-white rounded-lg shadow-md">
             {#each orders as order}
-                <div class="flex items-center justify-between border-b">
-                    {#if order.order_image}
-                        <img src={order.order_image} alt={order.order_name} class="w-16 h-16 object-cover rounded-md mr-4" />
-                    {/if}
-                    <div class="flex-1">
-                        <h2 class="text-lg font-semibold">{order.order_name}</h2>
-                        <p class="text-gray-600"><strong>Quantity:</strong> {order.order_quantity}</p>
-                        <p class="text-gray-600"><strong>Size:</strong> {order.order_size}</p>
-                        <p class="text-gray-600"><strong>Addons:</strong> {order.order_addons || 'None'}</p>
+                <div class="flex items-start justify-between border-b py-2">
+                    <div class="flex-1 flex items-center">
+                        <img src={order.order_image} alt="{order.order_name}" class="w-16 h-16 object-cover mr-4" />
+                        <div>
+                            <h2 class="text-lg font-semibold">{order.order_name}</h2>
+                            <p class="text-gray-600"><strong>Quantity:</strong> {order.order_quantity}</p>
+                            <p class="text-gray-600"><strong>Size:</strong> {order.order_size}</p>
+                            <p class="text-gray-600"><strong>Addons:</strong></p>
+                            <ul class="list-disc pl-5">
+                                {#if order.order_addons && order.order_addons !== 'None' && order.order_addons !== '0'}
+                                    <li>{order.order_addons}</li>
+                                {/if}
+                                {#if order.order_addons2 && order.order_addons2 !== 'None' && order.order_addons2 !== '0'}
+                                    <li>{order.order_addons2}</li>
+                                {/if}
+                                {#if order.order_addons3 && order.order_addons3 !== 'None' && order.order_addons3 !== '0'}
+                                    <li>{order.order_addons3}</li>
+                                {/if}
+                            </ul>
+                        </div>
                     </div>
-                    <div class="text-right">
-                        <p class="text-xl font-bold">₱{order.order_price}</p>
+                    <div class="text-right pl-4 flex-shrink-0">
+                        <p class="text-xl font-bold text-green-600">₱{(Number(order.order_price) + Number(order.order_addons_price) + Number(order.order_addons_price2) + Number(order.order_addons_price3)).toFixed(2)}</p>
+                        <p class="text-gray-600">₱{order.basePrice}.00</p>
+                        <p class="text-gray-600">---------------------------------------------</p>
+                        <p class="text-gray-600">---------------------------------------------</p>
+                        {#if order.order_addons_price > 0}
+                            <p class="text-gray-600">₱{order.order_addons_price}.00</p>
+                        {/if}
+                        {#if order.order_addons_price2 > 0}
+                            <p class="text-gray-600">₱{order.order_addons_price2}.00</p>
+                        {/if}
+                        {#if order.order_addons_price3 > 0}
+                            <p class="text-gray-600">₱{order.order_addons_price3}.00</p>
+                        {/if}
                     </div>
-                </div>
+                </div>  
             {/each}
         </div>
         <div class="text-right mt-4 bg-white p-4 rounded-lg shadow-md">
-            <h2 class="text-xl font-semibold">Total Cost: ₱{totalCost.toString().replace(/^0+/, '')}</h2>
+            <h2 class="text-xl font-semibold">Total Cost: ₱{totalCost.toFixed(2)}</h2>
             <p>Amount Paid: ₱{amountPaid.toFixed(2)}</p>
             <p>Change: ₱{(amountPaid - totalCost).toFixed(2)}</p>
         </div>

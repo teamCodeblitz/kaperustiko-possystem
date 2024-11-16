@@ -22,19 +22,15 @@
 		}
 	}
 
+	let orderedItems: OrderedItem[] = [];
+
+	// Function to fetch orders
 	async function fetchOrders() {
 		const response = await fetch('http://localhost/kaperustiko-possystem/backend/get_order.php');
 		if (response.ok) {
 			const orders = await response.json();
 			orderedItemsStore.set(orders);
-			// Fetch the total order count from the database
-			const totalResponse = await fetch('http://localhost/kaperustiko-possystem/backend/get_total_orders.php');
-			if (totalResponse.ok) {
-				const totalData = await totalResponse.json();
-				orderNumber = `#${(totalData.total_order).toString().padStart(2, '0')}`; // Increment order number
-			} else {
-				console.error('Failed to fetch total orders');
-			}
+			orderedItems = orders;
 		} else {
 			console.error('Failed to fetch orders');
 		}
@@ -43,6 +39,15 @@
 	onMount(() => {
 		fetchMenu();
 		fetchOrders();
+		// Retrieve ordered items from localStorage
+		const storedItems = localStorage.getItem('orderedItems');
+		if (storedItems) {
+			orderedItems = JSON.parse(storedItems); // Parse and set orderedItems
+		}
+
+		// Update orders every 500 milliseconds
+		const interval = setInterval(fetchOrders, 500);
+		return () => clearInterval(interval); // Clear interval on component unmount
 	});
 
 	let orderNumber = '';
@@ -54,15 +59,21 @@
 	let isVariationVisible = false;
 	let selectedItem: MenuItem | null = null;
 	let selectedItemDetails: { title: string; price: string; size: string; quantity: number; addons: string[] } | null = null;
+
 	type OrderedItem = {
-		title: string;
-		price: string;
-		size: string;
-		quantity: number;
-		addons: string[];
-		originalPrice: string;
+		order_name: string;
+		order_price: number;
+		order_size: string;
+		order_quantity: number;
+		order_addons: string;
+		order_addons_price: number;
+		order_addons2: string;
+		order_addons_price2: number;
+		order_addons3: string;
+		order_addons_price3: number;
+		basePrice: number;
 	};
-	let orderedItems: OrderedItem[] = [];
+
 	let selectedAddons: string[] = [];
 	let displayedPrice = selectedItem ? 
 		formatPrice(quantity * (parseFloat((selectedItem as MenuItem).price1.replace('₱', '').replace(',', '')) + 
@@ -116,21 +127,6 @@
 			.then(data => {
 				orderNumber = `#${(data.total_order).toString().padStart(2, '0')}`; // Set order number based on fetched data
 				isPopupVisible = true;
-
-				// Move the delete orders logic here
-				fetch('http://localhost/kaperustiko-possystem/backend/delete_all_order.php', {
-					method: 'DELETE', // Assuming you have a DELETE endpoint
-				})
-				.then(deleteResponse => {
-					if (!deleteResponse.ok) {
-						console.error('Failed to delete orders:', deleteResponse.statusText); // Log the status text for better debugging
-					} else {
-						console.log('Orders deleted successfully'); // Log success
-					}
-				})
-				.catch(error => {
-					console.error('Error deleting orders:', error);
-				});
 			})
 			.catch(error => {
 				console.error('Failed to fetch total orders:', error);
@@ -143,65 +139,60 @@
 	}
 
 	function printReceipt() {
-	// Prepare the receipt data
-	const receiptData = {
-		receiptNumber: orderNumber,
-		date: new Date().toLocaleDateString(),
-		time: new Date().toLocaleTimeString(),
-		cashierName: 'Mike',
-		itemsOrdered: orderedItems.map(item => ({
-			title: item.title,
-			quantity: 'x' + item.quantity,
-			size: item.size,
-			...(item.addons && item.addons.length > 0 && { addons: item.addons }),
-			price: item.price
-		})),
-		totalAmount: orderedItems.reduce((total, item) => total + parseFloat(item.price.replace('₱', '').replace(',', '')), 0).toFixed(2),
-		amountPaid: payment,
-		change: orderedItems.length > 0 && payment ? 
-			(parseFloat(payment.replace('₱', '').replace(',', '')) - 
-			orderedItems.reduce((total, item) => total + parseFloat(item.price.replace('₱', '').replace(',', '')), 0)).toFixed(2) 
-			: '0.00',
-		order_take: isDineIn ? 'Dine In' : 'Take Out'
-	};
+		// Prepare the receipt data
+		const receiptData = {
+			receiptNumber: parseInt(orderNumber.replace('#', '')), // Convert to integer
+			date: new Date().toLocaleDateString(),
+			time: new Date().toLocaleTimeString(),
+			cashierName: 'Mike',
+			itemsOrdered: orderedItems.map(item => ({
+				order_name: item.order_name,
+				order_quantity: 'x' + item.order_quantity,
+				order_size: item.order_size,
+				...(item.order_addons && item.order_addons.length > 0 && { order_addons: item.order_addons }),
+				order_price: item.order_price
+			})),
+			totalAmount: Math.round(orderedItems.reduce((total, item) => total + parseFloat(item.order_price.toString().replace('₱', '').replace(',', '')), 0)), // Convert to integer
+			amountPaid: Math.round(parseFloat(payment.replace('₱', '').replace(',', ''))), // Convert to integer
+			change: orderedItems.length > 0 && payment ? 
+				Math.round(parseFloat(payment.replace('₱', '').replace(',', '')) - 
+				orderedItems.reduce((total, item) => total + parseFloat(item.order_price.toString().replace('₱', '').replace(',', '')), 0)) // Convert to integer
+				: 0, // Default to 0
+			order_take: isDineIn ? 'Dine In' : 'Take Out'
+		};
 
-	// Send data to the server
-	fetch('http://localhost/kaperustiko-possystem/backend/save_receipt.php', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify(receiptData),
-	})
-	.then(response => {
-		if (!response.ok) {
-			return response.text().then(text => {
-				throw new Error(`Network response was not ok: ${text}`);
-			});
-		}
-		return response.json();
-	})
-	.then(data => {
-		console.log('Receipt saved successfully:', data);
-		// Show success alert
-		showAlert('Order Success', 'success'); // Call showAlert with success type
-
-		// Delete all orders from the database after printing the receipt
-		fetch('http://localhost/kaperustiko-possystem/backend/delete_all_order.php', {
-			method: 'DELETE', // Assuming you have a DELETE endpoint
-		})
-		.then(deleteResponse => {
-			if (!deleteResponse.ok) {
-				console.error('Failed to delete orders:', deleteResponse.statusText); // Log the status text for better debugging
-			} else {
-				console.log('Orders deleted successfully'); // Log success
+		// Send data to the server and delete orders simultaneously
+		console.log('Sending receipt data:', receiptData); // Log the receipt data being sent
+		Promise.all([
+				fetch('http://localhost/kaperustiko-possystem/backend/save_receipt.php', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(receiptData),
+				}),
+				// ... existing code ...
+		])
+		.then(async ([saveResponse]) => {
+			if (!saveResponse.ok) {
+				const text = await saveResponse.text();
+				throw new Error(`Failed to save receipt: ${text}`);
 			}
+			const data = await saveResponse.json();
+			console.log('Receipt saved successfully:', data);
+			
+			// Now delete all orders after saving the receipt
+			const deleteResponse = await fetch('http://localhost/kaperustiko-possystem/backend/delete_all_order.php', {
+				method: 'DELETE', // Assuming you have a DELETE endpoint
+			});
+			if (!deleteResponse.ok) {
+				const text = await deleteResponse.text();
+				throw new Error(`Failed to delete orders: ${text}`);
+			}
+			// Show success alert
+			showAlert('Order Success', 'success'); // Call showAlert with success type
 		})
 		.catch(error => {
-			console.error('Error deleting orders:', error);
-		});
-	})
-	.catch(error => {
 			console.error('There was a problem with the fetch operation:', error);
 		});
 
@@ -223,8 +214,8 @@
 		
 		// Reset all numbers in local storage
 		localStorage.clear(); // Clear all numbers in local storage
-
-		location.reload();
+		window.location.reload();
+		
 	}
 
 	function showAlert(message: string, type: string) {
@@ -248,6 +239,7 @@
 		image: string;
 		label: string;
 		label2: string;
+		qty: string;
 	};
 
 	function formatPrice(price: number): string {
@@ -267,9 +259,11 @@
         selectedSize === 'Large' ? parseFloat(item.price2.replace('₱', '').replace(',', '')) :
         parseFloat(item.price3.replace('₱', '').replace(',', '')); // Adjust for Family size
 
+    const totalAddonsPrice = parseFloat(addonsPrice.replace('₱', '').replace(',', '')) || 0; // Ensure it's 0 if NaN
+
     const newItem = {
         title: item.title1,
-        price: formatPrice(quantity * basePrice + parseFloat(addonsPrice.replace('₱', '').replace(',', ''))), // Correctly calculate total price
+        price: formatPrice(quantity * (basePrice + totalAddonsPrice)), // Correctly calculate total price
         originalPrice: formatPrice(basePrice),
         size: selectedSize,
         quantity: quantity,
@@ -280,46 +274,45 @@
             return `${addon} - ₱${price}`; // Format as "Addon - Price"
         }).join(', ') // Join the prices into a single string
     };
-    orderedItems = [...orderedItems, newItem];
+    orderedItems = [...orderedItems];
 
     // Prepare data to send to the server
     type OrderData = {
         order_name: string;
         order_quantity: number;
         order_size: string;
-        order_price: string;
+        order_price: number;
         order_image: string;
         order_addons?: string; // Add optional properties for addons
-        order_addons_price?: string;
+        order_addons_price?: number;
         order_addons2?: string;
-        order_addons_price2?: string;
+        order_addons_price2?: number;
         order_addons3?: string;
-        order_addons_price3?: string;
+        order_addons_price3?: number;
         basePrice: number; // Add basePrice to the OrderData type
     };
 
+    const currentAddonsPrice = calculateAddonsPrice(selectedAddons); // Renamed variable
+    const totalOrderPrice = basePrice + totalAddonsPrice; // Calculate total price
+
+    // Update the orderData to include the correct order_price
     const orderData: OrderData = {
         order_name: item.title1,
         order_quantity: quantity,
         order_size: selectedSize,
-        order_price: newItem.price,
+        order_price: totalOrderPrice, // Calculate total price as a number
         order_image: item.image,
-        basePrice: newItem.basePrice // Include basePrice in the order data
+        basePrice: basePrice, // Change this line to reflect the original price
+        // Add-ons handling
+        order_addons: selectedAddons.length > 0 ? selectedAddons[0] : 'None',
+        order_addons_price: selectedAddons.length > 0 ? parseFloat(calculateAddonsPrice([selectedAddons[0]]).replace('₱', '').replace(',', '')) : 0,
+        order_addons2: selectedAddons.length > 1 ? selectedAddons[1] : 'None',
+        order_addons_price2: selectedAddons.length > 1 ? parseFloat(calculateAddonsPrice([selectedAddons[1]]).replace('₱', '').replace(',', '')) : 0,
+        order_addons3: selectedAddons.length > 2 ? selectedAddons[2] : 'None',
+        order_addons_price3: selectedAddons.length > 2 ? parseFloat(calculateAddonsPrice([selectedAddons[2]]).replace('₱', '').replace(',', '')) : 0,
     };
 
-    // Handle add-ons
-    if (selectedAddons.length > 0) {
-        orderData.order_addons = selectedAddons[0]; // First addon
-        orderData.order_addons_price = calculateAddonsPrice([selectedAddons[0]]); // Price for first addon
-    }
-    if (selectedAddons.length > 1) {
-        orderData.order_addons2 = selectedAddons[1]; // Second addon
-        orderData.order_addons_price2 = calculateAddonsPrice([selectedAddons[1]]); // Price for second addon
-    }
-    if (selectedAddons.length > 2) {
-        orderData.order_addons3 = selectedAddons[2]; // Third addon
-        orderData.order_addons_price3 = calculateAddonsPrice([selectedAddons[2]]); // Price for third addon
-    }
+    console.log('Order Data:', orderData); // Log the order data
 
     // Save the order to the database
     fetch('http://localhost/kaperustiko-possystem/backend/save_order.php', {
@@ -344,6 +337,9 @@
     selectedAddons = [];
     quantity = 1; // Reset quantity to 1
     closePopup();
+
+    // Save the order to localStorage
+    localStorage.setItem('orderedItems', JSON.stringify(orderedItems)); // Store orderedItems in localStorage
 }
 
 	function calculateAddonsPrice(addons: string[]): string {
@@ -396,8 +392,22 @@
 
 	function confirmVoid() {
 		if (inputCode.length === 6) {
-			orderedItems.splice(voidIndex!, 1);
-			orderedItemsStore.set(orderedItems);
+			const orderToVoid = orderedItems[voidIndex!]; // Get the order to void
+			orderedItems.splice(voidIndex!, 1); // Remove from local array
+			localStorage.setItem('orderedItems', JSON.stringify(orderedItems)); // Update localStorage after voiding
+
+			// Send request to backend to delete the order
+			fetch(`http://localhost/kaperustiko-possystem/backend/void_order.php?order_name=${encodeURIComponent(orderToVoid.order_name)}`, {
+				method: 'POST',
+			})
+			.then(response => response.json())
+			.then(data => {
+				console.log('Order voided:', data);
+			})
+			.catch(error => {
+				console.error('Error voiding order:', error);
+			});
+
 			voidIndex = null;
 			inputCode = '';
 			isCodePopupVisible = false;
@@ -444,7 +454,7 @@
 			</div>
 
 			<div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-				{#each cardData.filter(item => selectedCategory === 'All' || item.label === selectedCategory || item.label2 === selectedCategory) as { code, title1, title2, price1, price2, price3, image, menu_no, label, label2 }}
+				{#each cardData.filter(item => selectedCategory === 'All' || item.label === selectedCategory || item.label2 === selectedCategory) as { code, title1, title2, price1, price2, price3, image, menu_no, label, label2, qty }}
 					<Card
 						{code}
 						{title1}
@@ -456,6 +466,7 @@
 						{label2}
 						{image}
 						{menu_no}
+						{qty}
 						onAdd={handleAdd}
 					/>
 				{/each}
@@ -476,20 +487,34 @@
 					{#each orderedItems as item, index}
 						<div class="flex flex-col p-4 bg-white rounded-lg shadow-md">
 							<div class="flex justify-between items-center">
-								<p class="font-semibold text-gray-800">{item.title} x {item.quantity}</p>
-								<p class="font-semibold text-gray-800 text-right">₱{item.price}</p>
+								<p class="font-semibold text-gray-800">{item.order_name} x {item.order_quantity}</p>
+								<p class="font-semibold text-gray-800 text-right">₱{item.order_price}.00</p>
 							</div>
 							<div class="flex justify-between items-center">
-								<p class="text-gray-600">Size: {item.size}</p>
-								<p class="text-gray-800 text-right">₱{item.originalPrice}</p>
+								<p class="text-gray-600">Size: {item.order_size}</p>
 							</div>
-							<p class="text-gray-600">Add-ons:</p>
-							{#each item.addons as addon}
-								<div class="flex justify-between">
-									<p class="text-gray-600">{addon}</p>
-									<p class="text-gray-500 text-right">₱{calculateAddonsPrice([addon])}</p>
+							{#if item.order_addons !== 'None'}
+							<ul class="list-disc pl-5">
+								{#if item.order_addons !== 'None'}
+								<div class="flex justify-between items-center">
+									<li class="text-gray-600">{item.order_addons}</li>
+									<p class="text-gray-600 text-right">₱{item.order_addons_price}.00</p>
 								</div>
-							{/each}
+								{/if}	
+								{#if item.order_addons2 !== 'None'}
+								<div class="flex justify-between items-center">
+									<li class="text-gray-600">{item.order_addons2}</li>
+									<p class="text-gray-600 text-right">₱{item.order_addons_price2}.00</p>
+								</div>
+								{/if}
+								{#if item.order_addons3 !== 'None'}
+								<div class="flex justify-between items-center">
+									<li class="text-gray-600">{item.order_addons3}</li>
+									<p class="text-gray-600 text-right">₱{item.order_addons_price3}.00</p>
+								</div>
+								{/if}
+							</ul>
+							{/if}
 							<button on:click={() => voidOrder(index)} class="mt-2 text-red-500 text-center">Void</button>
 						</div>
 					{/each}
@@ -501,18 +526,18 @@
 			<div class="mt-auto w-full p-4 rounded-lg shadow-md">
 				<div class="mb-4 flex w-full items-center justify-between border-b pb-2">
 					<p class="font-semibold text-gray-700">Total Cost:</p>
-					<p class="font-bold text-gray-800">₱{orderedItems.reduce((total, item) => total + parseFloat(item.price.replace('₱', '').replace(',', '')), 0).toFixed(2)}</p>
+					<p class="font-bold text-gray-800">₱{orderedItems.reduce((total, item) => total + parseFloat(item.order_price.toString().replace('₱', '').replace(',', '')), 0).toFixed(2)}</p>
 				</div>
 				<div class="flex justify-between">
 					<p class="text-lg">Amount Paid:</p>
-					<span class="text-lg">₱{payment || '0.00'}</span>
+					<span class="text-lg">₱{payment || '0'}.00</span>
 				</div>
 				<div class="flex justify-between">
 					<p class="text-lg">Change:</p>
 					<span class="text-lg">₱{orderedItems.length > 0 && payment ? 
-						(parseFloat(payment.replace('₱', '').replace(',', '')) - 
-						orderedItems.reduce((total, item) => total + parseFloat(item.price.replace('₱', '').replace(',', '')), 0)).toFixed(2) 
-						: '0.00'}</span>
+						Math.max(0, parseFloat((parseFloat(payment.replace('₱', '').replace(',', '')) - 
+						orderedItems.reduce((total, item) => total + parseFloat(item.order_price.toString().replace('₱', '').replace(',', '')), 0)).toFixed(2))) 
+						: '0'}.00</span>
 				</div>
 			</div>
 
@@ -595,14 +620,14 @@
 			<ul>
 				{#each orderedItems as item}
 					<li class="flex justify-between text-lg">
-						{item.title} x {item.quantity} {item.size} {item.addons.length > 0 ? `(${item.addons.join(', ')})` : ''}
-						<span>₱{item.price}</span>
+						{item.order_name} x {item.order_quantity} {item.order_size} {Array.isArray(item.order_addons) && item.order_addons.length > 0 ? `(${item.order_addons.join(', ')})` : ''}
+						<span>₱{item.order_price}</span>
 					</li>
 				{/each}
 			</ul>
 			<div class="flex justify-between">
 				<p class="mt-4 text-lg font-bold">Total Amount</p>
-				<span class="mt-4 text-lg font-bold">₱{orderedItems.reduce((total, item) => total + parseFloat(item.price.replace('₱', '').replace(',', '')), 0).toFixed(2)}</span>
+				<span class="mt-4 text-lg font-bold">₱{orderedItems.reduce((total, item) => total + parseFloat(item.order_price.toString().replace('₱', '').replace(',', '')), 0).toFixed(2)}</span>
 			</div>
 			<div class="flex justify-between">
 				<p class="text-lg">Amount Paid:</p>
@@ -611,8 +636,8 @@
 			<div class="flex justify-between">
 				<p class="text-lg">Change:</p>
 				<span class="text-lg">₱{orderedItems.length > 0 && payment ? 
-					(parseFloat(payment.replace('₱', '').replace(',', '')) - 
-					orderedItems.reduce((total, item) => total + parseFloat(item.price.replace('₱', '').replace(',', '')), 0)).toFixed(2) 
+					Math.max(0, parseFloat((parseFloat(payment.replace('₱', '').replace(',', '')) - 
+					orderedItems.reduce((total, item) => total + parseFloat(item.order_price.toString().replace('₱', '').replace(',', '')), 0)).toFixed(2))) 
 					: '0.00'}</span>
 			</div>
 			<h2 class="mt-4 text-center text-2xl font-bold">Thank You for Dining with Us!</h2>

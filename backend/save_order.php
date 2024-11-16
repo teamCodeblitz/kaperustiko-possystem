@@ -23,7 +23,7 @@ $data = json_decode(file_get_contents('php://input'), true);
 
 // Prepare and bind
 $stmt = $conn->prepare("INSERT INTO orders (order_name, order_quantity, order_size, order_price, order_addons, order_addons_price, order_addons2, order_addons_price2, order_addons3, order_addons_price3, order_image, basePrice) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-$stmt->bind_param("sisssssssssd", 
+$stmt->bind_param("sisisisisisi", 
     $data['order_name'], 
     $data['order_quantity'], 
     $data['order_size'], 

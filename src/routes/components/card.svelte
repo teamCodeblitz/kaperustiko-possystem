@@ -15,6 +15,7 @@
     export let image = '';
     export let label = '';
     export let label2 = '';
+    export let qty = '';
     export let onAdd;
   </script>
   
@@ -27,10 +28,15 @@
       </div>
   
       <!-- Right Information Section -->
-      <div class="w-1/2 flex flex-col justify-between pt-8">
+      <div class="w-1/2 flex flex-col justify-between">
         <!-- Centered Code Section -->
-        <div class="absolute top-3 ml-[85px] bg-gray-200 text-gray-500 text-xs rounded-full px-2 py-1">
-          CODE: {code}
+        <div class="flex justify-between">
+          <span class="bg-gray-200 text-gray-500 text-xs rounded-full px-2 py-1">
+            CODE: {code}
+          </span>
+          <span class={`bg-gray-200 text-gray-500 text-xs text-right rounded-full px-2 py-1 ${qty === '0' ? 'bg-red-500 text-white' : ''}`}>
+            {qty === '0' ? 'Sold Out' : `QTY: ${qty}`}
+          </span>
         </div>
   
         <!-- Text Section -->
@@ -40,13 +46,13 @@
         </div>
   
         <!-- Price Section -->
-        <p class="text-4xl font-bold text-gray-800">₱{price1}</p>
+        <p class="text-4xl font-bold text-gray-800">₱{price1}<span class="text-[17px] text-gray-500">.00</span></p>
   
         <!-- Order Button -->
         <Button color="dark" class="w-full" on:click={() => {
             console.log(menu_no);
             onAdd({ code, title1, title2, price1, price2, price3, image, label, label2 });
-        }}>
+        }} disabled={qty === '0'}>
           ADD
         </Button>
       </div>
