@@ -62,6 +62,7 @@
 
 	type OrderedItem = {
 		order_name: string;
+		order_name2: string;
 		order_price: number;
 		order_size: string;
 		order_quantity: number;
@@ -151,10 +152,15 @@
 			cashierName: 'Mike',
 			itemsOrdered: orderedItems.map(item => ({
 				order_name: item.order_name,
+				order_name2: item.order_name2,
 				order_quantity: 'x' + item.order_quantity,
 				order_size: item.order_size,
-				...(item.order_addons && item.order_addons.length > 0 && { order_addons: item.order_addons }),
-				order_price: item.order_price
+				order_addons: item.order_addons !== 'None' ? item.order_addons : undefined, // Save order_addons
+				order_addons_price: item.order_addons_price || 0, // Save order_addons_price
+				order_addons2: item.order_addons2 !== 'None' ? item.order_addons2 : undefined, // Save order_addons2
+				order_addons_price2: item.order_addons_price2 || 0, // Save order_addons_price2
+				order_addons3: item.order_addons3 !== 'None' ? item.order_addons3 : undefined, // Save order_addons3
+				order_addons_price3: item.order_addons_price3 || 0, // Save order_addons_price3
 			})),
 			totalAmount: Math.round(orderedItems.reduce((total, item) => total + parseFloat(item.order_price.toString().replace('₱', '').replace(',', '')), 0)), // Convert to integer
 			amountPaid: Math.round(parseFloat(payment.replace('₱', '').replace(',', ''))), // Convert to integer
@@ -306,6 +312,7 @@
     // Prepare data to send to the server
     type OrderData = {
         order_name: string;
+		order_name2: string;
         order_quantity: number;
         order_size: string;
         order_price: number;
@@ -326,6 +333,7 @@
     // Update the orderData to include the correct order_price
     const orderData: OrderData = {
         order_name: item.title1,
+		order_name2: item.title2,
         order_quantity: quantity,
         order_size: selectedSize,
         order_price: totalOrderPrice, // Calculate total price as a number
@@ -349,11 +357,16 @@
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(orderData), // Send the order data
+        body: JSON.stringify(orderData),
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => { throw new Error(text); });
+        }
+        return response.json();
+    })
     .then(data => {
-        console.log(data.message); // Log success or error message
+        console.log(data.message);
     })
     .catch(error => {
         console.error('Error saving order:', error);
@@ -656,7 +669,7 @@
 				{#each orderedItems as item}
 					<li class="flex flex-col justify-between text-lg">
 						<div class="flex justify-between">
-							<span>{item.order_name} x {item.order_quantity} {item.order_size}</span>
+							<span>{item.order_name} {item.order_name2} x {item.order_quantity} {item.order_size}</span>
 							<span>₱{item.basePrice}.00</span>
 						</div>
 						<ul class="list-disc pl-5">
@@ -717,7 +730,7 @@
 {#if isVariationVisible}
 	<div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70">
 		<div class="w-full max-w-md rounded-lg bg-white p-8 shadow-lg">
-			<h2 class="mb-6 text-center text-2xl font-bold">Add {selectedItem?.title1}</h2>
+			<h2 class="mb-6 text-center text-2xl font-bold">Add {selectedItem?.title1} {selectedItem?.title2}</h2>
 			<p class="mb-6 text-center text-lg">Price: ₱{displayedPrice} (Add-ons: ₱{calculateAddonsPrice(selectedAddons)})</p>
 			{#if selectedItem?.image}
 				<img

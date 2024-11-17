@@ -1,45 +1,10 @@
-<script>
+<script lang="ts">
     import { onMount } from "svelte";
     import Sidebar from '../sidebar/+page.svelte';
     import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
     import { faEye, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
   
-    let items = [
-      {
-        id: 1,
-        name: "Item 1",
-        price1: 1000.0,
-        price2: 2000.0,
-        stock1: 20,
-        expDate: "11-07-24",
-        status: "Good",
-        stock2: 20,
-        maxQty: 100,
-      },
-      {
-        id: 2,
-        name: "Item 2",
-        price1: 1000.0,
-        price2: 2000.0,
-        stock1: 20,
-        expDate: "11-07-24",
-        status: "Good",
-        stock2: 20,
-        maxQty: 100,
-      },
-      {
-        id: 2,
-        name: "Item 2",
-        price1: 1000.0,
-        price2: 2000.0,
-        stock1: 20,
-        expDate: "11-07-24",
-        status: "Good",
-        stock2: 20,
-        maxQty: 100,
-      }
-      // Add more items as needed
-    ];
+    let items: any[] = [];
   </script>
   
   <!-- Main Layout with Sidebar and Content -->

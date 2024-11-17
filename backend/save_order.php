@@ -22,10 +22,11 @@ if ($conn->connect_error) {
 $data = json_decode(file_get_contents('php://input'), true);
 
 // Prepare and bind
-$stmt = $conn->prepare("INSERT INTO orders (code, order_name, order_quantity, order_size, order_price, order_addons, order_addons_price, order_addons2, order_addons_price2, order_addons3, order_addons_price3, order_image, basePrice) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-$stmt->bind_param("ssisisisisisi", 
+$stmt = $conn->prepare("INSERT INTO orders (code, order_name, order_name2, order_quantity, order_size, order_price, order_addons, order_addons_price, order_addons2, order_addons_price2, order_addons3, order_addons_price3, order_image, basePrice) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+$stmt->bind_param("sssisisisisisi", 
     $data['code'],
     $data['order_name'], 
+    $data['order_name2'], 
     $data['order_quantity'], 
     $data['order_size'], 
     $data['order_price'], 

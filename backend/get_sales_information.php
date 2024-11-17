@@ -17,8 +17,10 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Fetch all data from total_sales
-$result = $conn->query("SELECT * FROM total_sales");
+// Fetch all data from total_sales by date if a date is provided
+$date = isset($_GET['date']) ? $_GET['date'] : null;
+$query = "SELECT * FROM total_sales" . ($date ? " WHERE date = '$date'" : "");
+$result = $conn->query($query);
 
 if ($result->num_rows > 0) {
     $salesData = $result->fetch_all(MYSQLI_ASSOC);

@@ -8,12 +8,9 @@
 
     ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement);
 
-    let salesRemitItems = [
-      { id: 1, name: "Nandy pogi", totalSales: "₱1000.00", date: "₱1000.00", shortage: "₱10.00" },
-      { id: 2, name: "Nandy padin", totalSales: "₱1000.00", date: "₱1000,00", shortage: "₱10.00" },
-    ];
+    let salesRemitItems: any[] = [];
 
-    let inventoryItems = [
+    let inventoryItems: any[] = [
       { id: 1, name: "beef kardereta", quantity: "beef kardereta", disposeDate: "11-07-24", disposeCost: "₱100.00" },
       { id: 2, name: "beef kardereta", quantity: "beef kardereta", disposeDate: "11-07-24", disposeCost: "₱100.00" },
     ];
@@ -75,6 +72,11 @@
             totalSalesToday = data[0].total_amount; // Update the total sales for today
         }
 
+        // Fetch all sales remit items from the backend
+        const responseRemit = await fetch('http://localhost/kaperustiko-possystem/backend/get_remit_sales.php');
+        const remitItems = await responseRemit.json();
+        salesRemitItems = remitItems; // Store fetched data in salesRemitItems
+
         // Fetch inventory items from the backend
         const responseMenu = await fetch('http://localhost/kaperustiko-possystem/backend/get_menu.php');
         const menuItems = await responseMenu.json();
@@ -110,14 +112,14 @@
         <!-- Statistics Cards -->
         <div class="grid grid-cols-6 gap-4 mb-6">
             <div class="bg-white rounded-lg shadow-md p-4 text-center">
-                <div class="text-gray-500">Today Total Sales</div>
+                <div class="text-gray-500">Today's Total Sales</div>
                 <div class="text-3xl font-bold">₱{totalSalesToday}</div>
                 <div class="text-green-600">
                     <FontAwesomeIcon icon={faDollarSign} />
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-md p-4 text-center">
-                <div class="text-gray-500">Return Items</div>
+                <div class="text-gray-500">Overall Total Sales</div>
                 <div class="text-3xl font-bold">###</div>
                 <div class="text-green-500">
                     <FontAwesomeIcon icon={faUndo} />
@@ -131,14 +133,14 @@
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-md p-4 text-center">
-                <div class="text-gray-500">Expired Items</div>
+                <div class="text-gray-500">Today's Total Shortage</div>
                 <div class="text-3xl font-bold">###</div>
                 <div class="text-red-500">
                     <FontAwesomeIcon icon={faExclamationTriangle} />
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-md p-4 text-center">
-                <div class="text-gray-500">Total Dispose Items</div>
+                <div class="text-gray-500">Overall Total Shortage</div>
                 <div class="text-3xl font-bold">###</div>
                 <div class="text-red-500">
                     <FontAwesomeIcon icon={faTrash} />
@@ -201,8 +203,9 @@
                         <tr>
                             <th class="p-2 text-center">Remit ID</th>
                             <th class="p-2 text-center">Name</th>
-                            <th class="p-2 text-center">Total Sales</th>
+                            <th class="p-2 text-center">Total Sales</th>    
                             <th class="p-2 text-center">Date</th>
+                            <th class="p-2 text-center">Time</th>
                             <th class="p-2 text-center">Shortage</th>
                             <th class="p-2 text-center">Validate</th>
                         </tr>
@@ -210,13 +213,14 @@
                     <tbody class="bg-white">
                         {#each salesRemitItems as item}
                             <tr class="border-t border-gray-300 hover:bg-gray-200 transition-colors duration-200">
-                                <td class="p-2 text-center">{item.id}</td>
-                                <td class="p-2 text-center">{item.name}</td>
-                                <td class="p-2 text-center">{item.totalSales}</td>
-                                <td class="p-2 text-center">{item.date}</td>
-                                <td class="p-2 text-center">{item.shortage}</td>
+                                <td class="p-2 text-center">{item.remit_id}</td>
+                                <td class="p-2 text-center">{item.cashier_name}</td>
+                                <td class="p-2 text-center">₱{item.total_sales}.00</td>
+                                <td class="p-2 text-center">{item.remit_date}</td>
+                                <td class="p-2 text-center">{item.remit_time}</td>
+                                <td class="p-2 text-center">₱{item.remit_shortage}.00</td>
                                 <td class="p-2 text-center">
-                                    <button class="p-1 bg-gray-200 text-gray-700 rounded">Validate</button>
+                                    <button class="p-1 {item.validation === 'Validated' ? 'bg-green-500' : item.validation === 'Pending' ? 'bg-yellow-500' : 'bg-gray-200'} text-white rounded">{item.validation}</button>
                                 </td>
                             </tr>
                         {/each}
