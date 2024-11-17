@@ -31,9 +31,9 @@
         labels: [],
         datasets: [
             {
-                label: 'Good',
+                label: 'Critical',
                 data: [],
-                backgroundColor: 'green',
+                backgroundColor: 'red',
             },
             {
                 label: 'Warning',
@@ -41,9 +41,9 @@
                 backgroundColor: 'yellow',
             },
             {
-                label: 'Critical',
+                label: 'Good',
                 data: [],
-                backgroundColor: 'red',
+                backgroundColor: 'green',
             }
         ]
     };
@@ -62,6 +62,8 @@
     };
 
     let totalSalesToday = 0; // Variable to store today's total sales
+    let sortOption = 'qty'; // Declare sortOption with a default value
+    let selectedCategory = 'Food'; // Reactive variable for selected category
 
     onMount(async () => {
         const today = new Date();
@@ -77,30 +79,36 @@
         const remitItems = await responseRemit.json();
         salesRemitItems = remitItems; // Store fetched data in salesRemitItems
 
-        // Fetch inventory items from the backend
-        const responseMenu = await fetch('http://localhost/kaperustiko-possystem/backend/get_menu.php');
-        const menuItems = await responseMenu.json();
-         // Sort menuItems by label and label2
-        menuItems.sort((a: any, b: any) => {
-            if (a.label < b.label) return -1;
-            if (a.label > b.label) return 1;
-            return a.label2 < b.label2 ? -1 : 1;
-        });
-
-        // Populate inventoryData with fetched menu items
-        inventoryData.labels = menuItems.map((item: { qty: number }) => item.qty.toString()); // Set labels to qty as strings
-        inventoryData.datasets[0].data = menuItems.map((item: { qty: number }) => item.qty); // Set data to qty
-
-        // Set background colors based on qty
-        inventoryData.datasets[0].backgroundColor = menuItems.map((item: { qty: number }) => {
-            if (item.qty < 10) return 'red'; // Red
-            if (item.qty < 20) return 'yellow'; // Yellow
-            return 'green';
-        });
+        fetchDataForCategory(selectedCategory); // Fetch data for Food on mount
     });
 
     function printPage() {
         window.print();
+    }
+
+    function handleCategoryChange(event: Event) {
+        selectedCategory = (event.target as HTMLSelectElement).value; // Update selectedCategory with the dropdown value
+        console.log("Selected Category:", selectedCategory);
+        
+        // Fetch and filter data based on selectedCategory
+        fetchDataForCategory(selectedCategory); // Call the new function to fetch data
+    }
+
+    async function fetchDataForCategory(category: string) {
+        const responseMenu = await fetch(`http://localhost/kaperustiko-possystem/backend/get_menu_dashboard.php?label=${category}&label2=${category}`);
+        const menuItems = await responseMenu.json();
+
+        // Populate inventoryData with fetched menu items
+        inventoryData.labels = menuItems.map((item: { title1: string, qty: number }) => `${item.title1}`); // Set labels to title and qty
+        inventoryData.datasets[0].data = menuItems.map((item: { qty: number }) => item.qty); // Set data to qty
+
+        // Set background colors based on qty with a maximum of 30
+        inventoryData.datasets[0].backgroundColor = menuItems.map((item: { qty: number }) => {
+            const quantity = Math.min(item.qty, 30); // Limit quantity to a maximum of 30
+            if (quantity < 10) return 'red'; // Red
+            if (quantity < 20) return 'yellow'; // Yellow
+            return 'green';
+        });
     }
 </script>
 
@@ -156,26 +164,7 @@
         </div>
 
          <!-- Date Sorter -->
-         <div class="flex justify-end mb-4 w-full">
-            <input type="text" placeholder="Search..." class="bg-white text-black border border-gray-300 rounded p-2 mr-2 flex-grow shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            <select class="bg-white text-black border border-gray-300 rounded p-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="all">All</option>
-                    <option value="beverages">Beverages</option>
-                    <option value="food">Food</option>
-                    <option value="dessert">Dessert</option>
-                    <option value="coffee">Coffee</option>
-                    <option value="tea">Tea</option>
-                    <option value="juice">Juice</option>
-                    <option value="sandwich">Sandwich</option>
-                    <option value="sushi">Sushi</option>
-                    <option value="pasta">Pasta</option>
-                    <option value="burger">Burger</option>
-                    <option value="ulam">Ulam</option>
-            </select>
-            <button class="ml-2 p-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition duration-200" on:click={printPage}>
-                <FontAwesomeIcon icon={faPrint} />
-            </button>
-        </div>
+         
 
         <!-- Charts Section -->
         <div class="grid grid-cols-3 gap-2 mb-6">
@@ -185,14 +174,36 @@
             </div>
             <div class="bg-white rounded-lg shadow-lg p-2">
                 <h3 class="text-center font-bold text-sm">Inventory Chart</h3>
-                <Bar data={inventoryData} options={{ responsive: true }} />
+                <select class="bg-white text-black border border-gray-300 rounded p-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" on:change={handleCategoryChange} value={selectedCategory}>
+                    <option value="Beverages">Beverages</option>
+                    <option value="Food">Food</option>
+                    <option value="Dessert">Dessert</option>
+                    <option value="Coffee">Coffee</option>
+                    <option value="Pasta">Pasta</option>
+                    <option value="Burger">Burger</option>
+                    <option value="Ulam">Ulam</option>
+                </select>
+                <Bar data={inventoryData} options={{ 
+                    responsive: true, 
+                    scales: {
+                        y: {
+                            max: 30 // Set maximum value for y-axis
+                        }
+                    }
+                }} />
             </div>
             <div class="bg-white rounded-lg shadow-lg p-2">
                 <h3 class="text-center font-bold text-sm">Returns Chart</h3>
                 <Bar data={returnData} options={{ responsive: true }} />
             </div>
         </div>
-
+        <div class="flex justify-end mb-4 w-full">
+            <input type="text" placeholder="Search..." class="bg-white text-black border border-gray-300 rounded p-2 mr-2 flex-grow shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+           
+            <button class="ml-2 p-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition duration-200" on:click={printPage}>
+                <FontAwesomeIcon icon={faPrint} />
+            </button>
+        </div>
         <!-- Tables Section -->
         <div class="grid grid-cols-2 gap-4">
             <!-- Sales Remit Table -->

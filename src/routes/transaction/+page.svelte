@@ -37,6 +37,10 @@
   
     let isRemitDisabled: boolean = false; // New variable to track if remit is disabled
   
+    // Add a new variable to control the return confirmation popup
+    let showReturnConfirmation: boolean = false; // New variable for return confirmation
+    let selectedReceipt: string | null = null; // Variable to store the selected receipt for return
+  
     // Function to get all date options for sorting
     function getAllDateOptions() {
         const options: string[] = [];
@@ -317,6 +321,26 @@
         // Check if any remit exists for the selected date
         isRemitDisabled = data.length > 0; // Disable remit if any records are found
     }
+  
+    // Function to handle Return button click
+    function handleReturn(receipt: string) {
+        selectedReceipt = receipt; // Store the selected receipt
+        showReturnConfirmation = true; // Show the confirmation popup
+    }
+  
+    // New function to confirm the return action
+    function confirmReturn() {
+        // Logic to handle the return of the sale
+        console.log(`Returning sale with receipt: ${selectedReceipt}`);
+        // Implement further return logic as needed
+
+        showReturnConfirmation = false; // Close the confirmation popup
+    }
+  
+    // New function to close the return confirmation popup
+    function closeReturnConfirmation() {
+        showReturnConfirmation = false; // Close the confirmation popup
+    }
   </script>
   
   <div class="flex h-screen bg-gradient-to-b from-green-500 to-green-700">
@@ -356,6 +380,7 @@
               <th class="p-2 text-center border-b">Order Time</th>
               <th class="p-2 text-center border-b">Order Type</th>
               <th class="p-2 text-center border-b">Cashier</th>
+              <th class="p-2 text-center border-b">Return</th>
             </tr>
           </thead>
           <tbody class="bg-white">
@@ -395,6 +420,9 @@
                         <td class="p-2 text-center border-b">{sale.orderTime}</td>
                         <td class="p-2 text-center border-b">{sale.orderIn}</td>
                         <td class="p-2 text-center border-b">{sale.name}</td>
+                        <td class="p-2 text-center border-b">
+                            <button class="bg-red-500 text-white px-2 py-1 rounded" on:click={() => handleReturn(sale.receipt)}>Return</button>
+                        </td>
                     </tr>
                 {/each}
             {:else}
@@ -444,6 +472,20 @@
                       <button class="w-full bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-200" on:click={closeSecondPopup}>Cancel</button>
                       <button class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-200" on:click={confirmRemit}>Confirm</button>
                       <button class="w-full bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition duration-200" on:click={handlePendingClick}>Pending</button>
+                  </div>
+              </div>
+          </div>
+      {/if}
+  
+      <!-- Popup for Return Confirmation -->
+      {#if showReturnConfirmation}
+          <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+              <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+                  <h3 class="text-xl font-bold text-gray-800">Confirm Return</h3>
+                  <p class="mt-2 text-gray-600">Are you sure you want to return this item?</p>
+                  <div class="flex justify-between mt-4 space-x-2">
+                      <button class="w-full bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-200" on:click={closeReturnConfirmation}>Cancel</button>
+                      <button class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-200" on:click={confirmReturn}>Confirm</button>
                   </div>
               </div>
           </div>
