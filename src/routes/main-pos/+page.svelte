@@ -12,6 +12,25 @@
 	let isDineIn = false;
 	let isTakeOut = false;
 	let riceQuantity = 0; // Declare riceQuantity
+	let cashierName = '';
+	let staffToken: string | null = null; // Declare a variable to hold the staff_token
+	let currentTime: string;
+	let currentDay: string;
+
+	async function fetchCashierName() {
+		// Retrieve staff_token from local storage only if not already fetched
+		if (!staffToken) {
+			staffToken = localStorage.getItem('staff_token'); // Get the staff_token
+		}
+		console.log('Fetched staff_token:', staffToken); // Log the fetched staff_token
+		console.log(`Fetching user data from: http://localhost/kaperustiko-possystem/backend/get_user.php?staff_token=${staffToken}`); // Log the URL with the staff_token
+		const response = await fetch(`http://localhost/kaperustiko-possystem/backend/get_user.php?staff_token=${staffToken}`);
+		if (response.ok) {
+			const userData = await response.json();
+			console.log('Fetched user data:', userData); // Log the fetched user data
+			cashierName = userData || 'Unknown'; // Default to 'Unknown' if firstName is not available
+		}
+	}
 
 	async function fetchMenu() {
 		const response = await fetch('http://localhost/kaperustiko-possystem/backend/get_menu.php');
@@ -36,18 +55,36 @@
 		}
 	}
 
+	function updateTime() {
+		const now = new Date();
+		currentTime = now.toLocaleString('en-US', { 
+			year: 'numeric', 
+			month: 'long', 
+			day: 'numeric', 
+			hour: '2-digit', 
+			minute: '2-digit', 
+			second: '2-digit' 
+		});
+		currentDay = now.toLocaleString('en-US', { weekday: 'long' });
+	}
+
 	onMount(() => {
 		fetchMenu();
 		fetchOrders();
+		fetchCashierName(); // Automatically fetch cashier name on mount
 		// Retrieve ordered items from localStorage
 		const storedItems = localStorage.getItem('orderedItems');
 		if (storedItems) {
-			orderedItems = JSON.parse(storedItems); // Parse and set orderedItems
+			 orderedItems = JSON.parse(storedItems); // Parse and set orderedItems
 		}
-
 		// Update orders every 500 milliseconds
 		const interval = setInterval(fetchOrders, 500);
-		return () => clearInterval(interval); // Clear interval on component unmount
+		updateTime(); // Initial call to set the time
+		const intervalTime = setInterval(updateTime, 1000); // Update time every second
+		return () => {
+			clearInterval(interval); // Clear interval on component unmount
+			clearInterval(intervalTime); // Clear interval on component unmount
+		};
 	});
 
 	let orderNumber = '';
@@ -122,20 +159,24 @@
 		}
 	}
 
-	function handlePlaceOrder() {
-		// Log the codes of all ordered items
-		console.log('Ordered Item Codes:', orderedItems.map(item => item.code)); // Log the codes
-
-		// Fetch the total order count from the database
-		fetch('http://localhost/kaperustiko-possystem/backend/get_total_orders.php')
+	fetch('http://localhost/kaperustiko-possystem/backend/get_total_orders.php')
 			.then(response => response.json())
 			.then(data => {
 				orderNumber = `#${(data.total_order).toString().padStart(2, '0')}`; // Set order number based on fetched data
-				isPopupVisible = true;
+				console.log('Order Number:', orderNumber); // Log the order number
+				
 			})
 			.catch(error => {
 				console.error('Failed to fetch total orders:', error);
 			});
+
+	function handlePlaceOrder() {
+		// Fetch cashier name when place order is clicked
+		fetchCashierName(); // Call to fetch cashier name
+		// Log the codes of all ordered items
+		console.log('Ordered Item Codes:', orderedItems.map(item => item.code)); // Log the codes
+		isPopupVisible = true;
+		// Fetch the total order count from the database
 	}
 
 	function closePopup() {
@@ -149,7 +190,7 @@
 			receiptNumber: parseInt(orderNumber.replace('#', '')), // Convert to integer
 			date: new Date().toLocaleDateString(),
 			time: new Date().toLocaleTimeString(),
-			cashierName: 'Mike',
+			cashierName: cashierName,
 			itemsOrdered: orderedItems.map(item => ({
 				order_name: item.order_name,
 				order_name2: item.order_name2,
@@ -243,10 +284,14 @@
 		voidIndex = null;
 		inputCode = '123456';
 		
-		// Reset all numbers in local storage
+		// Reset all numbers in local storage, except for staff_token
+		const staffToken = localStorage.getItem('staff_token'); // Preserve staff_token
 		localStorage.clear(); // Clear all numbers in local storage
+		if (staffToken) {
+			localStorage.setItem('staff_token', staffToken); // Restore staff_token
+		}
+	
 		window.location.reload();
-		
 		
 	}
 
@@ -291,7 +336,10 @@
         selectedSize === 'Large' ? parseFloat(item.price2.replace('₱', '').replace(',', '')) :
         parseFloat(item.price3.replace('₱', '').replace(',', '')); // Adjust for Family size
 
-    const totalAddonsPrice = parseFloat(addonsPrice.replace('₱', '').replace(',', '')) || 0; // Ensure it's 0 if NaN
+    const totalAddonsPrice = selectedAddons.reduce((total, addon) => {
+        const addonPrice = parseFloat(calculateAddonsPrice([addon]).replace('₱', '').replace(',', '')) || 0; // Calculate price for each addon
+        return total + addonPrice; // Sum up the prices
+    }, 0); // Initialize total to 0
 
     const newItem = {
         title: item.title1,
@@ -328,7 +376,7 @@
     };
 
     const currentAddonsPrice = calculateAddonsPrice(selectedAddons); // Renamed variable
-    const totalOrderPrice = basePrice + totalAddonsPrice; // Calculate total price
+    const totalOrderPrice = (basePrice * quantity) + totalAddonsPrice; // Calculate total price
 
     // Update the orderData to include the correct order_price
     const orderData: OrderData = {
@@ -486,7 +534,7 @@
 				{/each}
 			</div>
 
-			<div class="mb-4 font-bold text-black">
+			<div class="mb-4 font-bold text-black flex justify-between items-center">
 				{#if selectedCategory === 'All'}
 					<p>Display All Menu</p>
 				{:else if selectedCategory === 'Beverages'}
@@ -496,6 +544,7 @@
 				{:else if selectedCategory === 'Desserts'}
 					<p>Display Desserts Menu</p>
 				{/if}
+				<p class="mr-4">{currentDay} - {currentTime}</p>
 			</div>
 
 			<div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
@@ -659,7 +708,7 @@
 			<h2 class="mb-4 mt-4 text-center text-2xl font-bold">Sales Preview</h2>
 			<p class="text-lg">Receipt Number: {orderNumber}</p>
 			<p class="text-lg">Date and Time: {new Date().toLocaleString()}</p>
-			<p class="text-lg">Cashier Name: Mike</p>
+			<p class="text-lg">Cashier Name: {cashierName}</p>
 			<p class="text-lg">Order Type: {isDineIn ? 'Dine In' : 'Take Out'}</p>
 			<div class="flex justify-between">
 				<h2 class="mt-4 text-lg font-bold">Items Ordered:</h2>

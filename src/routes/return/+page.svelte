@@ -95,31 +95,36 @@
                         // Log the raw items_ordered data to inspect its format
                         console.log("Raw Items Ordered Data:", sale.items_ordered);
                         
-                        // Replace escaped quotes and parse items_ordered
-                        const itemsOrdered = JSON.parse(sale.items_ordered.replace(/\\/g, ''));
-                        
-                        // Check if itemsOrdered is an array
-                        if (!Array.isArray(itemsOrdered)) {
-                            throw new Error("Parsed itemsOrdered is not an array");
-                        }
+                        // Check if items_ordered is a valid JSON string
+                        if (typeof sale.items_ordered === 'string' && sale.items_ordered.trim() !== '') {
+                            // Replace escaped quotes and parse items_ordered
+                            const itemsOrdered = JSON.parse(sale.items_ordered.replace(/\\/g, ''));
+                            
+                            // Check if itemsOrdered is an array
+                            if (!Array.isArray(itemsOrdered)) {
+                                throw new Error("Parsed itemsOrdered is not an array");
+                            }
 
-                        return {
-                            receipt: sale.receipt_number,
-                            items: itemsOrdered.map((item: { order_name: string }) => item.order_name).join(", "),
-                            order_name2: itemsOrdered.map((item: { order_name2: string }) => item.order_name2).join(", "),
-                            order_quantity: itemsOrdered.map((item: { order_quantity: string }) => item.order_quantity).join(", "),
-                            order_size: itemsOrdered.map((item: { order_size: string }) => item.order_size).join(", "),
-                            price: itemsOrdered.map((item: { price: string }) => item.price).join(", "),
-                            totalCost: `₱${sale.total_amount}`,
-                            payAmount: `₱${sale.amount_paid}`,
-                            changeDue: `₱${sale.amount_change}`,
-                            orderDate: sale.return_date,
-                            orderTime: sale.return_time,
-                            orderIn: sale.order_take,
-                            name: sale.cashier_name,
-                            totalDiscount: "₱0.00", // Adjust if you have discount data
-                            items_ordered: sale.items_ordered,
-                        };
+                            return {
+                                receipt: sale.receipt_number,
+                                items: itemsOrdered.map((item: { order_name: string }) => item.order_name).join(", "),
+                                order_name2: itemsOrdered.map((item: { order_name2: string }) => item.order_name2).join(", "),
+                                order_quantity: itemsOrdered.map((item: { order_quantity: string }) => item.order_quantity).join(", "),
+                                order_size: itemsOrdered.map((item: { order_size: string }) => item.order_size).join(", "),
+                                price: itemsOrdered.map((item: { price: string }) => item.price).join(", "),
+                                totalCost: `₱${sale.total_amount}`,
+                                payAmount: `₱${sale.amount_paid}`,
+                                changeDue: `₱${sale.amount_change}`,
+                                orderDate: sale.return_date,
+                                orderTime: sale.return_time,
+                                orderIn: sale.order_take,
+                                name: sale.cashier_name,
+                                totalDiscount: "₱0.00", // Adjust if you have discount data
+                                items_ordered: sale.items_ordered,
+                            };
+                        } else {
+                            throw new Error("Invalid items_ordered data: Not a valid JSON string");
+                        }
                     } catch (error) {
                         console.error("Error parsing items_ordered:", error);
                         console.error("Invalid items_ordered data:", sale.items_ordered);
@@ -342,10 +347,12 @@
         <div>
           <select on:change={handleDateChange} class="bg-gray-800 text-white px-3 py-1 rounded shadow-md">
             {#each dateOptions as date}
-                <option value={date} selected={date === new Date().toISOString().split('T')[0]}>{new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</option>
+                <option value={date} selected={date === selectedDate.toISOString().split('T')[0]}>{new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</option>
             {/each}
           </select>
-          <button class="bg-gray-800 text-white px-3 py-1 rounded shadow-md ml-1">Recent Returns</button>
+          <button class="bg-gray-800 text-white px-3 py-1 rounded shadow-md ml-1" on:click={() => { selectedDate = new Date(); fetchSalesData(); }}>
+            Recent Returns
+          </button>
           <button class="bg-blue-600 text-white px-3 py-1 rounded shadow-md ml-1" on:click={handleRemitClick} disabled={isRemitDisabled}>
             Remit
           </button>

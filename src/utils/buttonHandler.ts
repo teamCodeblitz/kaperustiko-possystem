@@ -11,7 +11,7 @@ export function handleButtonClick(key: string, index: number, orderedItems: any[
 			showAlert('Error: Please select either Dine In or Take Out.');
 			return; // Prevent further execution
 		}
-		const totalCost = orderedItems.reduce((total, item) => {
+		const order_price = orderedItems.reduce((total, item) => {
 			const price = item.price ? parseFloat(item.price.replace('₱', '').replace(',', '')) : 0;
 			return total + price;
 		}, 0);
@@ -19,7 +19,9 @@ export function handleButtonClick(key: string, index: number, orderedItems: any[
 
 		if (!payment || amountPaid <= 0) {
 			showAlert('Error: No amount paid yet.');
-		} else if (amountPaid < totalCost) {
+		} else if (amountPaid < order_price) {
+			showAlert('Error: Amount paid is not enough.');
+		} else if (amountPaid >= order_price) {
 			showAlert('Error: Amount paid is not enough.');
 		} else {
 			handlePlaceOrder();

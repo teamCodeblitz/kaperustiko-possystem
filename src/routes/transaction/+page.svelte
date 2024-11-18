@@ -228,7 +228,7 @@
     // Updated showAlert function to include a success message
     function showAlert(message: string, type: string) {
         const alertDiv = document.createElement('div');
-        alertDiv.className = `fixed top-0 left-1/2 transform -translate-x-1/2 mt-4 p-4 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white rounded shadow-lg`;
+        alertDiv.className = `fixed top-0 left-1/2 transform -translate-x-1/2 mt-4 p-4 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white rounded shadow-lg z-50`;
         alertDiv.innerText = message;
         document.body.appendChild(alertDiv);
         setTimeout(() => {
@@ -322,9 +322,6 @@
     function handleReturn(receipt: string) {
         const saleToReturn = recentSales.find(sale => sale.receipt === receipt); // Find the selected sale
         if (saleToReturn) {
-            // Show alert before processing the return
-            showAlert("Are you sure you want to return this item?", "warning"); // Show alert for confirmation
-
             selectedReceipt = saleToReturn.receipt; // Store the selected receipt for confirmation
             showReturnConfirmation = true; // Show return confirmation popup
         }
@@ -355,8 +352,6 @@
   
     // New function to confirm the return action
     function confirmReturn() {
-        // Show alert before allowing to return
-        showAlert("Are you sure you want to return this item?", "warning"); // Show alert for confirmation
 
         const saleToReturn = recentSales.find(sale => sale.receipt === selectedReceipt); // Find the selected sale
         if (saleToReturn) {
@@ -387,7 +382,7 @@
                     if (selectedReceipt) { // Check if selectedReceipt is not null
                         deleteSale(selectedReceipt);
                     }
-                    showAlert("Return processed successfully.", "success");
+                    showAlert("Return processed successfully.", "success"); // Show success alert
                 } else {
                     showAlert("Failed to process return. Please try again.", "error");
                 }
@@ -420,10 +415,12 @@
         <div>
           <select on:change={handleDateChange} class="bg-gray-800 text-white px-3 py-1 rounded shadow-md">
             {#each dateOptions as date}
-                <option value={date} selected={date === new Date().toISOString().split('T')[0]}>{new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</option>
+                <option value={date} selected={date === selectedDate.toISOString().split('T')[0]}>{new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</option>
             {/each}
           </select>
-          <button class="bg-gray-800 text-white px-3 py-1 rounded shadow-md ml-1">Recent Sales</button>
+          <button class="bg-gray-800 text-white px-3 py-1 rounded shadow-md ml-1" on:click={() => { selectedDate = new Date(); fetchSalesData(); }}>
+            Recent Returns
+          </button>
           <button class="bg-blue-600 text-white px-3 py-1 rounded shadow-md ml-1" on:click={handleRemitClick} disabled={isRemitDisabled}>
             Remit
           </button>
