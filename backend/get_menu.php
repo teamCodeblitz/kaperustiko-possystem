@@ -1,6 +1,6 @@
 <?php
 header("Access-Control-Allow-Origin: *"); // Allow all origins, or specify a domain
-header("Access-Control-Allow-Methods: GET, OPTIONS"); // Allow specific methods
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS"); // Allow specific methods
 header("Access-Control-Allow-Headers: Content-Type"); // Allow specific headers
 
 $servername = "localhost";

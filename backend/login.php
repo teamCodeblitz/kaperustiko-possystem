@@ -21,15 +21,15 @@ $email = $_POST['email'];
 $password = $_POST['password'];
 
 // Prepare and bind
-$stmt = $conn->prepare("SELECT password FROM `user-staff` WHERE email = ?");
+$stmt = $conn->prepare("SELECT password, staff_token FROM `user-staff` WHERE email = ?");
 $stmt->bind_param("s", $email);
 $stmt->execute();
 $stmt->store_result();
-$stmt->bind_result($hashedPassword);
+$stmt->bind_result($hashedPassword, $staffToken);
 $stmt->fetch();
 
 if ($stmt->num_rows > 0 && password_verify($password, $hashedPassword)) {
-    echo json_encode(["status" => "success", "message" => "Login successful!"]); // Successful login
+    echo json_encode(["status" => "success", "message" => "Login successful!", "staff_token" => $staffToken]);
     // Here you can set session variables or redirect the user
 } else {
     echo json_encode(["status" => "error", "message" => "Invalid email or password."]); // Invalid credentials

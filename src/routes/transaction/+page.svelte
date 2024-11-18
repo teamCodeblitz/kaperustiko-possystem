@@ -77,14 +77,11 @@
     // New function to fetch sales data
     async function fetchSalesData() {
         const formattedDate = selectedDate.toLocaleDateString('en-US');
-        console.log("Fetching sales data for date:", formattedDate);
         
         const apiUrl = `http://localhost/kaperustiko-possystem/backend/get_sales_information.php?date=${formattedDate}`;
-        console.log("API URL:", apiUrl); // Log the final API URL
 
         const response = await fetch(apiUrl);
         const data = await response.json();
-        console.log("API Response:", data);
 
         if (Array.isArray(data) && data.length > 0) {
             noSalesData = false; // Reset noSalesData if data is found
@@ -92,9 +89,6 @@
                 // Ensure the sale date matches the selected date
                 if (new Date(sale.date).toLocaleDateString('en-US') === formattedDate) {
                     try {
-                        // Log the raw items_ordered data to inspect its format
-                        console.log("Raw Items Ordered Data:", sale.items_ordered);
-                        
                         // Replace escaped quotes and parse items_ordered
                         const itemsOrdered = JSON.parse(sale.items_ordered.replace(/\\/g, ''));
                         
@@ -136,13 +130,15 @@
             noSalesData = true; // Handle unexpected responses
         }
 
-        console.log("Recent Sales:", recentSales);
 
         await checkRemitExists(); // Check if remit exists after fetching sales data
     }
   
     onMount(() => {
         fetchSalesData(); // Fetch initial sales data on mount
+        const intervalId = setInterval(fetchSalesData, 1000); // Update sales data every second
+
+        return () => clearInterval(intervalId); // Clear interval on component unmount
     });
   
     // Function to calculate total sales
@@ -196,7 +192,7 @@
             remit_date: selectedDate.toISOString().split('T')[0], // Format date as YYYY-MM-DD
             remit_time: new Date().toLocaleTimeString(), // Get current time
             remit_shortage: (localStorage.getItem('shortage') || "0").toString(), // Get shortage from local storage
-            validation: "Validated" // Set validation status
+            remit_validation: "Validated" // Set validation status
         };
 
         console.log("Remit Data:", remitData); // Log remitData to check values
@@ -251,7 +247,7 @@
             remit_date: selectedDate.toISOString().split('T')[0], // Format date as YYYY-MM-DD
             remit_time: new Date().toLocaleTimeString(), // Get current time
             remit_shortage: (localStorage.getItem('shortage') || "0").toString(), // Get shortage from local storage
-            validation: "Pending" // Set validation status to Pending
+            remit_validation: "Pending" // Set validation status to Pending
         };
 
         console.log("Pending Data:", pendingData); // Log pendingData to check values
@@ -324,15 +320,83 @@
   
     // Function to handle Return button click
     function handleReturn(receipt: string) {
-        selectedReceipt = receipt; // Store the selected receipt
-        showReturnConfirmation = true; // Show the confirmation popup
+        const saleToReturn = recentSales.find(sale => sale.receipt === receipt); // Find the selected sale
+        if (saleToReturn) {
+            // Show alert before processing the return
+            showAlert("Are you sure you want to return this item?", "warning"); // Show alert for confirmation
+
+            selectedReceipt = saleToReturn.receipt; // Store the selected receipt for confirmation
+            showReturnConfirmation = true; // Show return confirmation popup
+        }
+    }
+
+    // New function to delete the sale from total_sales
+    function deleteSale(receipt: string) {
+        fetch('http://localhost/kaperustiko-possystem/backend/get_sales_information.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ receipt_number: receipt }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Refresh the sales data after deletion
+                fetchSalesData();
+            } else {
+                console.error("Failed to delete sale:", data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error deleting sale:", error);
+        });
     }
   
     // New function to confirm the return action
     function confirmReturn() {
-        // Logic to handle the return of the sale
-        console.log(`Returning sale with receipt: ${selectedReceipt}`);
-        // Implement further return logic as needed
+        // Show alert before allowing to return
+        showAlert("Are you sure you want to return this item?", "warning"); // Show alert for confirmation
+
+        const saleToReturn = recentSales.find(sale => sale.receipt === selectedReceipt); // Find the selected sale
+        if (saleToReturn) {
+            const returnData = {
+                receipt_number: saleToReturn.receipt,
+                return_date: saleToReturn.orderDate,
+                return_time: saleToReturn.orderTime,
+                cashier_name: saleToReturn.name,
+                items_ordered: saleToReturn.items_ordered,
+                total_amount: saleToReturn.totalCost.replace(/₱/, ''), // Remove currency symbol
+                amount_paid: saleToReturn.payAmount.replace(/₱/, ''), // Remove currency symbol
+                amount_change: saleToReturn.changeDue.replace(/₱/, ''), // Remove currency symbol
+                order_take: saleToReturn.orderIn,
+            };
+
+            // Send data to return_order.php
+            fetch('http://localhost/kaperustiko-possystem/backend/return_order.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(returnData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // If return is successful, delete the sale from total_sales
+                    if (selectedReceipt) { // Check if selectedReceipt is not null
+                        deleteSale(selectedReceipt);
+                    }
+                    showAlert("Return processed successfully.", "success");
+                } else {
+                    showAlert("Failed to process return. Please try again.", "error");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                showAlert("An error occurred. Please try again.", "error");
+            });
+        }
 
         showReturnConfirmation = false; // Close the confirmation popup
     }

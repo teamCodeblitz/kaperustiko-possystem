@@ -29,3 +29,24 @@ if ($result->num_rows > 0) {
     echo json_encode(["message" => "No sales data found"]);
 }
 
+// New function to handle return of an item
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    if (isset($data['receipt_number'])) {
+        $receiptNumber = $conn->real_escape_string($data['receipt_number']);
+        
+        // Delete the sale from the database
+        $deleteQuery = "DELETE FROM total_sales WHERE receipt_number = '$receiptNumber'";
+        if ($conn->query($deleteQuery) === TRUE) {
+            echo json_encode(["success" => true, "message" => "Sale returned successfully."]);
+        } else {
+            echo json_encode(["success" => false, "message" => "Error deleting sale: " . $conn->error]);
+        }
+    } else {
+        echo json_encode(["success" => false, "message" => "Receipt number not provided."]);
+    }
+}
+
+$conn->close();
+?>
+

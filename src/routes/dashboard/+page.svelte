@@ -9,11 +9,7 @@
     ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement);
 
     let salesRemitItems: any[] = [];
-
-    let inventoryItems: any[] = [
-      { id: 1, name: "beef kardereta", quantity: "beef kardereta", disposeDate: "11-07-24", disposeCost: "₱100.00" },
-      { id: 2, name: "beef kardereta", quantity: "beef kardereta", disposeDate: "11-07-24", disposeCost: "₱100.00" },
-    ];
+    let returnItems: any[] = [];
 
     // Sample data for charts
     let salesData = {
@@ -80,6 +76,10 @@
         salesRemitItems = remitItems; // Store fetched data in salesRemitItems
 
         fetchDataForCategory(selectedCategory); // Fetch data for Food on mount
+
+        const responseReturn = await fetch('http://localhost/kaperustiko-possystem/backend/get_remit_returns.php');
+        const fetchedReturnItems = await responseReturn.json(); // Fetch return items
+        returnItems = fetchedReturnItems; // Store fetched data in returnItems
     });
 
     function printPage() {
@@ -173,16 +173,18 @@
                 <Bar data={salesData} />
             </div>
             <div class="bg-white rounded-lg shadow-lg p-2">
-                <h3 class="text-center font-bold text-sm">Inventory Chart</h3>
-                <select class="bg-white text-black border border-gray-300 rounded p-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" on:change={handleCategoryChange} value={selectedCategory}>
-                    <option value="Beverages">Beverages</option>
-                    <option value="Food">Food</option>
-                    <option value="Dessert">Dessert</option>
-                    <option value="Coffee">Coffee</option>
-                    <option value="Pasta">Pasta</option>
-                    <option value="Burger">Burger</option>
-                    <option value="Ulam">Ulam</option>
-                </select>
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-center font-bold text-sm">Inventory Chart</h3>
+                    <select class="bg-white text-black border-none shadow-sm focus:outline-none" on:change={handleCategoryChange} value={selectedCategory}>
+                        <option value="Beverages">Beverages</option>
+                        <option value="Food">Food</option>
+                        <option value="Dessert">Dessert</option>
+                        <option value="Coffee">Coffee</option>
+                        <option value="Pasta">Pasta</option>
+                        <option value="Burger">Burger</option>
+                        <option value="Ulam">Ulam</option>
+                    </select>
+                </div>
                 <Bar data={inventoryData} options={{ 
                     responsive: true, 
                     scales: {
@@ -231,7 +233,7 @@
                                 <td class="p-2 text-center">{item.remit_time}</td>
                                 <td class="p-2 text-center">₱{item.remit_shortage}.00</td>
                                 <td class="p-2 text-center">
-                                    <button class="p-1 {item.validation === 'Validated' ? 'bg-green-500' : item.validation === 'Pending' ? 'bg-yellow-500' : 'bg-gray-200'} text-white rounded">{item.validation}</button>
+                                    <button class="p-1 {item.remit_validation === "Validated" ? 'bg-green-500' : item.remit_validation === "Pending" ? 'bg-yellow-500' : 'bg-gray-200'} text-white rounded">{item.remit_validation}</button>
                                 </td>
                             </tr>
                         {/each}
@@ -239,33 +241,39 @@
                 </table>
             </div>
 
-            <!-- Inventory Item Dispose Table -->
+            <!-- Inventory Item Returns Table -->
             <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                <div class="bg-gray-800 text-white text-center font-bold p-2">Inventory Item Dispose</div>
+                <div class="bg-gray-800 text-white text-center font-bold p-2">Inventory Item Returns</div>
                 <table class="w-full text-left table-fixed border-collapse">
                     <thead class="bg-gray-700 text-white">
                         <tr>
-                            <th class="p-2 text-center">Dispose ID</th>
-                            <th class="p-2 text-center">Item Name</th>
-                            <th class="p-2 text-center">Quantity</th>
-                            <th class="p-2 text-center">Dispose Date</th>
-                            <th class="p-2 text-center">Dispose Cost</th>
-                            <th class="p-2 text-center">Status</th>
+                            <th class="p-2 text-center">Return ID</th>
+                            <th class="p-2 text-center">Name</th>
+                            <th class="p-2 text-center">Total Cost</th>    
+                            <th class="p-2 text-center">Date</th>
+                            <th class="p-2 text-center">Time</th>
+                            <th class="p-2 text-center">Validate</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white">
-                        {#each inventoryItems as item}
-                            <tr class="border-t border-gray-300 hover:bg-gray-200 transition-colors duration-200">
-                                <td class="p-2 text-center">{item.id}</td>
-                                <td class="p-2 text-center">{item.name}</td>
-                                <td class="p-2 text-center">{item.quantity}</td>
-                                <td class="p-2 text-center">{item.disposeDate}</td>
-                                <td class="p-2 text-center">{item.disposeCost}</td>
-                                <td class="p-2 text-center">
-                                    <button class="p-1 bg-gray-200 text-gray-700 rounded">Status</button>
-                                </td>
+                        {#if returnItems.length === 0}
+                            <tr>
+                                <td colspan="6" class="p-2 text-center">No return orders yet</td>
                             </tr>
-                        {/each}
+                        {:else}
+                            {#each returnItems as item}
+                                <tr class="border-t border-gray-300 hover:bg-gray-200 transition-colors duration-200">
+                                    <td class="p-2 text-center">{item.return_id}</td>
+                                    <td class="p-2 text-center">{item.cashier_name}</td>    
+                                    <td class="p-2 text-center">{item.total_sales}</td>
+                                    <td class="p-2 text-center">{item.return_date}</td>
+                                    <td class="p-2 text-center">{item.return_time}</td>
+                                    <td class="p-2 text-center">
+                                        <button class="p-1 {item.return_validation === "Validated" ? 'bg-green-500' : item.return_validation === "Pending" ? 'bg-yellow-500' : 'bg-gray-200'} text-white rounded">{item.return_validation}</button>
+                                    </td>
+                                </tr>
+                            {/each}
+                        {/if}
                     </tbody>
                 </table>
             </div>

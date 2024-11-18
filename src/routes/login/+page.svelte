@@ -34,6 +34,8 @@
 		isLoading = false; // Reset loading state
 
 		if (result.status === "success") { // Check for success status
+			console.log('Login Successful', result.staff_token); // Log the staff_token
+			localStorage.setItem('staff_token', result.staff_token); // Store staff_token in local storage
 			showAlert('Login Successful', 'success'); // Call showAlert with success type
 			setTimeout(() => {
 				isLoading = true; // Set loading state to true

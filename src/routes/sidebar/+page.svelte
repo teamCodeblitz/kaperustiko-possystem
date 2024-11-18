@@ -1,11 +1,11 @@
 <script lang="ts">
     import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-    import { faTachometerAlt, faTruck, faBoxes, faUndo, faSignOutAlt, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
-    import { faClipboardCheck, faExchangeAlt, faBoxOpen } from '@fortawesome/free-solid-svg-icons';
+    import { faTachometerAlt, faTruck, faBoxes, faUndo, faSignOutAlt, faChevronLeft, faClipboardCheck, faChevronRight, faCashRegister, faExchangeAlt, faBoxOpen, faDashboard } from '@fortawesome/free-solid-svg-icons';
     import { onMount } from 'svelte';
     let isActive = { mainPos: false, transaction: false, dashboard: false, inventory: false, delivery: false, return: false }; // Define isActive without activeIcon
     let showModal = false; // Define showModal to control the modal visibility
     let sidebarWidth = 'w-18'; // Define a variable for sidebar width
+    let userFirstName = ''; // Variable to store the user's first name
 
     function setActive(icon: keyof typeof isActive) {
         // Reset all to false
@@ -16,7 +16,7 @@
         isActive[icon] = true; // No need for activeIcon
     }
 
-    onMount(() => {
+    onMount(async () => {
         const currentPath = window.location.pathname; // Get the current path
         if (currentPath === '/main-pos') {
             setActive('mainPos'); 
@@ -35,6 +35,16 @@
         }
         else if (currentPath === '/return') {
             setActive('return');
+        }
+
+        // Fetch the user's first name using staff_token
+        const staffToken = localStorage.getItem('staff_token'); // Assuming the token is stored in localStorage
+        if (staffToken) {
+            const response = await fetch(`http://localhost/kaperustiko-possystem/backend/get_user.php?staff_token=${staffToken}`);
+            if (response.ok) {
+                const data = await response.json();
+                userFirstName = data; // Set the user's first name
+            }
         }
     });
 
@@ -84,7 +94,7 @@
                 <span class:text-cyan-950={isActive.mainPos} class:text-white={!isActive.mainPos} class="text-2xl font-bold">Main POS</span>
             {:else}
                 <span class:text-white={!isActive.mainPos}>
-                    <FontAwesomeIcon icon={faTachometerAlt} class="text-3xl" />
+                    <FontAwesomeIcon icon={faCashRegister} class="text-3xl" />
                 </span>
             {/if}
         </button>
@@ -100,13 +110,23 @@
             {/if}
         </button>
     </div>
+    <div class="flex items-center p-4 hover:bg-green-600 justify-center" class:bg-white={isActive.return} class:rounded-[4px]={isActive.return} class:ml-[5px]={isActive.return} class:mr-[5px]={isActive.return} class:h-[50px]={isActive.return}>
+        <button type="button" on:click={() => { window.location.href = '/return'; setActive('return'); }} class="flex items-center justify-center">
+            {#if sidebarWidth === 'w-[220px]'}
+                <span class:text-cyan-950={isActive.return} class:text-white={!isActive.return} class="text-2xl font-bold">Return</span>
+            {:else}
+                <span class:text-white={!isActive.return}>
+                    <FontAwesomeIcon icon={faExchangeAlt} class="text-3xl" />
+                </span>
+            {/if}
+    </div>
     <div class="flex items-center p-2 hover:bg-cyan-600 justify-center" class:bg-white={isActive.dashboard} class:rounded-[4px]={isActive.dashboard} class:ml-[5px]={isActive.dashboard} class:mr-[5px]={isActive.dashboard} class:h-[50px]={isActive.dashboard}>
         <button type="button" on:click={() => { window.location.href = '/dashboard'; setActive('dashboard'); }} class="flex items-center justify-center">
             {#if sidebarWidth === 'w-[220px]'}
                 <span class:text-cyan-950={isActive.dashboard} class:text-white={!isActive.dashboard} class="text-2xl font-bold">Dashboard</span>
             {:else}
                 <span class:text-white={!isActive.dashboard}>
-                    <FontAwesomeIcon icon={faExchangeAlt} class="text-3xl" />
+                    <FontAwesomeIcon icon={faDashboard} class="text-3xl" />
                 </span>
             {/if}
         </button>
@@ -122,27 +142,6 @@
             {/if}
         </button>
     </div>
-    <div class="flex items-center p-4 hover:bg-cyan-600 justify-center" class:bg-white={isActive.delivery} class:rounded-[4px]={isActive.delivery} class:ml-[5px]={isActive.delivery} class:mr-[5px]={isActive.delivery} class:h-[50px]={isActive.delivery}>
-        <button type="button" on:click={() => { window.location.href = '/delivery'; setActive('delivery'); }} class="flex items-center justify-center">
-            {#if sidebarWidth === 'w-[220px]'}
-                <span class:text-cyan-950={isActive.delivery} class:text-white={!isActive.delivery} class="text-2xl font-bold">Delivery</span>
-            {:else}
-                <span class:text-white={!isActive.delivery}>
-                    <FontAwesomeIcon icon={faTruck} class="text-3xl" />
-                </span>
-            {/if}
-        </button>
-    </div>
-    <div class="flex items-center p-4 hover:bg-green-600 justify-center" class:bg-white={isActive.return} class:rounded-[4px]={isActive.return} class:ml-[5px]={isActive.return} class:mr-[5px]={isActive.return} class:h-[50px]={isActive.return}>
-        <button type="button" on:click={() => { window.location.href = '/return'; setActive('return'); }} class="flex items-center justify-center">
-            {#if sidebarWidth === 'w-[220px]'}
-                <span class:text-cyan-950={isActive.return} class:text-white={!isActive.return} class="text-2xl font-bold">Return</span>
-            {:else}
-                <span class:text-white={!isActive.return}>
-                    <FontAwesomeIcon icon={faBoxes} class="text-3xl" />
-                </span>
-            {/if}
-    </div>
     <div class="flex items-center p-4 hover:bg-green-600 justify-center" role="button" tabindex="0" on:click={() => window.location.reload()} on:keydown={(e) => e.key === 'Enter' && window.location.reload()}>
         {#if sidebarWidth === 'w-[220px]'}
             <span class="text-white text-2xl font-bold">Reload</span>
@@ -157,7 +156,7 @@
         <div class="flex justify-center mt-4">
             <img src="./default.jpg" alt="Avatar" class="w-[50px] h-[50px] rounded-full border-2 border-white" />
         </div>
-        <span class="text-white font-bold mt-2 text-sm">USER</span>
+        <span class="text-white font-bold mt-2 text-sm">{userFirstName || 'USER'}</span>
         <button class="bg-yellow-300 text-black rounded-full p-1 mt-2 text-lg hover:bg-gray-900" on:click={handleLogout}>
           <FontAwesomeIcon icon={faSignOutAlt} class="text-black" />
         </button>
