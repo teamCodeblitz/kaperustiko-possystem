@@ -33,10 +33,18 @@
 
     // Calculate total cost reactively, including all relevant prices
     $: totalCost = orders.reduce((sum, order) => {
-        return sum + Number(order.order_price) + 
-               Number(order.order_addons_price) + 
-               Number(order.order_addons_price2) + 
-               Number(order.order_addons_price3);
+        const basePrice = Number(order.basePrice) || 0; // Ensure base price is a number
+        const quantity = Number(order.order_quantity) || 1; // Ensure quantity is a number
+        const addonsTotal = 
+            (Number(order.order_addons_price) || 0) + 
+            (Number(order.order_addons_price2) || 0) + 
+            (Number(order.order_addons_price3) || 0);
+        
+        // Calculate total for this order including quantity
+        const orderTotal = (basePrice * quantity) + addonsTotal; // Multiply base price by quantity and add addons total
+        console.log(`Order Total for ${order.order_name}: ₱${orderTotal.toFixed(2)}`); // Log the total for each order
+
+        return sum + orderTotal; // Sum total for all orders
     }, 0); // Ensure all prices are included
 
     // Function to update amount paid from local storage
@@ -95,7 +103,7 @@
                         </div>
                     </div>
                     <div class="text-right pl-4 flex-shrink-0">
-                        <p class="text-xl font-bold text-green-600">₱{(Number(order.basePrice) + Number(order.order_addons_price) + Number(order.order_addons_price2) + Number(order.order_addons_price3)).toFixed(2)}</p>
+                        <p class="text-xl font-bold text-green-600">₱{order.order_price}.00</p>
                         <p class="text-gray-600">₱{order.basePrice}.00</p>
                         <p class="text-gray-600">---------------------------------------------</p>
                         <p class="text-gray-600">---------------------------------------------</p>
