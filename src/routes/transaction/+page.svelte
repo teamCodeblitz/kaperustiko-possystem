@@ -33,7 +33,7 @@
   
     let showSecondPopup: boolean = false; // New variable to control second popup visibility
   
-    let inputCode: string = "123456"; // Declare inputCode variable
+    let inputCode: string = ""; // Declare inputCode variable
   
     let isRemitDisabled: boolean = false; // New variable to track if remit is disabled
   

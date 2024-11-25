@@ -401,7 +401,7 @@
         <div class="w-full max-w-md rounded-lg bg-white p-8 shadow-lg">
             <h2 class="mb-4 text-center text-2xl font-bold">Input 6-Digit Code</h2>
             <input
-                type="text"
+                type="password"
                 bind:value={inputCode}
                 maxlength="6"
                 class="w-full rounded border border-gray-300 p-2 text-center"

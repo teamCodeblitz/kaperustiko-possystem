@@ -291,8 +291,7 @@
 			localStorage.setItem('staff_token', staffToken); // Restore staff_token
 		}
 	
-
-		
+		window.location.reload();
 	}
 
 	function showAlert(message: string, type: string) {
