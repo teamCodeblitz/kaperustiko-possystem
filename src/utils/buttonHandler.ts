@@ -12,10 +12,13 @@ export function handleButtonClick(key: string, index: number, orderedItems: any[
 			return; // Prevent further execution
 		}
 		const order_price = orderedItems.reduce((total, item) => {
-			const price = item.price ? parseFloat(item.price.replace('₱', '').replace(',', '')) : 0;
+			const price = item.order_price ? parseFloat(item.order_price.toString().replace('₱', '').replace(',', '')) : 0;
 			return total + price;
 		}, 0);
+		console.log('Calculated Order Price:', order_price);
 		const amountPaid = parseFloat(payment.replace('₱', '').replace(',', ''));
+
+		console.log('Amount Paid:', amountPaid);
 
 		if (!payment || amountPaid <= 0) {
 			showAlert('Error: No amount paid yet.');

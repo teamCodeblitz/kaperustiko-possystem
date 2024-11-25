@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Asia/Manila'); // Set the default timezone to Asia/Manila
 header("Access-Control-Allow-Origin: http://localhost:5173"); // Allow your frontend origin
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS"); // Allow specific methods
 header("Access-Control-Allow-Headers: Content-Type"); // Allow specific headers
@@ -49,7 +50,7 @@ if (isset($_FILES['image'])) {
 
 // Prepare and bind
 $stmt = $conn->prepare("INSERT INTO `pos-menu` (code, title1, title2, label, label2, price1, price2, price3, qty, stock_date, stock_time, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-$stmt->bind_param("ssssddisssss", 
+$stmt->bind_param("sssssdisssss", 
     $data['code'], 
     $data['title1'], 
     $data['title2'], 

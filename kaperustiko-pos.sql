@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 25, 2024 at 04:05 PM
+-- Generation Time: Nov 25, 2024 at 05:04 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -45,6 +45,13 @@ CREATE TABLE `orders` (
   `order_addons_price3` int(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`order_no`, `code`, `order_name`, `order_name2`, `order_quantity`, `order_size`, `basePrice`, `order_price`, `order_addons`, `order_addons_price`, `order_image`, `order_addons2`, `order_addons_price2`, `order_addons3`, `order_addons_price3`) VALUES
+(287, 'P001', 'Carbonara', 'Pasta', 1, 'Regular', 150, 150, 'None', 0, 'carbonara.jpg', 'None', 0, 'None', 0);
+
 -- --------------------------------------------------------
 
 --
@@ -77,14 +84,26 @@ INSERT INTO `pos-menu` (`menu_no`, `code`, `title1`, `title2`, `label`, `label2`
 (3, 'B001', 'Americano', 'Coffee', 'Beverages', 'Coffee', 80, 120, 150, 'americano.jpg', 1, '11/17/2024\r\n', '07:13:00 PM'),
 (4, 'B002', 'Cappuccino', 'Coffee', 'Beverages', 'Coffee', 80, 120, 150, 'cappuccino.jpg', 0, '11/17/2024\r\n', '07:13:00 PM'),
 (5, 'B003', 'Spanish', 'Latte', 'Beverages', 'Coffee', 80, 120, 150, 'latte.jpg', 0, '11/17/2024\r\n', '07:13:00 PM'),
-(6, 'B004', 'Hazelnut', 'Latte', 'Beverages', 'Coffee', 80, 120, 150, 'hazelnut-latte.jpg', 3, '2024-11-18', '17:36:27'),
+(6, 'B004', 'Hazelnut', 'Latte', 'Beverages', 'Coffee', 80, 120, 150, 'hazelnut-latte.jpg', 0, '2024-11-18', '17:36:27'),
 (7, 'U001', 'Sisig', 'Beef', 'Food', 'Ulam', 250, 450, 900, 'sisig.jpg', 0, '11/17/2024\r\n', '07:13:00 PM'),
-(8, 'P001', 'Carbonara', 'Pasta', 'Food', 'Pasta', 150, 300, 500, 'carbonara.jpg', 7, '2024-11-19', '00:37:01'),
-(9, 'P002', 'Spaghetti', 'Pasta', 'Food', 'Pasta', 150, 300, 500, 'spagheti.jpg', 1, '11/18/2024', '05:35:28 PM'),
+(8, 'P001', 'Carbonara', 'Pasta', 'Food', 'Pasta', 150, 300, 500, 'carbonara.jpg', 6, '2024-11-19', '00:37:01'),
+(9, 'P002', 'Spaghetti', 'Pasta', 'Food', 'Pasta', 150, 300, 500, 'spagheti.jpg', 0, '11/18/2024', '05:35:28 PM'),
 (10, 'P003', 'Miki', 'Pasta', 'Food', 'Pasta', 150, 300, 500, 'pansit-miki.jpg', 14, '2024-11-18', '05:33:41 PM'),
 (11, 'D001', 'Buko Pandan', 'Salad', 'Food', 'Dessert', 50, 90, 150, 'buko-pandan.jpg', 0, '11/17/2024\r\n', '07:13:00 PM'),
 (32, 'U002', 'Chicken', 'Adobo', 'Food', 'Ulam', 150, 300, 500, 'd741f28eef20eaef73b8d93df2ce555c.jpg', 10, '2024-11-18', '16:41:11'),
-(35, 'D002', 'Cassava ', 'Cake', 'Food', '0', 80, 125, 250, 'cassava-cake.jpg', 10, '2024-11-25', '15:54:10');
+(35, 'D002', 'Cassava ', 'Cake', 'Food', 'Dessert', 80, 125, 250, 'cassava-cake.jpg', 10, '2024-11-25', '15:54:10'),
+(36, 'U003', 'Pork', 'Sinigang', 'Food', 'Ulam', 150, 250, 500, 'pork-sinigang.jpg', 10, '2024-11-25', '16:12:42'),
+(37, 'U004', 'Chicken', 'Inasal', 'Food', 'Ulam', 120, 250, 550, 'chicken-inasal.jpg', 5, '2024-11-25', '16:14:27'),
+(38, 'U004', 'Laing', 'Authentic', 'Food', 'Ulam', 80, 150, 250, 'laing.jpg', 5, '2024-11-25', '16:17:38'),
+(39, 'D003', 'Halo-Halo', 'Special', 'Food', 'Dessert', 85, 130, 200, 'halo-halo.jpg', 5, '2024-11-25', '16:19:15'),
+(40, 'T001', 'Strawberry', 'Fruit Tea', 'Beverages', 'Tea', 85, 120, 150, 'strawberry-fruit-tea.jpg', 9, '2024-11-25', '16:22:21'),
+(41, 'T002', 'Blueberry', 'Fruit Tea', 'Beverages', 'Tea', 85, 120, 150, 'blueberry-fruit-tea.jpg', 10, '2024-11-25', '16:24:18'),
+(42, 'T003', 'Green Apple', 'Fruit Tea', 'Beverages', 'Tea', 80, 120, 150, 'greenapple-fruit-tea.jpg', 6, '2024-11-25', '16:26:01'),
+(43, 'S001', 'Coke', 'Soda', 'Beverages', 'Soda', 30, 75, 120, 'coke.jpg', 14, '2024-11-25', '16:28:31'),
+(44, 'R001', 'Plain', 'Rice', 'Food', 'Rice', 20, 150, 300, 'plain-rice.jpg', 14, '2024-11-25', '16:41:04'),
+(45, 'R002', 'Java', 'Rice', 'Food', 'Rice', 20, 120, 300, 'java-rice.jpg', 13, '2024-11-25', '16:41:58'),
+(46, 'R003', 'Fried', 'Rice', 'Food', 'Rice', 30, 150, 400, 'fried-rice.jpg', 14, '2024-11-25', '16:42:58'),
+(47, 'T003', 'Mango', 'Fruit Tea', 'Beverages', 'Tea', 80, 120, 150, 'mango-fruit-tea.jpg', 5, '2024-11-25', '23:45:33');
 
 -- --------------------------------------------------------
 
@@ -205,7 +224,11 @@ INSERT INTO `total_sales` (`total_order`, `receipt_number`, `date`, `time`, `cas
 (124, '124', '11/18/2024', '7:00:54 PM', 'sample', '[{\"order_name\":\"Carbonara\",\"order_name2\":\"Pasta\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons_price\":\"0\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"}]', 150, 200, 50, 'Take Out'),
 (125, '125', '11/18/2024', '7:02:22 PM', 'sample', '[{\"order_name\":\"Carbonara\",\"order_name2\":\"Pasta\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons_price\":\"0\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"}]', 150, 200, 50, 'Take Out'),
 (126, '126', '11/18/2024', '7:02:40 PM', 'sample', '[{\"order_name\":\"Carbonara\",\"order_name2\":\"Pasta\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons_price\":\"0\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"},{\"order_name\":\"Carbonara\",\"order_name2\":\"Pasta\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons_price\":\"0\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"}]', 300, 200, -100, 'Take Out'),
-(128, '127', '11/19/2024', '3:55:49 PM', 'sample', '[{\"order_name\":\"Cheese\",\"order_name2\":\"Burger\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons\":\"Extra Cheese\",\"order_addons_price\":\"15\",\"order_addons2\":\"Bacon\",\"order_addons_price2\":\"20\",\"order_addons3\":\"Olives\",\"order_addons_price3\":\"10\"}]', 145, 500, 355, 'Take Out');
+(128, '127', '11/19/2024', '3:55:49 PM', 'sample', '[{\"order_name\":\"Cheese\",\"order_name2\":\"Burger\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons\":\"Extra Cheese\",\"order_addons_price\":\"15\",\"order_addons2\":\"Bacon\",\"order_addons_price2\":\"20\",\"order_addons3\":\"Olives\",\"order_addons_price3\":\"10\"}]', 145, 500, 355, 'Take Out'),
+(129, '129', '11/25/2024', '11:49:15 PM', 'sample', '[{\"order_name\":\"Strawberry\",\"order_name2\":\"Fruit Tea\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons_price\":\"0\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"},{\"order_name\":\"Spaghetti\",\"order_name2\":\"Pasta\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons_price\":\"0\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"}]', 235, 200, -35, 'Take Out'),
+(130, '130', '11/25/2024', '11:51:29 PM', 'sample', '[{\"order_name\":\"Hazelnut\",\"order_name2\":\"Latte\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons_price\":\"0\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"},{\"order_name\":\"Hazelnut\",\"order_name2\":\"Latte\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons_price\":\"0\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"}]', 160, 20, -140, 'Take Out'),
+(131, '131', '11/25/2024', '11:57:10 PM', 'sample', '[{\"order_name\":\"Carbonara\",\"order_name2\":\"Pasta\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons_price\":\"0\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"}]', 150, 2, -148, 'Dine In'),
+(132, '132', '11/25/2024', '11:57:29 PM', 'sample', '[{\"order_name\":\"Hazelnut\",\"order_name2\":\"Latte\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons_price\":\"0\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"}]', 80, 2, -78, 'Take Out');
 
 -- --------------------------------------------------------
 
@@ -287,13 +310,13 @@ ALTER TABLE `user-staff`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_no` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=281;
+  MODIFY `order_no` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=288;
 
 --
 -- AUTO_INCREMENT for table `pos-menu`
 --
 ALTER TABLE `pos-menu`
-  MODIFY `menu_no` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `menu_no` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
 -- AUTO_INCREMENT for table `remit_returns`
@@ -317,7 +340,7 @@ ALTER TABLE `return-orders`
 -- AUTO_INCREMENT for table `total_sales`
 --
 ALTER TABLE `total_sales`
-  MODIFY `total_order` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=129;
+  MODIFY `total_order` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=133;
 
 --
 -- AUTO_INCREMENT for table `user-staff`

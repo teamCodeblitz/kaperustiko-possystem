@@ -291,7 +291,7 @@
 			localStorage.setItem('staff_token', staffToken); // Restore staff_token
 		}
 	
-		window.location.reload();
+
 		
 	}
 
@@ -451,11 +451,11 @@
 	function selectSize(size: string) {
 		 selectedSize = size;
 		 if (selectedItem) {
-			 if (size === 'Regular') {
+			 if (size === 'Regular' || size === '0.25L') {
 				 displayedPrice = formatPrice(quantity * parseFloat(selectedItem.price1.replace('₱', '').replace(',', '')));
-			 } else if (size === 'Large') {
+			 } else if (size === 'Large' || size === '0.33L') {
 				 displayedPrice = formatPrice(quantity * parseFloat(selectedItem.price2.replace('₱', '').replace(',', '')));
-			 } else if (size === 'Family') {
+			 } else if (size === 'Family' || size === '1.5L') {
 				 displayedPrice = formatPrice(quantity * parseFloat(selectedItem.price3.replace('₱', '').replace(',', '')));
 			 }
 		 }
@@ -464,11 +464,11 @@
 	$: {
 		if (selectedItem) {
 			let price = 0;
-			if (selectedSize === 'Regular') {
+			if (selectedSize === 'Regular' || selectedSize === '0.25L') {
 				price = parseFloat(selectedItem.price1.replace('₱', '').replace(',', ''));
-			} else if (selectedSize === 'Large') {
+			} else if (selectedSize === 'Large' || selectedSize === '0.33L') {
 				price = parseFloat(selectedItem.price2.replace('₱', '').replace(',', ''));
-			} else if (selectedSize === 'Family') {
+			} else if (selectedSize === 'Family' || selectedSize === '1.5L') {
 				price = parseFloat(selectedItem.price3.replace('₱', '').replace(',', ''));
 			}
 			displayedPrice = formatPrice(quantity * price);
@@ -520,7 +520,7 @@
 	<div class="flex flex-grow overflow-hidden bg-gray-100">
 		<div class="flex-start w-full overflow-auto p-4">
 			<div class="mb-4 flex space-x-4">
-				{#each ['All', 'Beverages', 'Food', 'Dessert', 'Coffee', 'Tea', 'Juice', 'Sandwich', 'Sushi', 'Pasta', 'Burger', 'Ulam'] as category}
+				{#each ['All', 'Beverages', 'Food', 'Dessert', 'Coffee', 'Tea', 'Soda', 'Sandwich', 'Pasta', 'Burger', 'Ulam', 'Rice'] as category}
 					<button
 						class="rounded-md px-6 py-2 font-bold text-black"
 						class:bg-cyan-950={selectedCategory === category}
@@ -547,12 +547,14 @@
 					<p>Display Coffee Menu</p>
 				{:else if selectedCategory === 'Tea'}
 					<p>Display Tea Menu</p>
-				{:else if selectedCategory === 'Juice'}
-					<p>Display Juice Menu</p>
+				{:else if selectedCategory === 'Soda'}
+					<p>Display Soda Menu</p>
 				{:else if selectedCategory === 'Sandwich'}
 					<p>Display Sandwich Menu</p>
 				{:else if selectedCategory === 'Ulam'}
 					<p>Display Ulam Menu</p>
+				{:else if selectedCategory === 'Rice'}
+					<p>Display Rice Menu</p>
 				{:else if selectedCategory === 'Desserts'}
 					<p>Display Desserts Menu</p>
 				{/if}
@@ -803,29 +805,32 @@
 
 			<label for="size" class="mb-2 block text-sm font-medium">Size:</label>
 			<div class="mb-6 flex w-full space-x-4">
-				<button
-					on:click={() => selectSize('Regular')}
-					class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === 'Regular'
-						? 'bg-blue-500 text-white'
-						: ''}">Regular</button
-				>
-				<button
-					on:click={() => selectSize('Large')}
-					class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === 'Large'
-						? 'bg-blue-500 text-white'
-						: ''}">Large</button
-				>
-				<button
-					on:click={() => selectSize('Family')}
-					class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === 'Family'
-						? 'bg-blue-500 text-white'
-						: ''}">Family</button
-				>
+				{#if selectedItem?.label === 'Soda' || selectedItem?.label2 === 'Soda'}
+					<button
+						on:click={() => selectSize('0.25L')}
+						class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === '0.25L' ? 'bg-blue-500 text-white' : ''}">0.25L</button>
+					<button
+						on:click={() => selectSize('0.33L')}
+						class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === '0.33L' ? 'bg-blue-500 text-white' : ''}">0.33L</button>
+					<button
+						on:click={() => selectSize('1.5L')}
+						class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === '1.5L' ? 'bg-blue-500 text-white' : ''}">1.5L</button>
+				{:else}
+					<button
+						on:click={() => selectSize('Regular')}
+						class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === 'Regular' ? 'bg-blue-500 text-white' : ''}">Regular</button>
+					<button
+						on:click={() => selectSize('Large')}
+						class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === 'Large' ? 'bg-blue-500 text-white' : ''}">Large</button>
+					<button
+						on:click={() => selectSize('Family')}
+						class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === 'Family' ? 'bg-blue-500 text-white' : ''}">Family</button>
+				{/if}
 			</div>
 
 			<label for="addons" class="mb-2 block text-sm font-medium">Add-ons:</label>
 			<div class="mb-6">
-				{#if selectedItem?.label === 'Beverages' || selectedItem?.label2 === 'Beverages'}
+				{#if selectedItem?.label === 'Tea' || selectedItem?.label2 === 'Tea'}
 					<label class="mb-4 block">
 						<input
 							type="checkbox"
@@ -850,7 +855,7 @@
 							class="mr-2 h-6 w-6"
 						/> Milk - ₱7
 					</label>
-				{:else if selectedItem?.label === 'Food' || selectedItem?.label2 === 'Food'}
+				{:else if selectedItem?.label === 'Pasta' || selectedItem?.label2 === 'Pasta'}
 					<label class="mb-4 block">
 						<input type="checkbox" bind:group={selectedAddons} value="Extra Cheese" class="mr-2 h-6 w-6" /> Extra Cheese - ₱15
 					</label>
@@ -860,11 +865,10 @@
 					<label class="mb-4 block">
 						<input type="checkbox" bind:group={selectedAddons} value="Olives" class="mr-2 h-6 w-6" /> Olives - ₱10
 					</label>
-				{:else if selectedItem?.label2 === 'Ulam'}
-					<label class="mb-4 block">
-						<input type="checkbox" bind:group={selectedAddons} value="Rice" class="mr-2 h-6 w-6" /> Rice - ₱10
-						<input type="number" min="0" bind:value={riceQuantity} class="ml-2 w-10" />
-					</label>
+				{:else if selectedItem?.label === 'Soda' || selectedItem?.label2 === 'Soda'}
+					<!-- No add-ons for Soda -->
+				{:else if selectedItem?.label === 'Ulam' || selectedItem?.label2 === 'Ulam'}
+					<!-- No add-ons for Ulam -->
 				{/if}
 			</div>
 

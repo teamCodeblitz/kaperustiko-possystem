@@ -65,6 +65,7 @@
         showAlert('Product uploaded successfully', 'success');
         isCodePopupVisible = false;
         showPopup = false;
+        window.location.reload();
     } else {
         showAlert('Failed to upload product', 'error');
         isCodePopupVisible = false;
