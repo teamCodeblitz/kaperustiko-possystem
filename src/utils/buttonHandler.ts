@@ -22,12 +22,10 @@ export function handleButtonClick(key: string, index: number, orderedItems: any[
 		} else if (amountPaid < order_price) {
 			showAlert('Error: Amount paid is not enough.');
 		} else if (amountPaid >= order_price) {
-			showAlert('Error: Amount paid is not enough.');
-		} else {
 			handlePlaceOrder();
 		}
 	} else {
-		handleNumberInput(key);
+		handleNumberInput(key);	
 	}
 }
 

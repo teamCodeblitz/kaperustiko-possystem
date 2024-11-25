@@ -75,7 +75,7 @@
             {#each orders as order}
                 <div class="flex items-start justify-between border-b py-2">
                     <div class="flex-1 flex items-center">
-                        <img src={order.order_image} alt="{order.order_name}" class="w-16 h-16 object-cover mr-4" />
+                        <img src={`/foods/${order.order_image}`} alt="{order.order_name}" class="w-16 h-16 object-cover mr-4" />
                         <div>
                             <h2 class="text-lg font-semibold">{order.order_name}</h2>
                             <p class="text-gray-600"><strong>Quantity:</strong> {order.order_quantity}</p>

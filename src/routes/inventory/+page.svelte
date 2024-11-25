@@ -232,6 +232,24 @@
             imageFile = file; // Store the file for upload
         }
     }
+
+    async function updateProduct() {
+        const response = await fetch('http://localhost/kaperustiko-possystem/backend/update_product.php', { // Adjust the URL as needed
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(editProductData)
+        });
+
+        if (response.ok) {
+            // Handle success (e.g., show a success message, refresh the product list, etc.)
+            showEditPopup = false;
+        } else {
+            // Handle error (e.g., show an error message)
+            console.error('Failed to update product');
+        }
+    }
 </script>
 
 <!-- Main Layout with Sidebar and Content -->
@@ -438,7 +456,7 @@
     <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
         <div class="bg-white p-6 rounded shadow-lg">
             <h2 class="text-lg font-bold mb-4">Edit Product</h2>
-            <form on:submit|preventDefault={async () => { /* Add your update logic here */ showEditPopup = false; }}>
+            <form on:submit|preventDefault={updateProduct}>
                 <div>
                     <label for="code">Product Code:</label>
                     <input type="text" bind:value={editProductData.code} class="border rounded p-2 w-full" required />

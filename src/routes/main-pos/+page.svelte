@@ -541,6 +541,18 @@
 					<p>Display Beverages Menu</p>
 				{:else if selectedCategory === 'Food'}
 					<p>Display Food Menu</p>
+				{:else if selectedCategory === 'Dessert'}
+					<p>Display Dessert Menu</p>
+				{:else if selectedCategory === 'Coffee'}
+					<p>Display Coffee Menu</p>
+				{:else if selectedCategory === 'Tea'}
+					<p>Display Tea Menu</p>
+				{:else if selectedCategory === 'Juice'}
+					<p>Display Juice Menu</p>
+				{:else if selectedCategory === 'Sandwich'}
+					<p>Display Sandwich Menu</p>
+				{:else if selectedCategory === 'Ulam'}
+					<p>Display Ulam Menu</p>
 				{:else if selectedCategory === 'Desserts'}
 					<p>Display Desserts Menu</p>
 				{/if}
@@ -783,7 +795,7 @@
 			<p class="mb-6 text-center text-lg">Price: ₱{displayedPrice} (Add-ons: ₱{calculateAddonsPrice(selectedAddons)})</p>
 			{#if selectedItem?.image}
 				<img
-					src={selectedItem.image}
+					src={`/foods/${selectedItem.image}`}
 					alt={selectedItem.title1}
 					class="mb-4 h-[400px] w-full rounded"
 				/>
