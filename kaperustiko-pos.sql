@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 18, 2024 at 12:16 PM
+-- Generation Time: Nov 25, 2024 at 04:05 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -72,17 +72,19 @@ CREATE TABLE `pos-menu` (
 --
 
 INSERT INTO `pos-menu` (`menu_no`, `code`, `title1`, `title2`, `label`, `label2`, `price1`, `price2`, `price3`, `image`, `qty`, `stock_date`, `stock_time`) VALUES
-(1, 'A001', 'Peperoni', 'Pizza', 'Food', 'Pizza', 150, 300, 900, './foods/pizza.jpg', 3, '11/17/2024', '07:00:38 PM'),
-(2, 'A002', 'Cheese', 'Burger', 'Food', 'Burger', 100, 180, 250, './foods/burger.jpg', 0, '11/17/2024', '07:13:00 PM'),
-(3, 'B001', 'Americano', 'Coffee', 'Beverages', 'Coffee', 80, 120, 150, './foods/americano.jpg', 1, '11/17/2024\r\n', '07:13:00 PM'),
-(4, 'B002', 'Cappuccino', 'Coffee', 'Beverages', 'Coffee', 80, 120, 150, './foods/cappuccino.jpg', 0, '11/17/2024\r\n', '07:13:00 PM'),
-(5, 'B003', 'Spanish', 'Latte', 'Beverages', 'Coffee', 80, 120, 150, './foods/latte.jpg', 0, '11/17/2024\r\n', '07:13:00 PM'),
-(6, 'B004', 'Hazelnut', 'Latte', 'Beverages', 'Coffee', 80, 120, 150, './foods/hazelnut-latte.jpg', 0, '11/17/2024\r\n', '07:13:00 PM'),
-(7, 'U001', 'Sisig', 'Beef', 'Food', 'Ulam', 250, 450, 900, './foods/sisig.jpg', 0, '11/17/2024\r\n', '07:13:00 PM'),
-(8, 'P001', 'Carbonara', 'Pasta', 'Food', 'Pasta', 150, 300, 500, './foods/carbonara.jpg', 6, '11/17/2024\r\n', '07:13:00 PM'),
-(9, 'P002', 'Spaghetti', 'Pasta', 'Food', 'Pasta', 150, 300, 500, './foods/spagheti.jpg', 0, '11/17/2024\r\n', '07:13:00 PM'),
-(10, 'P003', 'Miki', 'Pasta', 'Food', 'Pasta', 150, 300, 500, './foods/pansit-miki.jpg', 12, '11/17/2024\r\n', '07:13:00 PM'),
-(11, 'D001', 'Buko Pandan', 'Salad', 'Food', 'Dessert', 50, 90, 150, './foods/buko-pandan.jpg', 0, '11/17/2024\r\n', '07:13:00 PM');
+(1, 'A001', 'Peperoni', 'Pizza', 'Food', 'Pizza', 150, 300, 900, 'pizza.jpg', 3, '11/17/2024', '07:00:38 PM'),
+(2, 'A002', 'Cheese', 'Burger', 'Food', 'Burger', 100, 180, 250, 'burger.jpg', 1, '11/18/2024', '05:36:05 PM'),
+(3, 'B001', 'Americano', 'Coffee', 'Beverages', 'Coffee', 80, 120, 150, 'americano.jpg', 1, '11/17/2024\r\n', '07:13:00 PM'),
+(4, 'B002', 'Cappuccino', 'Coffee', 'Beverages', 'Coffee', 80, 120, 150, 'cappuccino.jpg', 0, '11/17/2024\r\n', '07:13:00 PM'),
+(5, 'B003', 'Spanish', 'Latte', 'Beverages', 'Coffee', 80, 120, 150, 'latte.jpg', 0, '11/17/2024\r\n', '07:13:00 PM'),
+(6, 'B004', 'Hazelnut', 'Latte', 'Beverages', 'Coffee', 80, 120, 150, 'hazelnut-latte.jpg', 3, '2024-11-18', '17:36:27'),
+(7, 'U001', 'Sisig', 'Beef', 'Food', 'Ulam', 250, 450, 900, 'sisig.jpg', 0, '11/17/2024\r\n', '07:13:00 PM'),
+(8, 'P001', 'Carbonara', 'Pasta', 'Food', 'Pasta', 150, 300, 500, 'carbonara.jpg', 7, '2024-11-19', '00:37:01'),
+(9, 'P002', 'Spaghetti', 'Pasta', 'Food', 'Pasta', 150, 300, 500, 'spagheti.jpg', 1, '11/18/2024', '05:35:28 PM'),
+(10, 'P003', 'Miki', 'Pasta', 'Food', 'Pasta', 150, 300, 500, 'pansit-miki.jpg', 14, '2024-11-18', '05:33:41 PM'),
+(11, 'D001', 'Buko Pandan', 'Salad', 'Food', 'Dessert', 50, 90, 150, 'buko-pandan.jpg', 0, '11/17/2024\r\n', '07:13:00 PM'),
+(32, 'U002', 'Chicken', 'Adobo', 'Food', 'Ulam', 150, 300, 500, 'd741f28eef20eaef73b8d93df2ce555c.jpg', 10, '2024-11-18', '16:41:11'),
+(35, 'D002', 'Cassava ', 'Cake', 'Food', '0', 80, 125, 250, 'cassava-cake.jpg', 10, '2024-11-25', '15:54:10');
 
 -- --------------------------------------------------------
 
@@ -107,7 +109,8 @@ INSERT INTO `remit_returns` (`return_id`, `cashier_name`, `total_sales`, `return
 (1, 'Mike', '945.00', '2024-11-17', '5:17:08 PM', 'Validated'),
 (2, 'Mike', '945.00', '2024-11-17', '5:17:08 PM', 'Validated'),
 (3, 'Mike', '150.00', '2024-11-18', '5:43:13 PM', 'Pending'),
-(4, 'Mike', '150.00', '2024-11-18', '5:45:02 PM', 'Validated');
+(4, 'Mike', '150.00', '2024-11-18', '5:45:02 PM', 'Validated'),
+(5, 'sample', '125.00', '2024-11-19', '3:53:17 PM', 'Validated');
 
 -- --------------------------------------------------------
 
@@ -171,7 +174,8 @@ INSERT INTO `return-orders` (`return_id`, `receipt_number`, `return_date`, `retu
 (14, 1, '11/18/2024', '6:29:12 PM', 'Mike', '[{\"order_name\":\"Carbonara\",\"order_name2\":\"Pasta\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons\":\"Extra Cheese\",\"order_addons_price\":\"15\",\"order_addons2\":\"Bacon\",\"order_addons_price2\":\"20\",\"order_addons3\":\"Olives\",\"order_addons_price3\":\"10\"}]', 195, 500, 305, 'Dine In'),
 (15, 1, '11/18/2024', '6:53:18 PM', 'Mike', '[{\"order_name\":\"Americano\",\"order_name2\":\"Coffee\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons_price\":\"0\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"},{\"order_name\":\"Carbonara\",\"order_name2\":\"Pasta\",\"order_quantity\":\"x1\",\"order_size\"', 380, 500, 120, 'Take Out'),
 (16, 122, '11/18/2024', '6:57:02 PM', '', '[{\"order_name\":\"Carbonara\",\"order_name2\":\"Pasta\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons_price\":\"0\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"}]', 150, 500, 350, 'Take Out'),
-(17, 121, '11/18/2024', '6:54:25 PM', '', '[{\"order_name\":\"Carbonara\",\"order_name2\":\"Pasta\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons_price\":\"0\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"}]', 150, 200, 50, 'Take Out');
+(17, 121, '11/18/2024', '6:54:25 PM', '', '[{\"order_name\":\"Carbonara\",\"order_name2\":\"Pasta\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons_price\":\"0\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"}]', 150, 200, 50, 'Take Out'),
+(18, 127, '11/19/2024', '3:48:51 PM', 'sample', '[{\"order_name\":\"Spanish\",\"order_name2\":\"Latte\",\"order_quantity\":\"x1\",\"order_size\":\"Large\",\"order_addons\":\"Sugar\",\"order_addons_price\":\"5\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"}]', 125, 200, 75, 'Take Out');
 
 -- --------------------------------------------------------
 
@@ -200,7 +204,8 @@ INSERT INTO `total_sales` (`total_order`, `receipt_number`, `date`, `time`, `cas
 (123, '123', '11/18/2024', '6:59:37 PM', 'Mike', '[{\"order_name\":\"Peperoni\",\"order_name2\":\"Pizza\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons_price\":\"0\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"}]', 150, 500, 350, 'Take Out'),
 (124, '124', '11/18/2024', '7:00:54 PM', 'sample', '[{\"order_name\":\"Carbonara\",\"order_name2\":\"Pasta\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons_price\":\"0\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"}]', 150, 200, 50, 'Take Out'),
 (125, '125', '11/18/2024', '7:02:22 PM', 'sample', '[{\"order_name\":\"Carbonara\",\"order_name2\":\"Pasta\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons_price\":\"0\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"}]', 150, 200, 50, 'Take Out'),
-(126, '126', '11/18/2024', '7:02:40 PM', 'sample', '[{\"order_name\":\"Carbonara\",\"order_name2\":\"Pasta\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons_price\":\"0\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"},{\"order_name\":\"Carbonara\",\"order_name2\":\"Pasta\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons_price\":\"0\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"}]', 300, 200, -100, 'Take Out');
+(126, '126', '11/18/2024', '7:02:40 PM', 'sample', '[{\"order_name\":\"Carbonara\",\"order_name2\":\"Pasta\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons_price\":\"0\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"},{\"order_name\":\"Carbonara\",\"order_name2\":\"Pasta\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons_price\":\"0\",\"order_addons_price2\":\"0\",\"order_addons_price3\":\"0\"}]', 300, 200, -100, 'Take Out'),
+(128, '127', '11/19/2024', '3:55:49 PM', 'sample', '[{\"order_name\":\"Cheese\",\"order_name2\":\"Burger\",\"order_quantity\":\"x1\",\"order_size\":\"Regular\",\"order_addons\":\"Extra Cheese\",\"order_addons_price\":\"15\",\"order_addons2\":\"Bacon\",\"order_addons_price2\":\"20\",\"order_addons3\":\"Olives\",\"order_addons_price3\":\"10\"}]', 145, 500, 355, 'Take Out');
 
 -- --------------------------------------------------------
 
@@ -282,19 +287,19 @@ ALTER TABLE `user-staff`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_no` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=279;
+  MODIFY `order_no` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=281;
 
 --
 -- AUTO_INCREMENT for table `pos-menu`
 --
 ALTER TABLE `pos-menu`
-  MODIFY `menu_no` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `menu_no` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT for table `remit_returns`
 --
 ALTER TABLE `remit_returns`
-  MODIFY `return_id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `return_id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `remit_sales`
@@ -306,13 +311,13 @@ ALTER TABLE `remit_sales`
 -- AUTO_INCREMENT for table `return-orders`
 --
 ALTER TABLE `return-orders`
-  MODIFY `return_id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `return_id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `total_sales`
 --
 ALTER TABLE `total_sales`
-  MODIFY `total_order` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=127;
+  MODIFY `total_order` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=129;
 
 --
 -- AUTO_INCREMENT for table `user-staff`
