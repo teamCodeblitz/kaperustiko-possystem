@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { FontAwesomeIcon } from "@fortawesome/svelte-fontawesome";
-    import { faStar, faUndo, faExclamationTriangle, faTrash, faDollarSign, faPrint } from "@fortawesome/free-solid-svg-icons";
+    import { faStar, faUndo, faExclamationTriangle, faTrash, faDollarSign, faPrint, faArrowDown, faChartBar, faTrophy, faExclamationCircle, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
     import Sidebar from "../sidebar/+page.svelte";
     import { Bar, Line, Pie } from 'svelte-chartjs';
     import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement } from 'chart.js';
@@ -60,6 +60,9 @@
     let totalSalesToday = 0; // Variable to store today's total sales
     let sortOption = 'qty'; // Declare sortOption with a default value
     let selectedCategory = 'Food'; // Reactive variable for selected category
+    let overallTotalSales: number = 0; // Variable to store overall total sales
+    let bestSeller: string = "Loading..."; // Initialize bestSeller
+    let leastSeller: string = "Loading..."; // Initialize leastSeller
 
     onMount(async () => {
         const today = new Date();
@@ -80,6 +83,50 @@
         const responseReturn = await fetch('http://localhost/kaperustiko-possystem/backend/get_remit_returns.php');
         const fetchedReturnItems = await responseReturn.json(); // Fetch return items
         returnItems = fetchedReturnItems; // Store fetched data in returnItems
+
+        try {
+            const response = await fetch('http://localhost/kaperustiko-possystem/backend/get_total_sales.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await response.json();
+            if (data.total_sales !== null) {
+                overallTotalSales = data.total_sales; // Update the total sales variable
+            }
+        } catch (error) {
+            console.error("Error fetching total sales:", error);
+        }
+
+        try {
+            const response = await fetch('http://localhost/kaperustiko-possystem/backend/get_bestseller.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await response.json();
+            bestSeller = data.length > 0 ? data[0] : "No sales yet"; // Update bestSeller
+        } catch (error) {
+            console.error("Error fetching best seller:", error);
+            bestSeller = "Error fetching data"; // Handle error
+        }
+
+        // Fetch least ordered item
+        try {
+            const responseLeastSeller = await fetch('http://localhost/kaperustiko-possystem/backend/get_leastseller.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await responseLeastSeller.json();
+            leastSeller = data.length > 0 ? data[0] : "No orders yet"; // Update leastSeller
+        } catch (error) {
+            console.error("Error fetching least seller:", error);
+            leastSeller = "Error fetching data"; // Handle error
+        }
     });
 
     function printPage() {
@@ -118,7 +165,7 @@
     <!-- Main Content -->
     <div class="flex-grow p-6 bg-gray-100">
         <!-- Statistics Cards -->
-        <div class="grid grid-cols-6 gap-4 mb-6">
+        <div class="grid grid-cols-8 gap-4 mb-6">
             <div class="bg-white rounded-lg shadow-md p-4 text-center">
                 <div class="text-gray-500">Today's Total Sales</div>
                 <div class="text-3xl font-bold">₱{totalSalesToday}</div>
@@ -128,39 +175,54 @@
             </div>
             <div class="bg-white rounded-lg shadow-md p-4 text-center">
                 <div class="text-gray-500">Overall Total Sales</div>
-                <div class="text-3xl font-bold">###</div>
+                <div class="text-3xl font-bold">₱{overallTotalSales}</div>
                 <div class="text-green-500">
-                    <FontAwesomeIcon icon={faUndo} />
+                    <FontAwesomeIcon icon={faChartBar} />
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-md p-4 text-center">
                 <div class="text-gray-500">Best Seller</div>
-                <div class="text-3xl font-bold">###</div>
+                <div class="text-3xl font-bold">{bestSeller}</div>
                 <div class="text-green-500">
-                    <FontAwesomeIcon icon={faStar} />
+                    <FontAwesomeIcon icon={faTrophy} />
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-md p-4 text-center">
-                <div class="text-gray-500">Today's Total Shortage</div>
+                <div class="text-gray-500">Least Seller</div>
+                <div class="text-3xl font-bold">{leastSeller}</div>
+                <div class="text-red-500">
+                    <FontAwesomeIcon icon={faArrowDown} />
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-4 text-center">
+                <div class="text-gray-500">Today's Shortage Cost</div>
                 <div class="text-3xl font-bold">###</div>
                 <div class="text-red-500">
                     <FontAwesomeIcon icon={faExclamationTriangle} />
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-md p-4 text-center">
-                <div class="text-gray-500">Overall Total Shortage</div>
+                <div class="text-gray-500">Today's Shortage Cost</div>
                 <div class="text-3xl font-bold">###</div>
                 <div class="text-red-500">
-                    <FontAwesomeIcon icon={faTrash} />
+                    <FontAwesomeIcon icon={faExclamationTriangle} />
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-md p-4 text-center">
-                <div class="text-gray-500">Total Dispose Cost</div>
+                <div class="text-gray-500 text-sm">Today's Total Return Cost</div>
                 <div class="text-3xl font-bold">###</div>
                 <div class="text-red-500">
-                    <FontAwesomeIcon icon={faDollarSign} />
+                    <FontAwesomeIcon icon={faExclamationCircle} />
                 </div>
             </div>
+            <div class="bg-white rounded-lg shadow-md p-4 text-center">
+                <div class="text-gray-500 text-sm">Overall Total Return Cost</div>
+                <div class="text-3xl font-bold">###</div>
+                <div class="text-red-500">
+                    <FontAwesomeIcon icon={faTrashAlt} />
+                </div>
+            </div>
+           
         </div>
 
          <!-- Date Sorter -->

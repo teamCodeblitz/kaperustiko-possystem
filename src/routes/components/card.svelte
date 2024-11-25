@@ -24,7 +24,7 @@
       
       <!-- Left Image Section -->
       <div class="w-1/2 h-62 bg-gray-200 rounded-lg mr-4">
-        <img src={image} alt="Image" class="w-full h-full rounded-lg object-cover" aria-hidden="true">
+        <img src={`foods/${image}`} alt="Image" class="w-full h-full rounded-lg object-cover" aria-hidden="true">
       </div>
   
       <!-- Right Information Section -->
