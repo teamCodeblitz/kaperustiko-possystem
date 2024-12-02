@@ -25,3 +25,6 @@ node_modules/
 build/
 dist/
 *.log
+
+# Add this line to your .gitignore file
+backend/config/connection.php
