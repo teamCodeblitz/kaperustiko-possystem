@@ -15,7 +15,7 @@
 
     // Fetch orders from the PHP endpoint
     async function fetchOrders() {
-        const response = await fetch('http://localhost/kaperustiko-possystem/backend/get_order.php'); // Update the path as necessary
+        const response = await fetch('http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getOrders'); // Update the path as necessary
         if (response.ok) {
             const data = await response.json();
             orders = data && Array.isArray(data) ? data : []; // Check if data is an array

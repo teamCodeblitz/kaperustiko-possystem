@@ -6,6 +6,10 @@
     let showModal = false; // Define showModal to control the modal visibility
     let sidebarWidth = 'w-18'; // Define a variable for sidebar width
     let userFirstName = ''; // Variable to store the user's first name
+    let showSecondPopup = false; // Define a variable to control the second popup visibility
+    let inputCode = ''; // Variable to bind the input code
+    let code = '123456'; // The correct code for confirmation
+    let currentIcon: 'inventory' | 'dashboard' | null = null;
 
     function setActive(icon: keyof typeof isActive) {
         // Reset all to false
@@ -40,7 +44,7 @@
         // Fetch the user's first name using staff_token
         const staffToken = localStorage.getItem('staff_token'); // Assuming the token is stored in localStorage
         if (staffToken) {
-            const response = await fetch(`http://localhost/kaperustiko-possystem/backend/get_user.php?staff_token=${staffToken}`);
+            const response = await fetch(`http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getUser&staff_token=${staffToken}`);
             if (response.ok) {
                 const data = await response.json();
                 userFirstName = data; // Set the user's first name
@@ -63,6 +67,32 @@
 
     function toggleSidebarWidth() {
         sidebarWidth = sidebarWidth === 'w-18' ? 'w-[220px]' : 'w-18'; // Toggle width
+    }
+
+    function handleInventoryClick() {
+        showSecondPopup = true; // Show the popup when inventory is clicked
+        currentIcon = 'inventory'; // Store the current icon type
+    }
+
+    function handleDashboardClick() {
+        showSecondPopup = true; // Show the popup when dashboard is clicked
+        currentIcon = 'dashboard'; // Store the current icon type
+    }
+
+    function confirmAuth(icon: 'inventory' | 'dashboard') {
+        if (inputCode === code) {
+            // Proceed with the action if the code is correct
+            showSecondPopup = false; // Close the popup
+            // Navigate to the href of the clicked icon
+            window.location.href = icon === 'inventory' ? '/inventory' : '/dashboard'; // Change this based on the clicked icon
+        } else {
+            alert('Incorrect code. Please try again.'); // Alert for incorrect code
+        }
+    }
+
+    function closeSecondPopup() {
+        showSecondPopup = false; // Close the popup
+        inputCode = ''; // Reset the input code
     }
 
 </script>
@@ -121,7 +151,7 @@
             {/if}
     </div>
     <div class="flex items-center p-2 hover:bg-cyan-600 justify-center" class:bg-white={isActive.dashboard} class:rounded-[4px]={isActive.dashboard} class:ml-[5px]={isActive.dashboard} class:mr-[5px]={isActive.dashboard} class:h-[50px]={isActive.dashboard}>
-        <button type="button" on:click={() => { window.location.href = '/dashboard'; setActive('dashboard'); }} class="flex items-center justify-center">
+        <button type="button" on:click={handleDashboardClick} class="flex items-center justify-center">
             {#if sidebarWidth === 'w-[220px]'}
                 <span class:text-cyan-950={isActive.dashboard} class:text-white={!isActive.dashboard} class="text-2xl font-bold">Dashboard</span>
             {:else}
@@ -132,7 +162,7 @@
         </button>
     </div>
     <div class="flex items-center p-4 hover:bg-cyan-600 justify-center" class:bg-white={isActive.inventory} class:rounded-[4px]={isActive.inventory} class:ml-[5px]={isActive.inventory} class:mr-[5px]={isActive.inventory} class:h-[50px]={isActive.inventory}>
-        <button type="button" on:click={() => { window.location.href = '/inventory'; setActive('inventory'); }} class="flex items-center justify-center">
+        <button type="button" on:click={handleInventoryClick} class="flex items-center justify-center">
             {#if sidebarWidth === 'w-[220px]'}
                 <span class:text-cyan-950={isActive.inventory} class:text-white={!isActive.inventory} class="text-2xl font-bold">Inventory</span>
             {:else}
@@ -165,8 +195,8 @@
 <!-- Modal for logout confirmation -->
 {#if showModal}
 <div class="fixed inset-0 flex items-center justify-center z-50">
-    <div class="modal-overlay fixed inset-0 bg-black opacity-50"></div>
-    <div class="modal-content bg-white rounded-lg shadow-lg p-6 z-10">
+    <div class="modal-overlay fixed inset-0 bg-black opacity-50 z-40"></div>
+    <div class="modal-content bg-white rounded-lg shadow-lg p-6 z-50">
         <h2 class="text-lg font-bold mb-4">Confirm Logout</h2>
         <p class="mb-4">Are you sure you want to logout?</p>
         <div class="flex justify-end">
@@ -175,4 +205,24 @@
         </div>
     </div>
 </div>
+{/if}
+<!-- Popup for Second Sales -->
+{#if showSecondPopup}
+    <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full z-50">
+            <h3 class="text-xl font-bold text-gray-800">Input 6-Digit Code</h3>
+            <input
+                type="password"
+                bind:value={inputCode}
+                maxlength="6"
+                class="w-full rounded border border-gray-300 p-2 text-center"
+                placeholder="Enter 6-digit code"
+            />
+            <div class="flex justify-between mt-4 space-x-2">
+                <button class="w-full bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-200" on:click={closeSecondPopup}>Cancel</button>
+                <button class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-200" on:click={() => currentIcon && confirmAuth(currentIcon)}>Confirm</button>
+               
+            </div>
+        </div>
+    </div>
 {/if}

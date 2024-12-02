@@ -17,15 +17,16 @@
 		isLoading = true; // Set loading state to true
 
 		// Send login request to the backend
-		const response = await fetch('http://localhost/kaperustiko-possystem/backend/login.php', {
+		const response = await fetch('http://localhost/kaperustiko-possystem/backend/modules/auth.php', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded',
 			},
 			body: new URLSearchParams({
+				action: 'login',
 				email: email,
 				password: password
-			})
+			}).toString()
 		});
 
 		const result = await response.json(); // Parse JSON response

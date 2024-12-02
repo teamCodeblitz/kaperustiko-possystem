@@ -18,12 +18,13 @@ if ($conn->connect_error) {
     die(json_encode(["status" => "error", "message" => "Connection failed: " . $conn->connect_error]));
 }
 
-// Check if 'code' is set in the GET request
-if (!isset($_GET['code'])) {
-    die(json_encode(["status" => "error", "message" => "Code parameter is missing."]));
+// Check if 'code' and 'order_quantity' are set in the GET request
+if (!isset($_GET['code']) || !isset($_GET['order_quantity'])) {
+    die(json_encode(["status" => "error", "message" => "Code or order_quantity parameter is missing."]));
 }
 
 $code = $_GET['code']; // Replace with the specific code you want to update
+$order_quantity = intval($_GET['order_quantity']); // Get the order quantity from the request
 
 // Get current quantity
 $current_qty_sql = "SELECT qty FROM `pos-menu` WHERE code = ?";
@@ -34,7 +35,7 @@ $current_stmt->bind_result($current_qty);
 $current_stmt->fetch();
 $current_stmt->close();
 
-$new_qty = $current_qty - 1; // Decrement the quantity by 1
+$new_qty = $current_qty - $order_quantity; // Decrement the quantity by order_quantity
 
 $sql = "UPDATE `pos-menu` SET qty = ? WHERE code = ?";
 $stmt = $conn->prepare($sql);

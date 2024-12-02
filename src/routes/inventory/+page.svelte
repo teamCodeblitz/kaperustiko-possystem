@@ -8,7 +8,20 @@
     let searchQuery: string;
     let selectedStatus: string;
     let showPopup: boolean = false;
-    let newProduct = { code: '', title1: '', title2: '', label: '', label2: '', price1: '', price2: '', price3: '', qty: '', image: '', stock_date: '', stock_time: '' };
+    let newProduct: { [key: string]: string } = { 
+        code: '', 
+        title1: '', 
+        title2: '', 
+        label: '', 
+        label2: '', 
+        price1: '', 
+        price2: '', 
+        price3: '', 
+        qty: '', 
+        image: '', 
+        stock_date: '', 
+        stock_time: '' 
+    };
     let imageFile: File | null = null;
     let showOptionsPopup: boolean = false;
     let selectedItem: any;
@@ -22,7 +35,7 @@
 
     // Fetch menu items from the backend
     onMount(async () => {
-        const response = await fetch('http://localhost/kaperustiko-possystem/backend/get_menu.php'); // Update the URL as needed
+        const response = await fetch('http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getMenu'); // Update the URL as needed
         if (response.ok) {
             items = await response.json();
             console.log(items); // Debugging log to check the fetched data
@@ -40,37 +53,42 @@
 
     // Function to handle form submission
     const addProduct = async () => {
-        isCodePopupVisible = true;
+        showPopup = true;  // Show the product form directly
     };
 
     const generateProduct = async () => {
-    // Log the data to be sent
-    console.log("Data to be sent:", newProduct);
+        // Create a FormData object to send both the product data and the image
+        const formData = new FormData();
+        
+        // Append all product data to FormData
+        for (const key in newProduct) {
+            formData.append(key, newProduct[key]);
+        }
+        
+        // Append the image file if it exists
+        if (imageFile) {
+            formData.append('image', imageFile);
+        }
 
-    // Send the data to the backend
-    const response = await fetch('http://localhost/kaperustiko-possystem/backend/upload_product.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newProduct),
-    });
+        try {
+            const response = await fetch('http://localhost/kaperustiko-possystem/backend/modules/insert.php?action=upload_product', {
+                method: 'POST',
+                body: formData
+            });
 
-    // Log the API response
-    const result = await response.json();
-    console.log("API Response:", result);
-
-    // Handle response (e.g., show alert)
-    if (response.ok) {
-        showAlert('Product uploaded successfully', 'success');
-        isCodePopupVisible = false;
-        showPopup = false;
-        window.location.reload();
-    } else {
-        showAlert('Failed to upload product', 'error');
-        isCodePopupVisible = false;
-    }
-};
+            const result = await response.json();
+            
+            if (result.success) {
+                showAlert(result.message, 'success');
+                showPopup = false;
+                window.location.reload();
+            } else {
+                throw new Error(result.message || 'Upload failed');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
 
     // Update showAlert function to handle success type
     function showAlert(message: string, type: string) {
@@ -85,14 +103,12 @@
 
     const confirmAccess = (action: string) => {
         if (inputCode === '123456') {
-            if (action === 'add') {
-                showPopup = true; // Show the product addition form
-            } else if (action === 'options') {
+            if (action === 'options') {
                 showOptionsPopup = true; // Show options popup
             }
-            showAlert('Access successfully granted', 'success'); // Show success alert
+            showAlert('Access successfully granted', 'success');
         } else {
-            showAlert('Wrong code password', 'error'); // Show error alert
+            showAlert('Wrong code password', 'error');
         }
         inputCode = '';
         isCodePopupVisible = false;
@@ -119,7 +135,7 @@
         console.log('Clicked Item Code:', selectedItem);
 
         // Fetch the quantity from the backend
-        const response = await fetch(`http://localhost/kaperustiko-possystem/backend/get_product_qty.php?code=${selectedItem}`);
+        const response = await fetch(`http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getProductQty&code=${selectedItem}`);
         if (response.ok) {
             const data = await response.json();
             console.log('Current Quantity:', data.qty); // Log the fetched quantity
@@ -139,12 +155,12 @@
         };
 
         // Send the update request to the backend
-        const response = await fetch('http://localhost/kaperustiko-possystem/backend/update_qty.php', {
+        const response = await fetch('http://localhost/kaperustiko-possystem/backend/modules/update.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data),
+            body: JSON.stringify({ code: selectedItem, qty: quantityToAdd }),
         });
 
         // Log the API response
@@ -168,8 +184,8 @@
 
     const fetchItemDetails = async () => {
       console.log('Fetching item details for code:', selectedItem); // Debugging log
-        console.log(`Fetching item details from URL: http://localhost/kaperustiko-possystem/backend/get_items.php?code=${selectedItem}`); // Log the URL being fetched
-        const response = await fetch(`http://localhost/kaperustiko-possystem/backend/get_items.php?code=${selectedItem}`, {
+        console.log(`Fetching item details from URL: http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getItems&code=${selectedItem}`); // Log the URL being fetched
+        const response = await fetch(`http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getItems&code=${selectedItem}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -200,12 +216,12 @@
 
     const deleteProduct = async () => {
         if (selectedItem) {
-            const response = await fetch('http://localhost/kaperustiko-possystem/backend/delete_product.php', {
-                method: 'POST',
+            const response = await fetch(`http://localhost/kaperustiko-possystem/backend/modules/delete.php?action=deleteProduct`, {
+                method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ code: selectedItem }), // Send the selected item code
+                body: JSON.stringify({ code: selectedItem }),
             });
 
             const result = await response.json();
@@ -268,7 +284,7 @@
                     <option value="Good">Good</option>
                 </select>
             </div>
-            <button class="p-2 bg-green-600 text-white rounded shadow-md hover:bg-green-700 transition duration-200" on:click={() => { isCodePopupVisible = true; action = 'add'; }}>
+            <button class="p-2 bg-green-600 text-white rounded shadow-md hover:bg-green-700 transition duration-200" on:click={addProduct}>
                 Add Product
             </button>
         </div>

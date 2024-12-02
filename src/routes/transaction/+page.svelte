@@ -78,7 +78,8 @@
     async function fetchSalesData() {
         const formattedDate = selectedDate.toLocaleDateString('en-US');
         
-        const apiUrl = `http://localhost/kaperustiko-possystem/backend/get_sales_information.php?date=${formattedDate}`;
+        const apiUrl = `http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getSalesInformation&date=${formattedDate}`;
+        console.log("API URL:", apiUrl); // Log the final API URL
 
         const response = await fetch(apiUrl);
         const data = await response.json();
@@ -198,7 +199,7 @@
         console.log("Remit Data:", remitData); // Log remitData to check values
 
         // Send data to the backend
-        fetch('http://localhost/kaperustiko-possystem/backend/remit_sales.php', {
+        fetch('http://localhost/kaperustiko-possystem/backend/modules/insert.php?action=remit_sales', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -253,7 +254,7 @@
         console.log("Pending Data:", pendingData); // Log pendingData to check values
 
         // Send data to the backend for pending action
-        fetch('http://localhost/kaperustiko-possystem/backend/remit_sales.php', {
+        fetch('http://localhost/kaperustiko-possystem/backend/modules/insert.php?action=remit_sales', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -309,7 +310,7 @@
     // New function to check if a remit exists for the selected date
     async function checkRemitExists() {
         const formattedDate = selectedDate.toISOString().split('T')[0]; // Format date as YYYY-MM-DD
-        const apiUrl = `http://localhost/kaperustiko-possystem/backend/get_remit_sales.php?date=${formattedDate}`;
+        const apiUrl = `http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getRemitSales&date=${formattedDate}`;
         
         const response = await fetch(apiUrl);
         const data = await response.json();
@@ -329,14 +330,19 @@
 
     // New function to delete the sale from total_sales
     function deleteSale(receipt: string) {
-        fetch('http://localhost/kaperustiko-possystem/backend/get_sales_information.php', {
-            method: 'POST',
+        fetch('http://localhost/kaperustiko-possystem/backend/modules/delete.php?action=deleteSalesInformation', {
+            method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ receipt_number: receipt }),
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`); // Log HTTP errors
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 // Refresh the sales data after deletion
@@ -352,7 +358,6 @@
   
     // New function to confirm the return action
     function confirmReturn() {
-
         const saleToReturn = recentSales.find(sale => sale.receipt === selectedReceipt); // Find the selected sale
         if (saleToReturn) {
             const returnData = {
@@ -368,7 +373,7 @@
             };
 
             // Send data to return_order.php
-            fetch('http://localhost/kaperustiko-possystem/backend/return_order.php', {
+            fetch('http://localhost/kaperustiko-possystem/backend/modules/insert.php?action=return_order', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -378,11 +383,12 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // If return is successful, delete the sale from total_sales
-                    if (selectedReceipt) { // Check if selectedReceipt is not null
-                        deleteSale(selectedReceipt);
+                    // Check if selectedReceipt is not null before calling deleteSale
+                    if (selectedReceipt) { 
+                        deleteSale(selectedReceipt); // Call deleteSale to remove the sale from the database
                     }
                     showAlert("Return processed successfully.", "success"); // Show success alert
+                    location.reload(); // Reload the page after successful return
                 } else {
                     showAlert("Failed to process return. Please try again.", "error");
                 }

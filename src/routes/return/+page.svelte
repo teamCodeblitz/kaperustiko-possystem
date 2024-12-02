@@ -79,7 +79,7 @@
         const formattedDate = selectedDate.toLocaleDateString('en-US');
         console.log("Fetching sales data for date:", formattedDate);
         
-        const apiUrl = `http://localhost/kaperustiko-possystem/backend/get_return_orders.php?return_date=${formattedDate}`;
+        const apiUrl = `http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getReturnOrders&return_date=${formattedDate}`;
         console.log("API URL:", apiUrl); // Log the final API URL
 
         const response = await fetch(apiUrl);
@@ -194,24 +194,30 @@
         console.log("Return Data:", returnData); // Log remitData to check values
 
         // Send data to the backend
-        fetch('http://localhost/kaperustiko-possystem/backend/remit_returns.php', {
+        fetch('http://localhost/kaperustiko-possystem/backend/modules/insert.php?action=remit_returns', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(returnData),
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`); // Throw an error for non-2xx responses
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 showAlert("Sales return successfully.", "success"); // Show alert for successful remit
                 console.log("Return confirmed with code:", inputCode);
             } else {
                 showAlert("Failed to return sales. Please try again.", "error");
+                console.error("Error response:", data.message); // Log the error message
             }
         })
         .catch(error => {
-            console.error("Error:", error);
+            console.error("Fetch error:", error); // Log the fetch error
             showAlert("An error occurred. Please try again.", "error");
         });
 
@@ -248,7 +254,7 @@
         console.log("Pending Data:", pendingData); // Log pendingData to check values
 
         // Send data to the backend for pending action
-        fetch('http://localhost/kaperustiko-possystem/backend/remit_returns.php', {
+        fetch('http://localhost/kaperustiko-possystem/backend/modules/insert.php?action=remit_returns', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -304,7 +310,7 @@
     // New function to check if a remit exists for the selected date
     async function checkRemitExists() {
         const formattedDate = selectedDate.toISOString().split('T')[0]; // Format date as YYYY-MM-DD
-        const apiUrl = `http://localhost/kaperustiko-possystem/backend/get_remit_returns.php?date=${formattedDate}`;
+        const apiUrl = `http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getRemitReturns&date=${formattedDate}`;
         
         const response = await fetch(apiUrl);
         const data = await response.json();

@@ -67,26 +67,26 @@
     onMount(async () => {
         const today = new Date();
         const formattedDate = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`; // Format date as MM/DD/YYYY
-        const response = await fetch(`http://localhost/kaperustiko-possystem/backend/get_today_sales.php?date=${formattedDate}`); // Use formatted date in the URL
+        const response = await fetch(`http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getTodaySales&date=${formattedDate}`); // Use formatted date in the URL
         const data = await response.json();
         if (data.length > 0 && data[0].total_amount) { // Adjusted to check the correct structure of the response
             totalSalesToday = data[0].total_amount; // Update the total sales for today
         }
 
         // Fetch all sales remit items from the backend
-        const responseRemit = await fetch('http://localhost/kaperustiko-possystem/backend/get_remit_sales.php');
+        const responseRemit = await fetch('http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getRemitSales');
         const remitItems = await responseRemit.json();
         salesRemitItems = remitItems; // Store fetched data in salesRemitItems
 
         fetchDataForCategory(selectedCategory); // Fetch data for Food on mount
 
-        const responseReturn = await fetch('http://localhost/kaperustiko-possystem/backend/get_remit_returns.php');
+        const responseReturn = await fetch('http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getRemitReturns');
         const fetchedReturnItems = await responseReturn.json(); // Fetch return items
         returnItems = fetchedReturnItems; // Store fetched data in returnItems
 
         try {
-            const response = await fetch('http://localhost/kaperustiko-possystem/backend/get_total_sales.php', {
-                method: 'POST',
+            const response = await fetch('http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getTotalSales', {
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -100,13 +100,17 @@
         }
 
         try {
-            const response = await fetch('http://localhost/kaperustiko-possystem/backend/get_bestseller.php', {
-                method: 'POST',
+            const response = await fetch('http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getBestsellers', {
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
             });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const data = await response.json();
+            console.log("Best seller data:", data);
             bestSeller = data.length > 0 ? data[0] : "No sales yet"; // Update bestSeller
         } catch (error) {
             console.error("Error fetching best seller:", error);
@@ -115,8 +119,8 @@
 
         // Fetch least ordered item
         try {
-            const responseLeastSeller = await fetch('http://localhost/kaperustiko-possystem/backend/get_leastseller.php', {
-                method: 'POST',
+            const responseLeastSeller = await fetch('http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getLeastsellers', {
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -142,7 +146,7 @@
     }
 
     async function fetchDataForCategory(category: string) {
-        const responseMenu = await fetch(`http://localhost/kaperustiko-possystem/backend/get_menu_dashboard.php?label=${category}&label2=${category}`);
+        const responseMenu = await fetch(`http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getMenuDashboard&label=${category}&label2=${category}`);
         const menuItems = await responseMenu.json();
 
         // Populate inventoryData with fetched menu items
@@ -209,7 +213,7 @@
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-md p-4 text-center">
-                <div class="text-gray-500 text-sm">Today's Total Return Cost</div>
+                <div class="text-gray-500 text-sm">Today's Total Return Cost</div> 
                 <div class="text-3xl font-bold">###</div>
                 <div class="text-red-500">
                     <FontAwesomeIcon icon={faExclamationCircle} />

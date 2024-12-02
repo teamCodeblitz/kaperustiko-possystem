@@ -1,5 +1,4 @@
 <script lang="ts">
-	import 'svelte-routing';
 	import Card from '../components/card.svelte';
 	import Sidebar from '../sidebar/+page.svelte';
 	import { orderedItemsStore } from '../../stores/orderedItemsStore';
@@ -23,8 +22,12 @@
 			staffToken = localStorage.getItem('staff_token'); // Get the staff_token
 		}
 		console.log('Fetched staff_token:', staffToken); // Log the fetched staff_token
-		console.log(`Fetching user data from: http://localhost/kaperustiko-possystem/backend/get_user.php?staff_token=${staffToken}`); // Log the URL with the staff_token
-		const response = await fetch(`http://localhost/kaperustiko-possystem/backend/get_user.php?staff_token=${staffToken}`);
+		console.log(
+			`Fetching user data from: http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getUser&staff_token=${staffToken}`
+		); // Log the URL with the staff_token
+		const response = await fetch(
+			`http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getUser&staff_token=${staffToken}`
+		);
 		if (response.ok) {
 			const userData = await response.json();
 			console.log('Fetched user data:', userData); // Log the fetched user data
@@ -33,7 +36,9 @@
 	}
 
 	async function fetchMenu() {
-		const response = await fetch('http://localhost/kaperustiko-possystem/backend/get_menu.php');
+		const response = await fetch(
+			'http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getMenu'
+		);
 		if (response.ok) {
 			cardData = await response.json();
 		} else {
@@ -45,7 +50,9 @@
 
 	// Function to fetch orders
 	async function fetchOrders() {
-		const response = await fetch('http://localhost/kaperustiko-possystem/backend/get_order.php');
+		const response = await fetch(
+			'http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getOrders'
+		);
 		if (response.ok) {
 			const orders = await response.json();
 			orderedItemsStore.set(orders);
@@ -57,13 +64,13 @@
 
 	function updateTime() {
 		const now = new Date();
-		currentTime = now.toLocaleString('en-US', { 
-			year: 'numeric', 
-			month: 'long', 
-			day: 'numeric', 
-			hour: '2-digit', 
-			minute: '2-digit', 
-			second: '2-digit' 
+		currentTime = now.toLocaleString('en-US', {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit',
+			second: '2-digit'
 		});
 		currentDay = now.toLocaleString('en-US', { weekday: 'long' });
 	}
@@ -75,7 +82,7 @@
 		// Retrieve ordered items from localStorage
 		const storedItems = localStorage.getItem('orderedItems');
 		if (storedItems) {
-			 orderedItems = JSON.parse(storedItems); // Parse and set orderedItems
+			orderedItems = JSON.parse(storedItems); // Parse and set orderedItems
 		}
 		// Update orders every 500 milliseconds
 		const interval = setInterval(fetchOrders, 500);
@@ -95,7 +102,13 @@
 	let isPopupVisible = false;
 	let isVariationVisible = false;
 	let selectedItem: MenuItem | null = null;
-	let selectedItemDetails: { title: string; price: string; size: string; quantity: number; addons: string[] } | null = null;
+	let selectedItemDetails: {
+		title: string;
+		price: string;
+		size: string;
+		quantity: number;
+		addons: string[];
+	} | null = null;
 
 	type OrderedItem = {
 		order_name: string;
@@ -114,14 +127,17 @@
 	};
 
 	let selectedAddons: string[] = [];
-	let displayedPrice = selectedItem ? 
-		formatPrice(quantity * (parseFloat((selectedItem as MenuItem).price1.replace('₱', '').replace(',', '')) + 
-		parseFloat(calculateAddonsPrice(selectedAddons).replace('₱', '').replace(',', '')))) 
+	let displayedPrice = selectedItem
+		? formatPrice(
+				quantity *
+					(parseFloat((selectedItem as MenuItem).price1.replace('₱', '').replace(',', '')) +
+						parseFloat(calculateAddonsPrice(selectedAddons).replace('₱', '').replace(',', '')))
+			)
 		: '';
 	let selectedSize = 'Regular';
 	let isCodePopupVisible = false;
 	let voidIndex: number | null = null;
-	let inputCode = '123456';
+	let inputCode = '';
 
 	// Sort cardData by label1 and label2
 	cardData.sort((a, b) => {
@@ -159,22 +175,24 @@
 		}
 	}
 
-	fetch('http://localhost/kaperustiko-possystem/backend/get_total_orders.php')
-			.then(response => response.json())
-			.then(data => {
-				orderNumber = `#${(data.total_order).toString().padStart(2, '0')}`; // Set order number based on fetched data
-				console.log('Order Number:', orderNumber); // Log the order number
-				
-			})
-			.catch(error => {
-				console.error('Failed to fetch total orders:', error);
-			});
+	fetch('http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getTotalOrders')
+		.then((response) => response.json())
+		.then((data) => {
+			orderNumber = `#${data.total_order.toString().padStart(2, '0')}`; // Set order number based on fetched data
+			console.log('Order Number:', orderNumber); // Log the order number
+		})
+		.catch((error) => {
+			console.error('Failed to fetch total orders:', error);
+		});
 
 	function handlePlaceOrder() {
 		// Fetch cashier name when place order is clicked
 		fetchCashierName(); // Call to fetch cashier name
 		// Log the codes of all ordered items
-		console.log('Ordered Item Codes:', orderedItems.map(item => item.code)); // Log the codes
+		console.log(
+			'Ordered Item Codes:',
+			orderedItems.map((item) => item.code)
+		); // Log the codes
 		isPopupVisible = true;
 		// Fetch the total order count from the database
 	}
@@ -191,7 +209,7 @@
 			date: new Date().toLocaleDateString(),
 			time: new Date().toLocaleTimeString(),
 			cashierName: cashierName,
-			itemsOrdered: orderedItems.map(item => ({
+			itemsOrdered: orderedItems.map((item) => ({
 				order_name: item.order_name,
 				order_name2: item.order_name2,
 				order_quantity: 'x' + item.order_quantity,
@@ -201,45 +219,61 @@
 				order_addons2: item.order_addons2 !== 'None' ? item.order_addons2 : undefined, // Save order_addons2
 				order_addons_price2: item.order_addons_price2 || 0, // Save order_addons_price2
 				order_addons3: item.order_addons3 !== 'None' ? item.order_addons3 : undefined, // Save order_addons3
-				order_addons_price3: item.order_addons_price3 || 0, // Save order_addons_price3
+				order_addons_price3: item.order_addons_price3 || 0 // Save order_addons_price3
 			})),
-			totalAmount: Math.round(orderedItems.reduce((total, item) => total + parseFloat(item.order_price.toString().replace('₱', '').replace(',', '')), 0)), // Convert to integer
+			totalAmount: Math.round(
+				orderedItems.reduce(
+					(total, item) =>
+						total + parseFloat(item.order_price.toString().replace('₱', '').replace(',', '')),
+					0
+				)
+			), // Convert to integer
 			amountPaid: Math.round(parseFloat(payment.replace('₱', '').replace(',', ''))), // Convert to integer
-			change: orderedItems.length > 0 && payment ? 
-				Math.round(parseFloat(payment.replace('₱', '').replace(',', '')) - 
-				orderedItems.reduce((total, item) => total + parseFloat(item.order_price.toString().replace('₱', '').replace(',', '')), 0)) // Convert to integer
-				: 0, // Default to 0
+			change:
+				orderedItems.length > 0 && payment
+					? Math.round(
+							parseFloat(payment.replace('₱', '').replace(',', '')) -
+								orderedItems.reduce(
+									(total, item) =>
+										total +
+										parseFloat(item.order_price.toString().replace('₱', '').replace(',', '')),
+									0
+								)
+						) // Convert to integer
+					: 0, // Default to 0
 			order_take: isDineIn ? 'Dine In' : 'Take Out'
 		};
 
 		// Now delete all orders before saving the receipt
 		// Call updateQuantity for each ordered item
-		orderedItems.forEach(item => {
+		orderedItems.forEach((item) => {
 			const code = item.code;
 			console.log('Sending code to PHP:', code); // Log the code being sent
 			// Prioritize deleting quantity before saving receipt
-			fetch(`http://localhost/kaperustiko-possystem/backend/qty_data.php?code=${code}`, {
-				method: 'GET',
+			fetch(`http://localhost/kaperustiko-possystem/backend/qty_data.php?code=${code}&order_quantity=${item.order_quantity}`, {
+				method: 'GET'
 			})
-			.then(response => response.json())
-			.then(data => {
-				if (data.status === 'success') {
-					console.log(data.message); // Log success message
-					fetchOrders(); // Refresh orders to reflect updated quantities
-				} else {
-					console.error(data.message); // Log error message
-				}
-			})
-			.catch(error => {
-				console.error('Error updating quantity:', error);
-			});
+				.then((response) => response.json())
+				.then((data) => {
+					if (data.status === 'success') {
+						console.log(data.message); // Log success message
+						fetchOrders(); // Refresh orders to reflect updated quantities
+					} else {
+						console.error(data.message); // Log error message
+					}
+				})
+				.catch((error) => {
+					console.error('Error updating quantity:', error);
+				});
 		});
-		
+
 		// Now delete all orders before saving the receipt
-		fetch('http://localhost/kaperustiko-possystem/backend/delete_all_order.php', {
-			method: 'DELETE', // Assuming you have a DELETE endpoint
-		})
-		.then(async deleteResponse => {
+		fetch(
+			'http://localhost/kaperustiko-possystem/backend/modules/delete.php?action=deleteAllOrders',
+			{
+				method: 'DELETE' // Assuming you have a DELETE endpoint
+			}
+		).then(async (deleteResponse) => {
 			if (!deleteResponse.ok) {
 				const text = await deleteResponse.text();
 				throw new Error(`Failed to delete orders: ${text}`);
@@ -247,13 +281,16 @@
 			console.log('All orders deleted successfully');
 
 			// Send data to the server to save the receipt
-			const saveResponse = await fetch('http://localhost/kaperustiko-possystem/backend/save_receipt.php', {
-				method: 'POST',
+			const saveResponse = await fetch(
+				'http://localhost/kaperustiko-possystem/backend/modules/insert.php?action=save_receipt',
+				{
+					method: 'POST',
 					headers: {
-						'Content-Type': 'application/json',
+						'Content-Type': 'application/json'
 					},
-					body: JSON.stringify(receiptData),
-			});
+					body: JSON.stringify(receiptData)
+				}
+			);
 
 			const textResponse = await saveResponse.text(); // Get the response as text
 			console.log('Response from save_receipt.php:', textResponse); // Log the response
@@ -283,14 +320,14 @@
 		selectedAddons = [];
 		voidIndex = null;
 		inputCode = '123456';
-		
+
 		// Reset all numbers in local storage, except for staff_token
 		const staffToken = localStorage.getItem('staff_token'); // Preserve staff_token
 		localStorage.clear(); // Clear all numbers in local storage
 		if (staffToken) {
 			localStorage.setItem('staff_token', staffToken); // Restore staff_token
 		}
-	
+
 		window.location.reload();
 	}
 
@@ -319,7 +356,7 @@
 	};
 
 	function formatPrice(price: number): string {
-		return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+		return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 	}
 
 	function handleAdd(item: MenuItem) {
@@ -329,135 +366,158 @@
 	}
 
 	function handleOrder(item: MenuItem) {
-    selectedItem = item;
-    const addonsPrice = calculateAddonsPrice(selectedAddons); // Calculate addons price
-    const basePrice = selectedSize === 'Regular' ? parseFloat(item.price1.replace('₱', '').replace(',', '')) :
-        selectedSize === 'Large' ? parseFloat(item.price2.replace('₱', '').replace(',', '')) :
-        parseFloat(item.price3.replace('₱', '').replace(',', '')); // Adjust for Family size
+		selectedItem = item;
+		const addonsPrice = calculateAddonsPrice(selectedAddons); // Calculate addons price
+		const basePrice =
+			selectedSize === 'Regular'
+				? parseFloat(item.price1.replace('₱', '').replace(',', ''))
+				: selectedSize === 'Large'
+					? parseFloat(item.price2.replace('₱', '').replace(',', ''))
+					: parseFloat(item.price3.replace('₱', '').replace(',', '')); // Adjust for Family size
 
-    const totalAddonsPrice = selectedAddons.reduce((total, addon) => {
-        const addonPrice = parseFloat(calculateAddonsPrice([addon]).replace('₱', '').replace(',', '')) || 0; // Calculate price for each addon
-        return total + addonPrice; // Sum up the prices
-    }, 0); // Initialize total to 0
+		const totalAddonsPrice = selectedAddons.reduce((total, addon) => {
+			const addonPrice =
+				parseFloat(calculateAddonsPrice([addon]).replace('₱', '').replace(',', '')) || 0; // Calculate price for each addon
+			return total + addonPrice; // Sum up the prices
+		}, 0); // Initialize total to 0
 
-    const newItem = {
-        title: item.title1,
-        price: formatPrice(quantity * (basePrice + totalAddonsPrice)), // Correctly calculate total price
-        originalPrice: formatPrice(basePrice),
-        size: selectedSize,
-        quantity: quantity,
-        addons: selectedAddons,
-        basePrice: basePrice, // Add basePrice to the newItem
-        addonsPrices: selectedAddons.map(addon => {
-            const price = calculateAddonsPrice([addon]); // Get individual addon price
-            return `${addon} - ₱${price}`; // Format as "Addon - Price"
-        }).join(', '), // Join the prices into a single string
-		code: item.code
-    };
-    orderedItems = [...orderedItems];
+		const newItem = {
+			title: item.title1,
+			price: formatPrice(quantity * (basePrice + totalAddonsPrice)), // Correctly calculate total price
+			originalPrice: formatPrice(basePrice),
+			size: selectedSize,
+			quantity: quantity,
+			addons: selectedAddons,
+			basePrice: basePrice, // Add basePrice to the newItem
+			addonsPrices: selectedAddons
+				.map((addon) => {
+					const price = calculateAddonsPrice([addon]); // Get individual addon price
+					return `${addon} - ₱${price}`; // Format as "Addon - Price"
+				})
+				.join(', '), // Join the prices into a single string
+			code: item.code
+		};
+		orderedItems = [...orderedItems];
 
-    // Prepare data to send to the server
-    type OrderData = {
-        order_name: string;
-		order_name2: string;
-        order_quantity: number;
-        order_size: string;
-        order_price: number;
-        order_image: string;
-        order_addons?: string; // Add optional properties for addons
-        order_addons_price?: number;
-        order_addons2?: string;
-        order_addons_price2?: number;
-        order_addons3?: string;
-        order_addons_price3?: number;
-        basePrice: number; // Add basePrice to the OrderData type
-		code: string;
-    };
+		// Prepare data to send to the server
+		type OrderData = {
+			order_name: string;
+			order_name2: string;
+			order_quantity: number;
+			order_size: string;
+			order_price: number;
+			order_image: string;
+			order_addons?: string; // Add optional properties for addons
+			order_addons_price?: number;
+			order_addons2?: string;
+			order_addons_price2?: number;
+			order_addons3?: string;
+			order_addons_price3?: number;
+			basePrice: number; // Add basePrice to the OrderData type
+			code: string;
+		};
 
-    const currentAddonsPrice = calculateAddonsPrice(selectedAddons); // Renamed variable
-    const totalOrderPrice = (basePrice * quantity) + totalAddonsPrice; // Calculate total price
+		const currentAddonsPrice = calculateAddonsPrice(selectedAddons); // Renamed variable
+		const totalOrderPrice = basePrice * quantity + totalAddonsPrice; // Calculate total price
 
-    // Update the orderData to include the correct order_price
-    const orderData: OrderData = {
-        order_name: item.title1,
-		order_name2: item.title2,
-        order_quantity: quantity,
-        order_size: selectedSize,
-        order_price: totalOrderPrice, // Calculate total price as a number
-        order_image: item.image,
-        basePrice: basePrice, // Change this line to reflect the original price
-        // Add-ons handling
-        order_addons: selectedAddons.length > 0 ? selectedAddons[0] : 'None',
-        order_addons_price: selectedAddons.length > 0 ? parseFloat(calculateAddonsPrice([selectedAddons[0]]).replace('₱', '').replace(',', '')) : 0,
-        order_addons2: selectedAddons.length > 1 ? selectedAddons[1] : 'None',
-        order_addons_price2: selectedAddons.length > 1 ? parseFloat(calculateAddonsPrice([selectedAddons[1]]).replace('₱', '').replace(',', '')) : 0,
-        order_addons3: selectedAddons.length > 2 ? selectedAddons[2] : 'None',
-        order_addons_price3: selectedAddons.length > 2 ? parseFloat(calculateAddonsPrice([selectedAddons[2]]).replace('₱', '').replace(',', '')) : 0,
-		code: item.code
-    };
+		// Update the orderData to include the correct order_price
+		const orderData: OrderData = {
+			order_name: item.title1,
+			order_name2: item.title2,
+			order_quantity: quantity,
+			order_size: selectedSize,
+			order_price: totalOrderPrice, // Calculate total price as a number
+			order_image: item.image,
+			basePrice: basePrice, // Change this line to reflect the original price
+			// Add-ons handling
+			order_addons: selectedAddons.length > 0 ? selectedAddons[0] : 'None',
+			order_addons_price:
+				selectedAddons.length > 0
+					? parseFloat(calculateAddonsPrice([selectedAddons[0]]).replace('₱', '').replace(',', ''))
+					: 0,
+			order_addons2: selectedAddons.length > 1 ? selectedAddons[1] : 'None',
+			order_addons_price2:
+				selectedAddons.length > 1
+					? parseFloat(calculateAddonsPrice([selectedAddons[1]]).replace('₱', '').replace(',', ''))
+					: 0,
+			order_addons3: selectedAddons.length > 2 ? selectedAddons[2] : 'None',
+			order_addons_price3:
+				selectedAddons.length > 2
+					? parseFloat(calculateAddonsPrice([selectedAddons[2]]).replace('₱', '').replace(',', ''))
+					: 0,
+			code: item.code
+		};
 
-    console.log('Order Data:', orderData); // Log the order data
+		console.log('Order Data:', orderData); // Log the order data
 
-    // Save the order to the database
-    fetch('http://localhost/kaperustiko-possystem/backend/save_order.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData),
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.text().then(text => { throw new Error(text); });
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log(data.message);
-    })
-    .catch(error => {
-        console.error('Error saving order:', error);
-    });
+		// Save the order to the database
+		fetch('http://localhost/kaperustiko-possystem/backend/modules/insert.php?action=save_order', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(orderData)
+		})
+			.then((response) => {
+				if (!response.ok) {
+					return response.text().then((text) => {
+						throw new Error(text);
+					});
+				}
+				return response.json();
+			})
+			.then((data) => {
+				console.log(data.message);
+			})
+			.catch((error) => {
+				console.error('Error saving order:', error);
+			});
 
-    fetchOrders();
+		fetchOrders();
 
-    selectedItem = null;
-    selectedSize = 'Regular';
-    selectedAddons = [];
-    quantity = 1; // Reset quantity to 1
-    closePopup();
+		selectedItem = null;
+		selectedSize = 'Regular';
+		selectedAddons = [];
+		quantity = 1; // Reset quantity to 1
+		closePopup();
 
-    // Save the order to localStorage
-    localStorage.setItem('orderedItems', JSON.stringify(orderedItems)); // Store orderedItems in localStorage
-}
+		// Save the order to localStorage
+		localStorage.setItem('orderedItems', JSON.stringify(orderedItems)); // Store orderedItems in localStorage
+	}
 
 	function calculateAddonsPrice(addons: string[]): string {
 		// Define prices for each addon
 		const addonPrices: { [key: string]: number } = {
-			'Sugar': 5,
-			'Bobba': 10,
-			'Milk': 7,
+			Sugar: 5,
+			Bobba: 10,
+			Milk: 7,
 			'Extra Cheese': 15,
-			'Bacon': 20,
-			'Olives': 10,
-			'Rice': 10 
+			Bacon: 20,
+			Olives: 10,
+			Rice: 10
 		};
 
 		// Return a string of addon prices
-		return addons.map(addon => `${addonPrices[addon] || 0}`).join(', ');
+		return addons.map((addon) => `${addonPrices[addon] || 0}`).join(', ');
 	}
 
 	function selectSize(size: string) {
-		 selectedSize = size;
-		 if (selectedItem) {
-			 if (size === 'Regular' || size === '0.25L') {
-				 displayedPrice = formatPrice(quantity * parseFloat(selectedItem.price1.replace('₱', '').replace(',', '')));
-			 } else if (size === 'Large' || size === '0.33L') {
-				 displayedPrice = formatPrice(quantity * parseFloat(selectedItem.price2.replace('₱', '').replace(',', '')));
-			 } else if (size === 'Family' || size === '1.5L') {
-				 displayedPrice = formatPrice(quantity * parseFloat(selectedItem.price3.replace('₱', '').replace(',', '')));
-			 }
-		 }
+		selectedSize = size;
+		if (selectedItem) {
+			if (size === 'Regular' || size === '0.25L') {
+				displayedPrice = formatPrice(
+					quantity * parseFloat(selectedItem.price1.replace('₱', '').replace(',', ''))
+				);
+			} else if (size === 'Large' || size === '0.33L') {
+				displayedPrice = formatPrice(
+					quantity * parseFloat(selectedItem.price2.replace('₱', '').replace(',', ''))
+				);
+			} else if (size === 'Family' || size === '1.5L') {
+				displayedPrice = formatPrice(
+					quantity * parseFloat(selectedItem.price3.replace('₱', '').replace(',', ''))
+				);
+			}
+		}
 	}
 
 	$: {
@@ -486,16 +546,19 @@
 			localStorage.setItem('orderedItems', JSON.stringify(orderedItems)); // Update localStorage after voiding
 
 			// Send request to backend to delete the order
-			fetch(`http://localhost/kaperustiko-possystem/backend/void_order.php?order_name=${encodeURIComponent(orderToVoid.order_name)}`, {
-				method: 'POST',
-			})
-			.then(response => response.json())
-			.then(data => {
-				console.log('Order voided:', data);
-			})
-			.catch(error => {
-				console.error('Error voiding order:', error);
-			});
+			fetch(
+				`http://localhost/kaperustiko-possystem/backend/modules/delete.php?action=voidOrder&order_name=${encodeURIComponent(orderToVoid.order_name)}`,
+				{
+					method: 'DELETE'
+				}
+			)
+				.then((response) => response.json())
+				.then((data) => {
+					console.log('Order voided:', data);
+				})
+				.catch((error) => {
+					console.error('Error voiding order:', error);
+				});
 
 			voidIndex = null;
 			inputCode = '';
@@ -511,7 +574,6 @@
 		isCodePopupVisible = false;
 		inputCode = '';
 	}
-
 </script>
 
 <div class="flex h-screen">
@@ -533,7 +595,7 @@
 				{/each}
 			</div>
 
-			<div class="mb-4 font-bold text-black flex justify-between items-center">
+			<div class="mb-4 flex items-center justify-between font-bold text-black">
 				{#if selectedCategory === 'All'}
 					<p>Display All Menu</p>
 				{:else if selectedCategory === 'Beverages'}
@@ -561,7 +623,7 @@
 			</div>
 
 			<div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-				{#each cardData.filter(item => selectedCategory === 'All' || item.label === selectedCategory || item.label2 === selectedCategory) as { code, title1, title2, price1, price2, price3, image, menu_no, label, label2, qty }}
+				{#each cardData.filter((item) => selectedCategory === 'All' || item.label === selectedCategory || item.label2 === selectedCategory) as { code, title1, title2, price1, price2, price3, image, menu_no, label, label2, qty }}
 					<Card
 						{code}
 						{title1}
@@ -589,54 +651,64 @@
 				<p class="text-sm font-bold">Order Number {orderNumber}</p>
 			</div>
 
-			<div class="mb-4 w-full flex-grow space-y-2 overflow-y-auto max-h-[400px]">
+			<div class="mb-4 max-h-[400px] w-full flex-grow space-y-2 overflow-y-auto">
 				{#if orderedItems.length > 0}
 					{#each orderedItems as item, index}
-						<div class="flex flex-col p-4 bg-white rounded-lg shadow-md">
-							<div class="flex justify-between items-center">
+						<div class="flex flex-col rounded-lg bg-white p-4 shadow-md">
+							<div class="flex items-center justify-between">
 								<p class="text-gray-600">Code: {item.code}</p>
 							</div>
-							<div class="flex justify-between items-center">
+							<div class="flex items-center justify-between">
 								<p class="font-semibold text-gray-800">{item.order_name} x {item.order_quantity}</p>
-								<p class="font-semibold text-gray-800 text-right">₱{item.order_price}.00</p>
+								<p class="text-right font-semibold text-gray-800">₱{item.order_price}.00</p>
 							</div>
-							<div class="flex justify-between items-center">
+							<div class="flex items-center justify-between">
 								<p class="text-gray-600">Size: {item.order_size}</p>
 							</div>
 							{#if item.order_addons !== 'None'}
-							<ul class="list-disc pl-5">
-								{#if item.order_addons !== 'None'}
-								<div class="flex justify-between items-center">
-									<li class="text-gray-600">{item.order_addons}</li>
-									<p class="text-gray-600 text-right">₱{item.order_addons_price}.00</p>
-								</div>
-								{/if}	
-								{#if item.order_addons2 !== 'None'}
-								<div class="flex justify-between items-center">
-									<li class="text-gray-600">{item.order_addons2}</li>
-									<p class="text-gray-600 text-right">₱{item.order_addons_price2}.00</p>
-								</div>
-								{/if}
-								{#if item.order_addons3 !== 'None'}
-								<div class="flex justify-between items-center">
-									<li class="text-gray-600">{item.order_addons3}</li>
-									<p class="text-gray-600 text-right">₱{item.order_addons_price3}.00</p>
-								</div>
-								{/if}
-							</ul>
+								<ul class="list-disc pl-5">
+									{#if item.order_addons !== 'None'}
+										<div class="flex items-center justify-between">
+											<li class="text-gray-600">{item.order_addons}</li>
+											<p class="text-right text-gray-600">₱{item.order_addons_price}.00</p>
+										</div>
+									{/if}
+									{#if item.order_addons2 !== 'None'}
+										<div class="flex items-center justify-between">
+											<li class="text-gray-600">{item.order_addons2}</li>
+											<p class="text-right text-gray-600">₱{item.order_addons_price2}.00</p>
+										</div>
+									{/if}
+									{#if item.order_addons3 !== 'None'}
+										<div class="flex items-center justify-between">
+											<li class="text-gray-600">{item.order_addons3}</li>
+											<p class="text-right text-gray-600">₱{item.order_addons_price3}.00</p>
+										</div>
+									{/if}
+								</ul>
 							{/if}
-							<button on:click={() => voidOrder(index)} class="mt-2 text-red-500 text-center">Void</button>
+							<button on:click={() => voidOrder(index)} class="mt-2 text-center text-red-500"
+								>Void</button
+							>
 						</div>
 					{/each}
 				{:else}
-					<p class="text-gray-600 text-center">No items ordered yet.</p>
+					<p class="text-center text-gray-600">No items ordered yet.</p>
 				{/if}
 			</div>
 
-			<div class="mt-auto w-full p-4 rounded-lg shadow-md">
+			<div class="mt-auto w-full rounded-lg p-4 shadow-md">
 				<div class="mb-4 flex w-full items-center justify-between border-b pb-2">
 					<p class="font-semibold text-gray-700">Total Cost:</p>
-					<p class="font-bold text-gray-800">₱{orderedItems.reduce((total, item) => total + parseFloat(item.order_price.toString().replace('₱', '').replace(',', '')), 0).toFixed(2)}</p>
+					<p class="font-bold text-gray-800">
+						₱{orderedItems
+							.reduce(
+								(total, item) =>
+									total + parseFloat(item.order_price.toString().replace('₱', '').replace(',', '')),
+								0
+							)
+							.toFixed(2)}
+					</p>
 				</div>
 				<div class="flex justify-between">
 					<p class="text-lg">Amount Paid:</p>
@@ -644,34 +716,51 @@
 				</div>
 				<div class="flex justify-between">
 					<p class="text-lg">Change:</p>
-					<span class="text-lg">₱{orderedItems.length > 0 && payment ? 
-						Math.max(0, parseFloat((parseFloat(payment.replace('₱', '').replace(',', '')) - 
-						orderedItems.reduce((total, item) => total + parseFloat(item.order_price.toString().replace('₱', '').replace(',', '')), 0)).toFixed(2))) 
-						: '0'}.00</span>
+					<span class="text-lg"
+						>₱{orderedItems.length > 0 && payment
+							? Math.max(
+									0,
+									parseFloat(
+										(
+											parseFloat(payment.replace('₱', '').replace(',', '')) -
+											orderedItems.reduce(
+												(total, item) =>
+													total +
+													parseFloat(item.order_price.toString().replace('₱', '').replace(',', '')),
+												0
+											)
+										).toFixed(2)
+									)
+								)
+							: '0'}.00</span
+					>
 				</div>
 			</div>
 
 			<div class="grid h-[400px] w-full grid-cols-4 gap-2">
-				<button 
-				class="col-span-2 rounded py-2 font-bold text-gray-800 {isDineIn ? 'bg-blue-500 text-white' : 'bg-gray-300'}"
+				<button
+					class="col-span-2 rounded py-2 font-bold text-gray-800 {isDineIn
+						? 'bg-blue-500 text-white'
+						: 'bg-gray-300'}"
+					on:click={() => {
+						isDineIn = true;
+						isTakeOut = false;
+					}}
+				>
+					Dine In
+				</button>
 
-				on:click={() => { isDineIn = true; isTakeOut = false; }}
-			>
-
-				Dine In
-
-			</button>
-
-			<button 
-
-				class="col-span-2 rounded py-2 font-bold text-gray-800 {isTakeOut ? 'bg-blue-500 text-white' : 'bg-gray-300'}"
-				on:click={() => { isDineIn = false; isTakeOut = true; }}
-
-			>
-
-				Take Out
-
-			</button>
+				<button
+					class="col-span-2 rounded py-2 font-bold text-gray-800 {isTakeOut
+						? 'bg-blue-500 text-white'
+						: 'bg-gray-300'}"
+					on:click={() => {
+						isDineIn = false;
+						isTakeOut = true;
+					}}
+				>
+					Take Out
+				</button>
 
 				{#each ['7', '8', '9', '⌫', '4', '5', '6', 'Clr', '1', '2', '3', 'Void', '0', '00', 'Place Order'] as key, index}
 					<button
@@ -686,18 +775,37 @@
 							} else {
 								const currentPayment = localStorage.getItem('payment') || '';
 								localStorage.setItem('payment', currentPayment + key); // Store number in local storage
-								console.log('Stored number:', key, 'Current value:', localStorage.getItem('payment'));
+								console.log(
+									'Stored number:',
+									key,
+									'Current value:',
+									localStorage.getItem('payment')
+								);
 							}
-							handleButtonClick(key, index, orderedItems, payment, handleBackspace, handleClear, voidOrder, handlePlaceOrder, handleNumberInput, isDineIn, isTakeOut);
-							currentInputStore.update(store => {
+							handleButtonClick(
+								key,
+								index,
+								orderedItems,
+								payment,
+								handleBackspace,
+								handleClear,
+								voidOrder,
+								handlePlaceOrder,
+								handleNumberInput,
+								isDineIn,
+								isTakeOut
+							);
+							currentInputStore.update((store) => {
 								return {
 									...store,
 									currentInput: key, // Update the current input
-									amountPaid: parseFloat(amountPaid.replace('₱', '').replace(',', '')) 
+									amountPaid: parseFloat(amountPaid.replace('₱', '').replace(',', ''))
 								};
 							});
 						}}
-						class="rounded bg-gray-200 py-2 font-bold text-gray-800 col-span-{key === 'Place Order' ? '2' : '1'} {key === 'Void' ? 'bg-red-900 text-white' : ''}"
+						class="rounded bg-gray-200 py-2 font-bold text-gray-800 col-span-{key === 'Place Order'
+							? '2'
+							: '1'} {key === 'Void' ? 'bg-red-900 text-white' : ''}"
 					>
 						{key}
 					</button>
@@ -727,11 +835,15 @@
 				<h2 class="mt-4 text-lg font-bold">Items Ordered:</h2>
 				<span class="mt-4 text-lg font-bold">Items Price</span>
 			</div>
-			<ul class="overflow-auto max-h-[200px]">
+			<ul class="max-h-[200px] overflow-auto">
 				{#each orderedItems as item}
 					<li class="flex flex-col justify-between text-lg">
 						<div class="flex justify-between">
-							<span>{item.order_name} {item.order_name2} x {item.order_quantity} {item.order_size}</span>
+							<span
+								>{item.order_name}
+								{item.order_name2} x {item.order_quantity}
+								{item.order_size}</span
+							>
 							<span>₱{item.basePrice}.00</span>
 						</div>
 						<ul class="list-disc pl-5">
@@ -763,7 +875,15 @@
 			</ul>
 			<div class="flex justify-between">
 				<p class="mt-4 text-lg font-bold">Total Amount</p>
-				<span class="mt-4 text-lg font-bold">₱{orderedItems.reduce((total, item) => total + parseFloat(item.order_price.toString().replace('₱', '').replace(',', '')), 0).toFixed(2)}</span>
+				<span class="mt-4 text-lg font-bold"
+					>₱{orderedItems
+						.reduce(
+							(total, item) =>
+								total + parseFloat(item.order_price.toString().replace('₱', '').replace(',', '')),
+							0
+						)
+						.toFixed(2)}</span
+				>
 			</div>
 			<div class="flex justify-between">
 				<p class="text-lg">Amount Paid:</p>
@@ -771,10 +891,24 @@
 			</div>
 			<div class="flex justify-between">
 				<p class="text-lg">Change:</p>
-				<span class="text-lg">₱{orderedItems.length > 0 && payment ? 
-					Math.max(0, parseFloat((parseFloat(payment.replace('₱', '').replace(',', '')) - 
-					orderedItems.reduce((total, item) => total + parseFloat(item.order_price.toString().replace('₱', '').replace(',', '')), 0)).toFixed(2))) 
-					: '0.00'}</span>
+				<span class="text-lg"
+					>₱{orderedItems.length > 0 && payment
+						? Math.max(
+								0,
+								parseFloat(
+									(
+										parseFloat(payment.replace('₱', '').replace(',', '')) -
+										orderedItems.reduce(
+											(total, item) =>
+												total +
+												parseFloat(item.order_price.toString().replace('₱', '').replace(',', '')),
+											0
+										)
+									).toFixed(2)
+								)
+							)
+						: '0.00'}</span
+				>
 			</div>
 			<h2 class="mt-4 text-center text-2xl font-bold">Thank You for Dining with Us!</h2>
 			<div class="mt-4 flex justify-between">
@@ -792,8 +926,13 @@
 {#if isVariationVisible}
 	<div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70">
 		<div class="w-full max-w-md rounded-lg bg-white p-8 shadow-lg">
-			<h2 class="mb-6 text-center text-2xl font-bold">Add {selectedItem?.title1} {selectedItem?.title2}</h2>
-			<p class="mb-6 text-center text-lg">Price: ₱{displayedPrice} (Add-ons: ₱{calculateAddonsPrice(selectedAddons)})</p>
+			<h2 class="mb-6 text-center text-2xl font-bold">
+				Add {selectedItem?.title1}
+				{selectedItem?.title2}
+			</h2>
+			<p class="mb-6 text-center text-lg">
+				Price: ₱{displayedPrice} (Add-ons: ₱{calculateAddonsPrice(selectedAddons)})
+			</p>
 			{#if selectedItem?.image}
 				<img
 					src={`/foods/${selectedItem.image}`}
@@ -807,23 +946,41 @@
 				{#if selectedItem?.label === 'Soda' || selectedItem?.label2 === 'Soda'}
 					<button
 						on:click={() => selectSize('0.25L')}
-						class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === '0.25L' ? 'bg-blue-500 text-white' : ''}">0.25L</button>
+						class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === '0.25L'
+							? 'bg-blue-500 text-white'
+							: ''}">0.25L</button
+					>
 					<button
 						on:click={() => selectSize('0.33L')}
-						class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === '0.33L' ? 'bg-blue-500 text-white' : ''}">0.33L</button>
+						class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === '0.33L'
+							? 'bg-blue-500 text-white'
+							: ''}">0.33L</button
+					>
 					<button
 						on:click={() => selectSize('1.5L')}
-						class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === '1.5L' ? 'bg-blue-500 text-white' : ''}">1.5L</button>
+						class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === '1.5L'
+							? 'bg-blue-500 text-white'
+							: ''}">1.5L</button
+					>
 				{:else}
 					<button
 						on:click={() => selectSize('Regular')}
-						class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === 'Regular' ? 'bg-blue-500 text-white' : ''}">Regular</button>
+						class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === 'Regular'
+							? 'bg-blue-500 text-white'
+							: ''}">Regular</button
+					>
 					<button
 						on:click={() => selectSize('Large')}
-						class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === 'Large' ? 'bg-blue-500 text-white' : ''}">Large</button>
+						class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === 'Large'
+							? 'bg-blue-500 text-white'
+							: ''}">Large</button
+					>
 					<button
 						on:click={() => selectSize('Family')}
-						class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === 'Family' ? 'bg-blue-500 text-white' : ''}">Family</button>
+						class="flex-1 rounded-md border border-gray-300 p-3 {selectedSize === 'Family'
+							? 'bg-blue-500 text-white'
+							: ''}">Family</button
+					>
 				{/if}
 			</div>
 
@@ -831,38 +988,37 @@
 			<div class="mb-6">
 				{#if selectedItem?.label === 'Tea' || selectedItem?.label2 === 'Tea'}
 					<label class="mb-4 block">
-						<input
-							type="checkbox"
-							bind:group={selectedAddons}
-							value="Sugar"
-							class="mr-2 h-6 w-6"
-						/> Sugar - ₱5
+						<input type="checkbox" bind:group={selectedAddons} value="Sugar" class="mr-2 h-6 w-6" />
+						Sugar - ₱5
 					</label>
 					<label class="mb-4 block">
-						<input
-							type="checkbox"
-							bind:group={selectedAddons}
-							value="Bobba"
-							class="mr-2 h-6 w-6"
-						/> Bobba - ₱10
+						<input type="checkbox" bind:group={selectedAddons} value="Bobba" class="mr-2 h-6 w-6" />
+						Bobba - ₱10
 					</label>
 					<label class="mb-4 block">
-						<input
-							type="checkbox"
-							bind:group={selectedAddons}
-							value="Milk"
-							class="mr-2 h-6 w-6"
-						/> Milk - ₱7
+						<input type="checkbox" bind:group={selectedAddons} value="Milk" class="mr-2 h-6 w-6" /> Milk
+						- ₱7
 					</label>
 				{:else if selectedItem?.label === 'Pasta' || selectedItem?.label2 === 'Pasta'}
 					<label class="mb-4 block">
-						<input type="checkbox" bind:group={selectedAddons} value="Extra Cheese" class="mr-2 h-6 w-6" /> Extra Cheese - ₱15
+						<input
+							type="checkbox"
+							bind:group={selectedAddons}
+							value="Extra Cheese"
+							class="mr-2 h-6 w-6"
+						/> Extra Cheese - ₱15
 					</label>
 					<label class="mb-4 block">
-						<input type="checkbox" bind:group={selectedAddons} value="Bacon" class="mr-2 h-6 w-6" /> Bacon - ₱20
+						<input type="checkbox" bind:group={selectedAddons} value="Bacon" class="mr-2 h-6 w-6" />
+						Bacon - ₱20
 					</label>
 					<label class="mb-4 block">
-						<input type="checkbox" bind:group={selectedAddons} value="Olives" class="mr-2 h-6 w-6" /> Olives - ₱10
+						<input
+							type="checkbox"
+							bind:group={selectedAddons}
+							value="Olives"
+							class="mr-2 h-6 w-6"
+						/> Olives - ₱10
 					</label>
 				{:else if selectedItem?.label === 'Soda' || selectedItem?.label2 === 'Soda'}
 					<!-- No add-ons for Soda -->
@@ -915,9 +1071,13 @@
 				class="w-full rounded border border-gray-300 p-2 text-center"
 				placeholder="Enter 6-digit code"
 			/>
-			<div class="flex justify-between mt-4">
-				<button on:click={closeCodePopup} class="rounded-md bg-red-500 px-4 py-2 text-white">Cancel</button>
-				<button on:click={confirmVoid} class="rounded-md bg-blue-500 px-4 py-2 text-white">Confirm</button>
+			<div class="mt-4 flex justify-between">
+				<button on:click={closeCodePopup} class="rounded-md bg-red-500 px-4 py-2 text-white"
+					>Cancel</button
+				>
+				<button on:click={confirmVoid} class="rounded-md bg-blue-500 px-4 py-2 text-white"
+					>Confirm</button
+				>
 			</div>
 		</div>
 	</div>
