@@ -111,34 +111,6 @@ if ($requestMethod === 'POST') {
         $stmt->close();
     }
 
-    // Handle remit sales
-    if (isset($data['cashier_name']) && isset($data['total_sales'])) {
-        $stmt = $conn->prepare("INSERT INTO remit_sales (cashier_name, total_sales, remit_date, remit_time, remit_shortage, remit_validation) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssss", $data['cashier_name'], $data['total_sales'], $data['remit_date'], $data['remit_time'], $data['remit_shortage'], $data['remit_validation']);
-
-        // Execute the statement
-        if ($stmt->execute()) {
-            echo json_encode(["success" => true, "message" => "Record added successfully."]);
-        } else {
-            echo json_encode(["success" => false, "message" => "Error: " . $stmt->error]);
-        }
-        $stmt->close();
-    }
-
-    // Handle remit returns
-    if (isset($data['return_validation'])) {
-        $stmt = $conn->prepare("INSERT INTO remit_returns (cashier_name, total_sales, return_date, return_time, return_validation) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssss", $data['cashier_name'], $data['total_sales'], $data['return_date'], $data['return_time'], $data['return_validation']);
-
-        // Execute the statement
-        if ($stmt->execute()) {
-            echo json_encode(["success" => true, "message" => "Record added successfully."]);
-        } else {
-            error_log("Error executing statement: " . $stmt->error); // Log the error
-            echo json_encode(["success" => false, "message" => "Error: " . $stmt->error]);
-        }
-        $stmt->close();
-    }
 
     // Handle saving receipt
     if (isset($data['receiptNumber'])) {

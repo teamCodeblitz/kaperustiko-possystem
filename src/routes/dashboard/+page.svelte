@@ -18,7 +18,12 @@
             {
                 label: 'Sales',
                 data: [300, 500, 400, 600, 700, 800],
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                backgroundColor: (context: { dataset: { data: number[] }, dataIndex: number }) => {
+                    const value = context.dataset.data[context.dataIndex];
+                    if (value < 400) return 'red'; // Critical
+                    if (value < 600) return 'yellow'; // Warning
+                    return 'green'; // Good
+                },
             }
         ]
     };
@@ -63,6 +68,23 @@
     let overallTotalSales: number = 0; // Variable to store overall total sales
     let bestSeller: string = "Loading..."; // Initialize bestSeller
     let leastSeller: string = "Loading..."; // Initialize leastSeller
+    let totalShortageCost = 0; // Variable to store total shortage cost
+    let todayShortageCost = 0; // Variable to store today's shortage cost
+    let todayReturnCost = 0; // Variable to store today's total return cost
+    let totalReturnCost = 0; // Variable to store total return cost
+
+    // Add these variables for confirmation modals
+    let showDeleteRemitModal = false;
+    let showDeleteReturnModal = false;
+    let itemToDelete: number | null = null;
+
+    let selectedDateRange = 'firstHalf'; // Default value
+
+    // Add this interface before the forEach
+    interface MonthlySale {
+        month: number;
+        total_amount: number;
+    }
 
     onMount(async () => {
         const today = new Date();
@@ -131,6 +153,77 @@
             console.error("Error fetching least seller:", error);
             leastSeller = "Error fetching data"; // Handle error
         }
+
+        // Fetch total shortage cost
+        try {
+            const response = await fetch('http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getTotalShortage', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await response.json();
+            if (data.total_shortage !== null) {
+                totalShortageCost = data.total_shortage; // Update the total shortage cost variable
+            }
+        } catch (error) {
+            console.error("Error fetching total shortage cost:", error);
+        }
+
+        // Fetch today's shortage cost
+        try {
+            const response = await fetch('http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getTodayShortage', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await response.json();
+            if (data.total_shortage !== null) {
+                todayShortageCost = data.total_shortage; // Update the today's shortage cost variable
+            }
+        } catch (error) {
+            console.error("Error fetching today's shortage cost:", error);
+        }
+
+        // Fetch today's return cost
+        try {
+            const response = await fetch('http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getTodayReturnCost');
+            const data = await response.json();
+            if (data.total_return !== null) {
+                todayReturnCost = data.total_return; // Update the return cost variable
+            }
+        } catch (error) {
+            console.error("Error fetching today's return cost:", error);
+        }
+
+        // Fetch total return cost
+        try {
+            const response = await fetch('http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getTotalReturnCost');
+            const data = await response.json();
+            if (data.total_return_cost !== null) {
+                totalReturnCost = data.total_return_cost; // Update the total return cost variable
+            }
+        } catch (error) {
+            console.error("Error fetching total return cost:", error);
+        }
+
+        // Fetch monthly sales data
+        try {
+            const response = await fetch('http://localhost/kaperustiko-possystem/backend/modules/get.php?action=getMonthlySales');
+            const monthlySales = await response.json();
+            
+            // Prepare data for the sales chart
+            salesData.labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            salesData.datasets[0].data = Array(12).fill(0); // Initialize data array for 12 months
+
+            // Populate the sales data
+            monthlySales.forEach((sale: MonthlySale) => {
+                salesData.datasets[0].data[sale.month - 1] = sale.total_amount; // Adjust index for 0-based array
+            });
+        } catch (error) {
+            console.error("Error fetching monthly sales:", error);
+        }
     });
 
     function printPage() {
@@ -161,6 +254,53 @@
             return 'green';
         });
     }
+
+    // Modify the delete functions to show confirmation first
+    function confirmDeleteRemit(remit_id: number) {
+        itemToDelete = remit_id;
+        showDeleteRemitModal = true;
+    }
+
+    function confirmDeleteReturn(return_id: number) {
+        itemToDelete = return_id;
+        showDeleteReturnModal = true;
+    }
+
+    // Existing delete functions become the actual delete operations
+    async function deleteRemit(remit_id: number) {
+        try {
+            const response = await fetch(`http://localhost/kaperustiko-possystem/backend/modules/delete.php?action=deleteRemit&remit_id=${remit_id}`, {
+                method: 'DELETE'
+            });
+            const data = await response.json();
+            if (data.success) {
+                salesRemitItems = salesRemitItems.filter(item => item.remit_id !== remit_id);
+            }
+        } catch (error) {
+            console.error('Error deleting remit:', error);
+        } finally {
+            showDeleteRemitModal = false;
+            itemToDelete = null;
+        }
+    }
+
+    async function deleteReturn(return_id: number) {
+        try {
+            const response = await fetch(`http://localhost/kaperustiko-possystem/backend/modules/delete.php?action=deleteReturn&return_id=${return_id}`, {
+                method: 'DELETE'
+            });
+            const data = await response.json();
+            if (data.success) {
+                returnItems = returnItems.filter(item => item.return_id !== return_id);
+            }
+        } catch (error) {
+            console.error('Error deleting return:', error);
+        } finally {
+            showDeleteReturnModal = false;
+            itemToDelete = null;
+        }
+    }
+
 </script>
 
 <div class="flex h-screen bg-gradient-to-b from-green-500 to-green-700">
@@ -186,42 +326,42 @@
             </div>
             <div class="bg-white rounded-lg shadow-md p-4 text-center">
                 <div class="text-gray-500">Best Seller</div>
-                <div class="text-3xl font-bold">{bestSeller}</div>
+                <div class="text-3xl font-bold">{bestSeller || 'N/A'}</div>
                 <div class="text-green-500">
                     <FontAwesomeIcon icon={faTrophy} />
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-md p-4 text-center">
                 <div class="text-gray-500">Least Seller</div>
-                <div class="text-3xl font-bold">{leastSeller}</div>
+                <div class="text-3xl font-bold">{leastSeller || 'N/A'}</div>
                 <div class="text-red-500">
                     <FontAwesomeIcon icon={faArrowDown} />
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-md p-4 text-center">
-                <div class="text-gray-500">Today's Shortage Cost</div>
-                <div class="text-3xl font-bold">###</div>
+                <div class="text-gray-500">Shortage Cost</div>
+                <div class="text-3xl font-bold">₱{todayShortageCost}</div>
                 <div class="text-red-500">
                     <FontAwesomeIcon icon={faExclamationTriangle} />
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-md p-4 text-center">
-                <div class="text-gray-500">Today's Shortage Cost</div>
-                <div class="text-3xl font-bold">###</div>
+                <div class="text-gray-500">Overall Shortage</div>
+                <div class="text-3xl font-bold">₱{totalShortageCost}</div>
                 <div class="text-red-500">
                     <FontAwesomeIcon icon={faExclamationTriangle} />
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-md p-4 text-center">
-                <div class="text-gray-500 text-sm">Today's Total Return Cost</div> 
-                <div class="text-3xl font-bold">###</div>
+                <div class="text-gray-500">Return Cost</div> 
+                <div class="text-3xl font-bold">₱{todayReturnCost}</div>
                 <div class="text-red-500">
                     <FontAwesomeIcon icon={faExclamationCircle} />
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-md p-4 text-center">
-                <div class="text-gray-500 text-sm">Overall Total Return Cost</div>
-                <div class="text-3xl font-bold">###</div>
+                <div class="text-gray-500">Overall Returns</div>
+                <div class="text-3xl font-bold">₱{totalReturnCost}</div>
                 <div class="text-red-500">
                     <FontAwesomeIcon icon={faTrashAlt} />
                 </div>
@@ -287,22 +427,36 @@
                             <th class="p-2 text-center">Time</th>
                             <th class="p-2 text-center">Shortage</th>
                             <th class="p-2 text-center">Validate</th>
+                            <th class="p-2 text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white">
-                        {#each salesRemitItems as item}
-                            <tr class="border-t border-gray-300 hover:bg-gray-200 transition-colors duration-200">
-                                <td class="p-2 text-center">{item.remit_id}</td>
-                                <td class="p-2 text-center">{item.cashier_name}</td>
-                                <td class="p-2 text-center">₱{item.total_sales}.00</td>
-                                <td class="p-2 text-center">{item.remit_date}</td>
-                                <td class="p-2 text-center">{item.remit_time}</td>
-                                <td class="p-2 text-center">₱{item.remit_shortage}.00</td>
-                                <td class="p-2 text-center">
-                                    <button class="p-1 {item.remit_validation === "Validated" ? 'bg-green-500' : item.remit_validation === "Pending" ? 'bg-yellow-500' : 'bg-gray-200'} text-white rounded">{item.remit_validation}</button>
-                                </td>
+                        {#if salesRemitItems.length === 0}
+                            <tr>
+                                <td colspan="8" class="p-2 text-center">No data yet</td>
                             </tr>
-                        {/each}
+                        {:else}
+                            {#each salesRemitItems as item}
+                                <tr class="border-t border-gray-300 hover:bg-gray-200 transition-colors duration-200">
+                                    <td class="p-2 text-center">{item.remit_id}</td>
+                                    <td class="p-2 text-center">{item.cashier_name}</td>
+                                    <td class="p-2 text-center">₱{item.total_sales}.00</td>
+                                    <td class="p-2 text-center">{item.remit_date}</td>
+                                    <td class="p-2 text-center">{item.remit_time}</td>
+                                    <td class="p-2 text-center">₱{item.remit_shortage}.00</td>
+                                    <td class="p-2 text-center">
+                                        <button class="p-1 {item.remit_validation === "Validated" ? 'bg-green-500' : item.remit_validation === "Pending" ? 'bg-yellow-500' : 'bg-gray-200'} text-white rounded">{item.remit_validation}</button>
+                                    </td>
+                                    <td class="p-2 text-center">
+                                        <button 
+                                            class="p-1 bg-red-500 text-white rounded hover:bg-red-600" 
+                                            on:click={() => confirmDeleteRemit(item.remit_id)}>
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            {/each}
+                        {/if}
                     </tbody>
                 </table>
             </div>
@@ -319,12 +473,13 @@
                             <th class="p-2 text-center">Date</th>
                             <th class="p-2 text-center">Time</th>
                             <th class="p-2 text-center">Validate</th>
+                            <th class="p-2 text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white">
                         {#if returnItems.length === 0}
                             <tr>
-                                <td colspan="6" class="p-2 text-center">No return orders yet</td>
+                                <td colspan="7" class="p-2 text-center">No data yet</td>
                             </tr>
                         {:else}
                             {#each returnItems as item}
@@ -337,6 +492,13 @@
                                     <td class="p-2 text-center">
                                         <button class="p-1 {item.return_validation === "Validated" ? 'bg-green-500' : item.return_validation === "Pending" ? 'bg-yellow-500' : 'bg-gray-200'} text-white rounded">{item.return_validation}</button>
                                     </td>
+                                    <td class="p-2 text-center">
+                                        <button 
+                                            class="p-1 bg-red-500 text-white rounded hover:bg-red-600" 
+                                            on:click={() => confirmDeleteReturn(item.return_id)}>
+                                            Delete
+                                        </button>
+                                    </td>
                                 </tr>
                             {/each}
                         {/if}
@@ -346,4 +508,47 @@
         </div>
     </div>
 </div>
+
+<!-- Add these modal components just before the closing </div> of the main content -->
+{#if showDeleteRemitModal}
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h3 class="text-lg font-bold mb-4">Confirm Delete</h3>
+            <p class="mb-4">Are you sure you want to delete this remit record?</p>
+            <div class="flex justify-end gap-2">
+                <button 
+                    class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                    on:click={() => {showDeleteRemitModal = false; itemToDelete = null;}}>
+                    Cancel
+                </button>
+                <button 
+                    class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                    on:click={() => itemToDelete && deleteRemit(itemToDelete)}>
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+{/if}
+
+{#if showDeleteReturnModal}
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h3 class="text-lg font-bold mb-4">Confirm Delete</h3>
+            <p class="mb-4">Are you sure you want to delete this return record?</p>
+            <div class="flex justify-end gap-2">
+                <button 
+                    class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                    on:click={() => {showDeleteReturnModal = false; itemToDelete = null;}}>
+                    Cancel
+                </button>
+                <button 
+                    class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                    on:click={() => itemToDelete && deleteReturn(itemToDelete)}>
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+{/if}
   

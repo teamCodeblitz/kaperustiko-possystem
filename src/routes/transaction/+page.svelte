@@ -21,6 +21,14 @@
         items_ordered: string;
     };
   
+    // Add this type definition near your Sale type
+    type OrderItem = {
+        order_name: string;
+        order_name2: string;
+        order_size: string;
+        order_quantity: string;
+    };
+  
     let recentSales: Sale[] = [];
   
     let selectedDate: Date = new Date(); // Change to Date object
@@ -254,7 +262,7 @@
         console.log("Pending Data:", pendingData); // Log pendingData to check values
 
         // Send data to the backend for pending action
-        fetch('http://localhost/kaperustiko-possystem/backend/modules/insert.php?action=remit_sales', {
+        fetch('http://localhost/kaperustiko-possystem/backend/modules/remit_sales.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -357,10 +365,11 @@
     }
   
     // New function to confirm the return action
-    function confirmReturn() {
+    async function confirmReturn() {
         const saleToReturn = recentSales.find(sale => sale.receipt === selectedReceipt); // Find the selected sale
         if (saleToReturn) {
             const returnData = {
+                action: 'return_order',
                 receipt_number: saleToReturn.receipt,
                 return_date: saleToReturn.orderDate,
                 return_time: saleToReturn.orderTime,
@@ -372,16 +381,16 @@
                 order_take: saleToReturn.orderIn,
             };
 
-            // Send data to return_order.php
-            fetch('http://localhost/kaperustiko-possystem/backend/modules/insert.php?action=return_order', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(returnData),
-            })
-            .then(response => response.json())
-            .then(data => {
+            try {
+                const response = await fetch('http://localhost/kaperustiko-possystem/backend/modules/insert.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(returnData),
+                });
+
+                const data = await response.json();
                 if (data.success) {
                     // Check if selectedReceipt is not null before calling deleteSale
                     if (selectedReceipt) { 
@@ -390,13 +399,12 @@
                     showAlert("Return processed successfully.", "success"); // Show success alert
                     location.reload(); // Reload the page after successful return
                 } else {
-                    showAlert("Failed to process return. Please try again.", "error");
+                    console.error("Failed to process return:", data.message);
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error("Error:", error);
                 showAlert("An error occurred. Please try again.", "error");
-            });
+            }
         }
 
         showReturnConfirmation = false; // Close the confirmation popup
@@ -405,6 +413,99 @@
     // New function to close the return confirmation popup
     function closeReturnConfirmation() {
         showReturnConfirmation = false; // Close the confirmation popup
+    }
+  
+    // Update the printTable function
+    function printTable() {
+        // Calculate total sales first
+        calculateTotalSales();
+        
+        // Create a new window for printing
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) return;
+
+        // Create the print content with styles
+        const printContent = `
+            <html>
+            <head>
+                <title>Sales Report</title>
+                <style>
+                    body { font-family: Arial, sans-serif; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                    th { background-color: #f2f2f2; }
+                    .header { text-align: center; margin-bottom: 20px; }
+                    .header img { max-width: 100px; margin-bottom: 10px; }
+                    .business-info { text-align: center; margin-bottom: 10px; font-size: 14px; }
+                    .date { text-align: center; margin-bottom: 10px; }
+                    @media print {
+                        .no-print { display: none; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <img src="http://localhost/kaperustiko-possystem/src/lib/images/logo.png" alt="Kape Rustiko Logo">
+                    <h1>KAPE RUSTIKO</h1>
+                    <div class="business-info">
+                        <p>Brgy. Singcang Airport, Bacolod City</p>
+                        <p>Contact: 0912-345-6789</p>
+                        <p>Email: kaperustiko@gmail.com</p>
+                    </div>
+                    <h2>Sales Report</h2>
+                </div>
+                <div class="date">
+                    Date: ${selectedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Receipt #</th>
+                            <th>Items</th>
+                            <th>Total Cost</th>
+                            <th>Pay Amount</th>
+                            <th>Change Due</th>
+                            <th>Order Date</th>
+                            <th>Order Time</th>
+                            <th>Order Type</th>
+                            <th>Cashier</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${recentSales.map(sale => `
+                            <tr>
+                                <td>${sale.receipt}</td>
+                                <td>${JSON.parse(sale.items_ordered).map((item: OrderItem) => 
+                                    `${item.order_name} ${item.order_name2} (${item.order_size} ${item.order_quantity})`
+                                ).join('<br>')}</td>
+                                <td>${sale.totalCost}</td>
+                                <td>${sale.payAmount}</td>
+                                <td>${sale.changeDue}</td>
+                                <td>${new Date(sale.orderDate).toLocaleDateString()}</td>
+                                <td>${sale.orderTime}</td>
+                                <td>${sale.orderIn}</td>
+                                <td>${sale.name}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                <div style="margin-top: 20px; text-align: right;">
+                    <p><strong>Total Sales:</strong> ₱${totalSales.toFixed(2)}</p>
+                </div>
+            </body>
+            </html>
+        `;
+
+        // Write content to the new window and print
+        printWindow.document.write(printContent);
+        printWindow.document.close();
+        printWindow.focus();
+        
+        // Print after images and resources are loaded
+        printWindow.onload = function() {
+            printWindow.print();
+            printWindow.close();
+        };
     }
   </script>
   
@@ -429,6 +530,9 @@
           </button>
           <button class="bg-blue-600 text-white px-3 py-1 rounded shadow-md ml-1" on:click={handleRemitClick} disabled={isRemitDisabled}>
             Remit
+          </button>
+          <button class="bg-purple-600 text-white px-3 py-1 rounded shadow-md ml-1" on:click={printTable}>
+            <i class="fas fa-print mr-1"></i> Print
           </button>
         </div>
       </div>

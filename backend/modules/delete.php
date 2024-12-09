@@ -11,79 +11,48 @@ switch ($requestMethod) {
         if (isset($_GET['action'])) {
             switch ($_GET['action']) {
                 case 'deleteProduct':
-                    // Get the code from the request
-                    $data = json_decode(file_get_contents("php://input"), true);
-                    $code = $data['code'] ?? null;
-
-                    if ($code) {
-                        // Prepare and bind
-                        $stmt = $conn->prepare("DELETE FROM `pos-menu` WHERE `code` = ?");
-                        $stmt->bind_param("s", $code);
-
-                        // Execute the statement
-                        if ($stmt->execute()) {
-                            echo json_encode(["message" => "Product deleted successfully."]);
-                        } else {
-                            echo json_encode(["message" => "Error deleting product: " . $stmt->error]);
-                        }
-
-                        $stmt->close();
-                    } else {
-                        echo json_encode(["message" => "No code provided."]);
-                    }
+                    delete_product($conn);
                     break;
 
                 case 'deleteAllOrders':
-                    // SQL to delete all records
-                    $sql = "DELETE FROM orders";
-
-                    if ($conn->query($sql) === TRUE) {
-                        echo json_encode(["message" => "All orders deleted successfully."]);
-                    } else {
-                        echo json_encode(["message" => "Error deleting orders: " . $conn->error]);
-                    }
+                    delete_all_orders($conn);
                     break;
 
                 case 'voidOrder':
-                    $orderName = $_GET['order_name'] ?? null;
-
-                    if ($orderName) {
-                        // Prepare and bind
-                        $stmt = $conn->prepare("DELETE FROM orders WHERE order_name = ?");
-                        $stmt->bind_param("s", $orderName);
-
-                        // Execute the statement
-                        if ($stmt->execute()) {
-                            echo json_encode(["message" => "Order voided successfully."]);
-                        } else {
-                            echo json_encode(["message" => "Error voiding order: " . $stmt->error]);
-                        }
-
-                        $stmt->close();
-                    } else {
-                        echo json_encode(["message" => "No order name provided."]);
-                    }
+                    void_order($conn);
                     break;
 
                 case 'deleteSalesInformation':
-                    $data = json_decode(file_get_contents("php://input"), true);
-                    $receipt_number = $data['receipt_number'] ?? null;
+                    delete_sales_information($conn);
+                    break;
 
-                    if ($receipt_number) {
-                        // Prepare and bind
-                        $stmt = $conn->prepare("DELETE FROM total_sales WHERE receipt_number = ?");
-                        $stmt->bind_param("s", $receipt_number);
-
-                        // Execute the statement
+                case 'deleteReturn':
+                    $return_id = $_GET['return_id'] ?? null;
+                    if ($return_id) {
+                        $stmt = $conn->prepare("DELETE FROM `remit_returns` WHERE return_id = ?");
+                        $stmt->bind_param("i", $return_id);
                         if ($stmt->execute()) {
-                            echo json_encode(["success" => true, "message" => "Sale deleted successfully."]);
+                            echo json_encode(["success" => true]);
                         } else {
-                            echo json_encode(["success" => false, "message" => "Error deleting sale: " . $stmt->error]);
+                            echo json_encode(["success" => false, "message" => $stmt->error]);
                         }
-
                         $stmt->close();
                     } else {
-                        echo json_encode(["success" => false, "message" => "No receipt number provided."]);
+                        echo json_encode(["success" => false, "message" => "No return ID provided"]);
+                    }
+                    break;
+
+                case 'deleteRemit':
+                    $remit_id = $_GET['remit_id'] ?? null;
+                    if ($remit_id) {
+                        $stmt = $conn->prepare("DELETE FROM remit_sales WHERE remit_id = ?");
+                        $stmt->bind_param("i", $remit_id);
+                        if ($stmt->execute()) {
+                            echo json_encode(["success" => true]);
+                        } else {
+                            echo json_encode(["success" => false, "message" => $stmt->error]);
+                        }
+                        $stmt->close();
                     }
                     break;
 
@@ -108,5 +77,80 @@ switch ($requestMethod) {
 
 // Close the connection
 $conn->close();
-?>
 
+function delete_product($conn) {
+    // Get the code from the request
+    $data = json_decode(file_get_contents("php://input"), true);
+    $code = $data['code'] ?? null;
+
+    if ($code) {
+        // Prepare and bind
+        $stmt = $conn->prepare("DELETE FROM `pos-menu` WHERE `code` = ?");
+        $stmt->bind_param("s", $code);
+
+        // Execute the statement
+        if ($stmt->execute()) {
+            echo json_encode(["message" => "Product deleted successfully."]);
+        } else {
+            echo json_encode(["message" => "Error deleting product: " . $stmt->error]);
+        }
+
+        $stmt->close();
+    } else {
+        echo json_encode(["message" => "No code provided."]);
+    }
+}
+
+function delete_all_orders($conn) {
+    // SQL to delete all records
+    $sql = "DELETE FROM orders";
+
+    if ($conn->query($sql) === TRUE) {
+        echo json_encode(["message" => "All orders deleted successfully."]);
+    } else {
+        echo json_encode(["message" => "Error deleting orders: " . $conn->error]);
+    }
+}
+
+function void_order($conn) {
+    $orderName = $_GET['order_name'] ?? null;
+
+    if ($orderName) {
+        // Prepare and bind
+        $stmt = $conn->prepare("DELETE FROM orders WHERE order_name = ?");
+        $stmt->bind_param("s", $orderName);
+
+        // Execute the statement
+        if ($stmt->execute()) {
+            echo json_encode(["message" => "Order voided successfully."]);
+        } else {
+            echo json_encode(["message" => "Error voiding order: " . $stmt->error]);
+        }
+
+        $stmt->close();
+    } else {
+        echo json_encode(["message" => "No order name provided."]);
+    }
+}
+
+function delete_sales_information($conn) {
+    $data = json_decode(file_get_contents("php://input"), true);
+    $receipt_number = $data['receipt_number'] ?? null;
+
+    if ($receipt_number) {
+        // Prepare and bind
+        $stmt = $conn->prepare("DELETE FROM total_sales WHERE receipt_number = ?");
+        $stmt->bind_param("s", $receipt_number);
+
+        // Execute the statement
+        if ($stmt->execute()) {
+            echo json_encode(["success" => true, "message" => "Sale deleted successfully."]);
+        } else {
+            echo json_encode(["success" => false, "message" => "Error deleting sale: " . $stmt->error]);
+        }
+
+        $stmt->close();
+    } else {
+        echo json_encode(["success" => false, "message" => "No receipt number provided."]);
+    }
+}

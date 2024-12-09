@@ -83,16 +83,27 @@
         if (inputCode === code) {
             // Proceed with the action if the code is correct
             showSecondPopup = false; // Close the popup
+            showAlert('Code confirmed successfully!', 'success'); // Show success alert
             // Navigate to the href of the clicked icon
             window.location.href = icon === 'inventory' ? '/inventory' : '/dashboard'; // Change this based on the clicked icon
         } else {
-            alert('Incorrect code. Please try again.'); // Alert for incorrect code
+            showAlert('Incorrect code. Please try again.', 'error'); // Show error alert
         }
     }
 
     function closeSecondPopup() {
         showSecondPopup = false; // Close the popup
         inputCode = ''; // Reset the input code
+    }
+
+    function showAlert(message: string, type: string) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `fixed top-0 left-1/2 transform -translate-x-1/2 mt-4 p-4 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white rounded shadow-lg z-50`;
+        alertDiv.innerText = message;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000); // Remove alert after 3 seconds
     }
 
 </script>

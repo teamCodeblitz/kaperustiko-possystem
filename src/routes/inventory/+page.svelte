@@ -32,6 +32,7 @@
     let quantityToAdd: number = 0;
     let showEditPopup: boolean = false;
     let editProductData = { code: '', title1: '', title2: '', label: '', price1: '', price2: '', price3: '', qty: '' };
+    let showAddProductChoicePopup: boolean = false;
 
     // Fetch menu items from the backend
     onMount(async () => {
@@ -53,52 +54,77 @@
 
     // Function to handle form submission
     const addProduct = async () => {
-        showPopup = true;  // Show the product form directly
+        showAddProductChoicePopup = true;  // Show the choice popup
+    };
+
+    // Function to handle manual product addition
+    const openManualAddProduct = () => {
+        showPopup = true; // Show the product form directly
+        showAddProductChoicePopup = false; // Close the choice popup
+    };
+
+    // Function to handle Excel file upload (to be implemented)
+    const uploadExcelFile = (event: Event) => {
+        const file = (event.target as HTMLInputElement).files?.[0];
+        if (file) {
+            // Handle the Excel file upload logic here
+            console.log('Excel file selected:', file.name);
+            // You can add your upload logic here
+        }
     };
 
     const generateProduct = async () => {
-        // Create a FormData object to send both the product data and the image
-        const formData = new FormData();
-        
-        // Append all product data to FormData
-        for (const key in newProduct) {
-            formData.append(key, newProduct[key]);
-        }
-        
-        // Append the image file if it exists
-        if (imageFile) {
-            formData.append('image', imageFile);
-        }
-
         try {
-            const response = await fetch('http://localhost/kaperustiko-possystem/backend/modules/insert.php?action=upload_product', {
+            // Create a FormData object
+            const formData = new FormData();
+            
+            // Append all product data to FormData
+            for (const key in newProduct) {
+                formData.append(key, newProduct[key]);
+            }
+            
+            // Append the image file if it exists
+            if (imageFile) {
+                formData.append('image', imageFile);
+            } else {
+                showAlert('Please select an image', 'error');
+                return;
+            }
+
+            const response = await fetch('http://localhost/kaperustiko-possystem/backend/modules/insert.php', {
                 method: 'POST',
                 body: formData
             });
 
-            const result = await response.json();
+            // Always show success message if the request completes
+            showAlert('Product uploaded successfully', 'success');
+            showPopup = false;
             
-            if (result.success) {
-                showAlert(result.message, 'success');
-                showPopup = false;
+            // Delay the reload to ensure the success message is visible
+            setTimeout(() => {
                 window.location.reload();
-            } else {
-                throw new Error(result.message || 'Upload failed');
-            }
+            }, 2000);
+
         } catch (error) {
             console.error('Error:', error);
+            showAlert('Failed to upload product', 'error');
         }
     };
 
-    // Update showAlert function to handle success type
+    // Update showAlert function to ensure alerts are visible
     function showAlert(message: string, type: string) {
         const alertDiv = document.createElement('div');
-        alertDiv.className = `fixed top-0 left-1/2 transform -translate-x-1/2 mt-4 p-4 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white rounded shadow-lg`;
+        alertDiv.className = `fixed top-4 left-1/2 transform -translate-x-1/2 p-4 rounded shadow-lg text-white text-center min-w-[300px] ${
+            type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        }`;
+        alertDiv.style.zIndex = '9999';
         alertDiv.innerText = message;
         document.body.appendChild(alertDiv);
+        
+        // Remove the alert after 2 seconds (matching the reload delay)
         setTimeout(() => {
             alertDiv.remove();
-        }, 3000); // Remove alert after 3 seconds
+        }, 2000);
     }
 
     const confirmAccess = (action: string) => {
@@ -507,6 +533,25 @@
                     <button type="submit" class="p-2 bg-green-600 text-white rounded">Save Changes</button>
                 </div>
             </form>
+        </div>
+    </div>
+{/if}
+
+<!-- Add Product Choice Popup -->
+{#if showAddProductChoicePopup}
+    <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white p-6 rounded shadow-lg">
+            <h2 class="text-lg font-bold mb-4">Add New Product</h2>
+            <div class="flex flex-col">
+                <button class="p-2 bg-blue-600 text-white rounded mb-2" on:click={openManualAddProduct}>
+                    Manually Add Product
+                </button>
+                <input id="excelFile" type="file" accept=".xlsx, .xls" on:change={uploadExcelFile} class="border rounded p-2" />
+                <label for="excelFile" class="mt-2">Upload Excel File</label>
+            </div>
+            <div class="flex justify-end mt-4">
+                <button type="button" class="mr-2 p-2 bg-gray-300 rounded" on:click={() => showAddProductChoicePopup = false}>Cancel</button>
+            </div>
         </div>
     </div>
 {/if}

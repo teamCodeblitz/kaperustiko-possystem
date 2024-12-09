@@ -194,7 +194,7 @@
         console.log("Return Data:", returnData); // Log remitData to check values
 
         // Send data to the backend
-        fetch('http://localhost/kaperustiko-possystem/backend/modules/insert.php?action=remit_returns', {
+        fetch('http://localhost/kaperustiko-possystem/backend/modules/remit_returns.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
